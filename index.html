@@ -734,47 +734,145 @@ let robotPos = {col:0, row:4}; // A1
 let particles = [];
 let circuitAnim = 0;
 
-// ── PHASES ──────────────────────────────────
+// ── COORDINATE SYSTEM ───────────────────────
+// col: 0=A ... 4=E  (esquerda→direita)
+// row: 0=linha5(topo) ... 4=linha1(base)
+// robotDir: 0=norte(↑) 1=leste(→) 2=sul(↓) 3=oeste(←)
+//
+// FASE 1 — A1→E5  dir Norte
+//   Fila: F×4, GD, F×4  (sobe col A, cruza linha 5)
+//
+// FASE 2 — A1→E5  dir Leste
+//   Fila: F×4, GE, F×4  (cruza linha 1, sobe col E)
+//
+// FASE 3 — A1→E5  dir Norte  zigue-zague
+//   Fila: F×4, GD, F, GD, F, GE, F×3, GE, F
+//
+// FASE 4 — E1→A5  dir Norte  (começa no canto oposto)
+//   Rota: E1→E5 (col E, 4F norte), GE→Oeste, E5→D5→C5→B5→A5 (4F)
+//   Fila: F×4, GE, F×4
+//
+// FASE 5 — C1→C5  dir Leste  (centro→centro, corredor em S)
+//   Rota: C1→D1 (1F leste), GE→Norte, D1→D2→D3 (2F), GD→Leste,
+//         D3→E3 (1F), GE→Norte, E3→E4→E5? não chega C5...
+//   Melhor: C1(dir Norte), C1→C2→C3(bloqueado) → desvio
+//   Rota: C1(Norte)→C2, GD→Leste, C2→D2→E2, GE→Norte,
+//         E2→E3→E4→E5? meta é C5...
+//   Rota válida para C1→C5: C1(Leste)→D1, GE→Norte, D1→D2→D3→D4→D5,
+//         GE→Oeste, D5→C5. Fila: F, GE, F×4, GE, F
+//
+// FASE 6 — A3→E3  dir Leste  (travessia horizontal do meio)
+//   Rota: A3→B3→C3→D3→E3 (4F). Obstáculos fora da linha 3.
+//   Fila: F×4  (simples, mas com SE-ENTÃO para desvios opcionais)
+
 const phases = [
   {
+    // ── FASE 1 ──────────────────────────────────────────────────────
+    // Rota: A1(N)→A5, GD(L), A5→E5
+    // Fila: F F F F GD F F F F
     name: "INICIALIZAÇÃO DO GEORROBÔ",
-    desc: "Leve o Georrobô da posição inicial até o destino!",
+    desc: "Leve o Georrobô de A1 até E5. Suba pela borda esquerda e cruze o topo!",
     start: {col:0, row:4}, startDir: 0,
-    end: {col:4, row:0},
+    end:   {col:4, row:0},
     obstacles: [
-      {col:1, row:3, type:'circle', color:'#00bfff'},
-      {col:2, row:2, type:'square', color:'#ff4d6d'},
-      {col:3, row:1, type:'rect',   color:'#f5c842'},
+      {col:1, row:3, type:'circle', color:'#00bfff'},  // B4
+      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
+      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
     ]
   },
   {
+    // ── FASE 2 ──────────────────────────────────────────────────────
+    // Dir inicial: Leste. Rota: A1(L)→E1, GE(N), E1→E5
+    // Fila: F F F F GE F F F F
     name: "LABIRINTO DE CIRCUITOS",
-    desc: "Cuidado com os obstáculos! Use a lógica SE-ENTÃO.",
-    start: {col:0, row:0}, startDir: 1,
-    end: {col:4, row:4},
+    desc: "Georrobô aponta para o Leste! Cruze a linha 1 e suba pela coluna E.",
+    start: {col:0, row:4}, startDir: 1,
+    end:   {col:4, row:0},
     obstacles: [
-      {col:1, row:0, type:'square', color:'#ff4d6d'},
-      {col:1, row:1, type:'circle', color:'#00bfff'},
-      {col:2, row:2, type:'rect',   color:'#f5c842'},
-      {col:2, row:3, type:'circle', color:'#00bfff'},
-      {col:3, row:2, type:'square', color:'#ff4d6d'},
-      {col:3, row:3, type:'rect',   color:'#7cff6b'},
+      {col:1, row:3, type:'square', color:'#ff4d6d'},  // B4
+      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
+      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
+      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
+      {col:3, row:2, type:'circle', color:'#00bfff'},  // D3
+      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
     ]
   },
   {
-    name: "MISSÃO FINAL: A GRANDE DIAGONAL",
-    desc: "A rota mais difícil! Programe com cuidado.",
+    // ── FASE 3 ──────────────────────────────────────────────────────
+    // Dir inicial: Norte. Zigue-zague:
+    // A1→A5(4F), GD→B5(1F), GD(sul)→B4(1F), GE(L)→E4(3F), GE(N)→E5(1F)
+    // Fila: F F F F GD F GD F GE F F F GE F
+    name: "O ZIGUE-ZAGUE",
+    desc: "Atenção ao corredor! Suba, desvie pelo meio e chegue à meta.",
     start: {col:0, row:4}, startDir: 0,
-    end: {col:4, row:0},
+    end:   {col:4, row:0},
     obstacles: [
-      {col:0, row:3, type:'rect',   color:'#f5c842'},
-      {col:1, row:3, type:'circle', color:'#00bfff'},
-      {col:1, row:2, type:'square', color:'#ff4d6d'},
-      {col:2, row:2, type:'rect',   color:'#7cff6b'},
-      {col:2, row:1, type:'circle', color:'#00bfff'},
-      {col:3, row:2, type:'square', color:'#ff4d6d'},
-      {col:3, row:1, type:'rect',   color:'#f5c842'},
-      {col:4, row:1, type:'circle', color:'#00bfff'},
+      {col:2, row:0, type:'square', color:'#ff4d6d'},  // C5 — bloqueia linha 5
+      {col:3, row:0, type:'rect',   color:'#f5c842'},  // D5
+      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3 — bloqueia col B acima B4
+      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2
+      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
+      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3 — bloqueia interior
+      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
+      {col:3, row:2, type:'rect',   color:'#f5c842'},  // D3
+    ]
+  },
+  {
+    // ── FASE 4 ──────────────────────────────────────────────────────
+    // INVERTIDO: começa em E1, chega em A5. Dir inicial: Norte.
+    // Rota: E1(N)→E5(4F), GE(L→vira oeste), E5→A5(4F oeste)
+    // Fila: F F F F GE F F F F
+    name: "CAMINHO INVERSO",
+    desc: "Agora o Georrobô começa no canto direito! Suba pela coluna E e cruze até A5.",
+    start: {col:4, row:4}, startDir: 0,   // E1, olhando Norte
+    end:   {col:0, row:0},                 // A5
+    obstacles: [
+      {col:3, row:3, type:'circle', color:'#00bfff'},  // D4
+      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
+      {col:1, row:1, type:'rect',   color:'#f5c842'},  // B2
+      {col:3, row:1, type:'circle', color:'#b66dff'},  // D2
+      {col:1, row:3, type:'square', color:'#ff4d6d'},  // B4
+    ]
+  },
+  {
+    // ── FASE 5 ──────────────────────────────────────────────────────
+    // Centro→Centro: C1→C5. Dir inicial: Leste.
+    // Rota: C1(L)→D1(1F), GE(N)→D1→D2→D3→D4→D5(4F), GE(O)→D5→C5(1F)
+    // Fila: F GE F F F F GE F
+    name: "ROTA DO CENTRO",
+    desc: "Do centro à meta! Desvie pelo corredor D e chegue em C5.",
+    start: {col:2, row:4}, startDir: 1,   // C1, olhando Leste
+    end:   {col:2, row:0},                 // C5
+    obstacles: [
+      {col:2, row:3, type:'square', color:'#ff4d6d'},  // C4 — bloqueia subida direta col C
+      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3
+      {col:2, row:1, type:'rect',   color:'#f5c842'},  // C2
+      {col:0, row:2, type:'square', color:'#ff4d6d'},  // A3 — fecha esquerda
+      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
+      {col:4, row:2, type:'rect',   color:'#f5c842'},  // E3 — fecha direita
+    ]
+  },
+  {
+    // ── FASE 6 ──────────────────────────────────────────────────────
+    // Travessia horizontal: A3→E3. Dir inicial: Leste.
+    // Linha 3 totalmente livre. Obstáculos acima e abaixo tentam distrair.
+    // Rota direta: A3(L)→B3→C3→D3→E3 (4F)
+    // Mas col A linha 3 = row:2. start {col:0,row:2} end {col:4,row:2}
+    // Fila: F F F F  — simples! Foco pedagógico: usar SE-ENTÃO para
+    // ignorar obstáculos laterais que não bloqueiam o caminho.
+    name: "TRAVESSIA DO MEIO",
+    desc: "Cruze de ponta a ponta pelo meio da matriz! A linha 3 está livre.",
+    start: {col:0, row:2}, startDir: 1,   // A3, olhando Leste
+    end:   {col:4, row:2},                 // E3
+    obstacles: [
+      {col:1, row:3, type:'circle', color:'#00bfff'},  // B4 — abaixo da rota
+      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2 — acima da rota
+      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
+      {col:2, row:1, type:'circle', color:'#00bfff'},  // C2
+      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
+      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
+      {col:4, row:3, type:'circle', color:'#b66dff'},  // E4
+      {col:4, row:1, type:'square', color:'#ff4d6d'},  // E2
     ]
   }
 ];
@@ -1305,10 +1403,11 @@ function closeWin() {
 function loadPhase() {
   const p = getPhase();
   const idx = currentPhase % phases.length;
+  const dirNames = ['⬆ Norte', '→ Leste', '↓ Sul', '← Oeste'];
   document.getElementById('phase-title').textContent = `FASE ${idx+1} — ${p.name}`;
   document.getElementById('phase-desc').textContent = p.desc;
   document.getElementById('phase-disp').textContent = idx + 1;
-  document.getElementById('coord-start').textContent = coordLabel(p.start);
+  document.getElementById('coord-start').textContent = coordLabel(p.start) + ' ' + dirNames[p.startDir || 0];
   document.getElementById('coord-end').textContent = coordLabel(p.end);
   resetPosition();
   showPhasePopup(idx);
@@ -1316,10 +1415,29 @@ function loadPhase() {
 
 // ── POPUP ─────────────────────────────────────
 function showPhasePopup(idx) {
-  const titles = ['INICIALIZAÇÃO', 'LABIRINTO DE CIRCUITOS', 'MISSÃO FINAL'];
-  const icons = ['🤖', '⚡', '🏆'];
-  document.getElementById('popup-icon').textContent = icons[idx % icons.length];
-  document.getElementById('popup-title').textContent = `FASE ${idx+1} — ${titles[idx % titles.length]}`;
+  const titles = [
+    'INICIALIZAÇÃO', 'LABIRINTO DE CIRCUITOS', 'O ZIGUE-ZAGUE',
+    'CAMINHO INVERSO', 'ROTA DO CENTRO', 'TRAVESSIA DO MEIO'
+  ];
+  const icons = ['🤖', '⚡', '🌀', '🔄', '🎯', '➡️'];
+  const hints = [
+    'Dir. Norte. Suba pela coluna A até A5, gire à Direita e avance até E5. Fila: F×4, Girar D, F×4.',
+    'Dir. Leste! Avance pela linha 1 até E1, gire à Esquerda (Norte) e suba até E5. Fila: F×4, Girar E, F×4.',
+    'Dir. Norte. Zigue-zague: suba col A, desvie em B5, desça p/ B4, cruze linha 4 até E4, suba p/ E5.',
+    'Dir. Norte — mas começa em E1! Suba pela col E até E5, gire à Esquerda (Oeste) e cruze até A5.',
+    'Dir. Leste — começa em C1! Avance p/ D1, gire Norte, suba col D até D5, gire Oeste, chegue em C5.',
+    'Dir. Leste — começa em A3! Linha 3 está livre. Avance direto 4 casas até E3. Cuidado com as armadilhas laterais!'
+  ];
+  const dirLabels = ['⬆ Norte', '→ Leste', '⬆ Norte', '⬆ Norte', '→ Leste', '→ Leste'];
+  const n = idx % 6;
+  document.getElementById('popup-icon').textContent = icons[n];
+  document.getElementById('popup-title').textContent = `FASE ${idx+1} — ${titles[n]}`;
+  document.getElementById('popup-pillar').textContent = `Direção inicial: ${dirLabels[n]}`;
+  document.getElementById('popup-lines').innerHTML = `
+    <div class="popup-line mec">⚙️ <strong>Mecânica:</strong> Verificando estrutura e articulações...</div>
+    <div class="popup-line ele">⚡ <strong>Eletrônica:</strong> Circuitos conectados e bateria carregada!</div>
+    <div class="popup-line prog">💻 <strong>Programação:</strong> ${hints[n]}</div>
+  `;
   document.getElementById('popup').classList.remove('hidden');
 }
 function closePopup() {
