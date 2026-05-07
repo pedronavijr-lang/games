@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Georrobô: Missão Matriz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --panel: #111827;
+    --panel2: #1a2236;
+    --accent: #00f5ff;
+    --accent2: #ff6b35;
+    --accent3: #7cff6b;
+    --accent4: #f5c842;
+    --red: #ff4d6d;
+    --purple: #b66dff;
+    --text: #e8f4f8;
+    --grid-border: #1e3a5f;
+    --cell-bg: #0d1b2e;
+    --cell-hover: #1a2f4a;
+    --neon-glow: 0 0 8px var(--accent), 0 0 20px rgba(0,245,255,0.3);
+    --orange-glow: 0 0 8px var(--accent2), 0 0 20px rgba(255,107,53,0.3);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(0,245,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(182,109,255,0.04) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ── */
+  #header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 28px;
+    background: linear-gradient(90deg, #0d1b2e 0%, #111827 50%, #0d1b2e 100%);
+    border-bottom: 2px solid var(--accent);
+    box-shadow: 0 0 24px rgba(0,245,255,0.2);
+    position: relative;
+    z-index: 10;
+  }
+  #header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: var(--neon-glow);
+    letter-spacing: 2px;
+  }
+  #header h1 span { color: var(--accent2); }
+  .header-stats {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+  }
+  .stat-box {
+    text-align: center;
+    background: var(--panel2);
+    border: 1px solid var(--grid-border);
+    border-radius: 10px;
+    padding: 6px 18px;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    color: var(--accent);
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent4);
+    text-shadow: 0 0 8px var(--accent4);
+  }
+
+  /* ── BATTERY TOGGLE ── */
+  .battery-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .battery-label {
+    font-size: 0.6rem;
+    font-family: 'Orbitron', monospace;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .battery-btn {
+    width: 64px;
+    height: 30px;
+    border-radius: 15px;
+    background: #1a2236;
+    border: 2px solid var(--grid-border);
+    position: relative;
+    transition: all 0.3s;
+    overflow: visible;
+  }
+  .battery-btn::after {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+    transition: all 0.3s;
+  }
+  .battery-btn.on { border-color: var(--accent3); background: #1a2e1a; }
+  .battery-btn.on::after {
+    left: 38px;
+    background: var(--accent3);
+    box-shadow: 0 0 8px var(--accent3);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  #main {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    padding: 20px 28px;
+    min-height: calc(100vh - 75px);
+  }
+
+  /* ── GAME AREA ── */
+  #game-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Phase banner */
+  #phase-banner {
+    background: var(--panel);
+    border: 1px solid var(--grid-border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #phase-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    color: var(--accent2);
+    text-shadow: var(--orange-glow);
+  }
+  #phase-desc { font-size: 0.9rem; color: #8aa; }
+  #coords-info {
+    text-align: right;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    color: var(--accent4);
+  }
+
+  /* Canvas wrapper */
+  #canvas-wrap {
+    position: relative;
+    background: var(--panel);
+    border: 2px solid var(--grid-border);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: inset 0 0 30px rgba(0,245,255,0.04), 0 0 0 1px rgba(0,245,255,0.1);
+  }
+  #gameCanvas { display: block; width: 100%; border-radius: 8px; }
+
+  /* Message overlay */
+  #msg-overlay {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,14,26,0.95);
+    border: 2px solid var(--accent2);
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    color: var(--accent2);
+    box-shadow: var(--orange-glow);
+    display: none;
+    text-align: center;
+    min-width: 320px;
+    z-index: 20;
+    white-space: nowrap;
+  }
+
+  /* ── SIDE PANEL ── */
+  #side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .panel-card {
+    background: var(--panel);
+    border: 1px solid var(--grid-border);
+    border-radius: 14px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+  .panel-card h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  /* Command blocks */
+  .cmd-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: var(--panel2);
+    border: 1px solid var(--grid-border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .cmd-btn:hover {
+    border-color: var(--accent);
+    background: #1a2f4a;
+    transform: translateX(3px);
+    box-shadow: -3px 0 0 var(--accent);
+  }
+  .cmd-btn .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .cmd-btn.forward .icon { background: rgba(0,245,255,0.15); color: var(--accent); }
+  .cmd-btn.right .icon { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .cmd-btn.left .icon { background: rgba(124,255,107,0.15); color: var(--accent3); }
+
+  /* Logic block */
+  .logic-block {
+    background: var(--panel2);
+    border: 1px dashed var(--purple);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .logic-block label {
+    font-size: 0.75rem;
+    color: var(--purple);
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .logic-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .logic-row span {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    color: var(--accent4);
+  }
+  select {
+    background: #0d1b2e;
+    border: 1px solid var(--purple);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    cursor: pointer;
+    outline: none;
+    flex: 1;
+    min-width: 90px;
+  }
+  .add-logic-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px;
+    background: rgba(182,109,255,0.1);
+    border: 1px solid var(--purple);
+    border-radius: 8px;
+    color: var(--purple);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .add-logic-btn:hover { background: rgba(182,109,255,0.2); box-shadow: 0 0 10px rgba(182,109,255,0.3); }
+
+  /* Queue display */
+  #queue-display {
+    min-height: 60px;
+    background: #070c14;
+    border: 1px solid var(--grid-border);
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-content: flex-start;
+  }
+  .queue-item {
+    background: var(--panel2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-family: 'Orbitron', monospace;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--grid-border);
+    position: relative;
+    animation: popIn 0.2s ease;
+  }
+  .queue-item.active { border-color: var(--accent); box-shadow: var(--neon-glow); }
+  .queue-item.done { opacity: 0.4; }
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Buttons */
+  #exec-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #003d4d 0%, #00263a 100%);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    color: var(--accent);
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(0,245,255,0.2);
+    text-transform: uppercase;
+  }
+  #exec-btn:hover {
+    background: linear-gradient(135deg, #005a73 0%, #003352 100%);
+    box-shadow: 0 0 35px rgba(0,245,255,0.5), inset 0 0 20px rgba(0,245,255,0.1);
+    transform: translateY(-2px);
+  }
+  #exec-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  #exec-btn .btn-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+
+  .action-row {
+    display: flex;
+    gap: 8px;
+  }
+  .small-btn {
+    flex: 1;
+    padding: 10px 8px;
+    background: var(--panel2);
+    border: 1px solid var(--grid-border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+  .small-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .small-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── POP-UP OVERLAY ── */
+  #popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,8,15,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(6px);
+  }
+  #popup.hidden { display: none; }
+  #popup-box {
+    background: var(--panel);
+    border: 2px solid var(--accent);
+    border-radius: 20px;
+    padding: 40px 50px;
+    max-width: 620px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(0,245,255,0.25), inset 0 0 40px rgba(0,245,255,0.03);
+    animation: popupIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes popupIn {
+    from { transform: scale(0.7) translateY(30px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .popup-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  #popup-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: var(--neon-glow);
+    margin-bottom: 8px;
+  }
+  #popup-pillar {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  #popup-lines { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .popup-line {
+    background: var(--panel2);
+    border-left: 3px solid;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 16px;
+    font-size: 1rem;
+    text-align: left;
+    line-height: 1.5;
+  }
+  .popup-line.mec { border-color: var(--accent2); color: #ffd; }
+  .popup-line.ele { border-color: var(--accent); color: #dff; }
+  .popup-line.prog { border-color: var(--accent3); color: #dfd; }
+  #popup-btn {
+    padding: 14px 44px;
+    background: linear-gradient(135deg, #003d4d, #00263a);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    color: var(--accent);
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #popup-btn:hover {
+    background: #005a73;
+    box-shadow: 0 0 25px rgba(0,245,255,0.5);
+    transform: translateY(-2px);
+  }
+
+  /* ── WIN OVERLAY ── */
+  #win-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,8,15,0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    backdrop-filter: blur(8px);
+  }
+  #win-overlay.hidden { display: none; }
+  #win-box {
+    text-align: center;
+    animation: winPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes winPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .win-icon { font-size: 5rem; margin-bottom: 20px; animation: spin 2s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #win-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent4);
+    text-shadow: 0 0 30px var(--accent4);
+    margin-bottom: 10px;
+  }
+  #win-sub {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin-bottom: 30px;
+  }
+  .win-btn {
+    padding: 16px 50px;
+    background: linear-gradient(135deg, #4a3000, #2a1a00);
+    border: 2px solid var(--accent4);
+    border-radius: 14px;
+    color: var(--accent4);
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    margin: 0 8px;
+  }
+  .win-btn:hover { box-shadow: 0 0 30px rgba(245,200,66,0.5); transform: translateY(-3px); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--grid-border); border-radius: 3px; }
+
+  /* Circuit background decoration */
+  .circuit-deco {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- DECORATIVE CIRCUITS -->
+<svg class="circuit-deco" style="top:0;right:0" viewBox="0 0 300 300">
+  <line x1="50" y1="0" x2="50" y2="100" stroke="#00f5ff" stroke-width="2"/>
+  <line x1="50" y1="100" x2="150" y2="100" stroke="#00f5ff" stroke-width="2"/>
+  <circle cx="150" cy="100" r="5" fill="#00f5ff"/>
+  <line x1="150" y1="100" x2="150" y2="200" stroke="#00f5ff" stroke-width="2"/>
+  <line x1="150" y1="200" x2="300" y2="200" stroke="#00f5ff" stroke-width="2"/>
+  <line x1="200" y1="0" x2="200" y2="60" stroke="#00f5ff" stroke-width="2"/>
+  <circle cx="200" cy="60" r="4" fill="#00f5ff"/>
+  <line x1="200" y1="60" x2="300" y2="60" stroke="#00f5ff" stroke-width="2"/>
+</svg>
+<svg class="circuit-deco" style="bottom:0;left:0" viewBox="0 0 300 300">
+  <line x1="0" y1="200" x2="100" y2="200" stroke="#ff6b35" stroke-width="2"/>
+  <circle cx="100" cy="200" r="5" fill="#ff6b35"/>
+  <line x1="100" y1="200" x2="100" y2="100" stroke="#ff6b35" stroke-width="2"/>
+  <line x1="100" y1="100" x2="250" y2="100" stroke="#ff6b35" stroke-width="2"/>
+  <line x1="0" y1="260" x2="180" y2="260" stroke="#ff6b35" stroke-width="2"/>
+  <circle cx="180" cy="260" r="4" fill="#ff6b35"/>
+  <line x1="180" y1="260" x2="180" y2="300" stroke="#ff6b35" stroke-width="2"/>
+</svg>
+
+<!-- HEADER -->
+<div id="header">
+  <h1>⬡ GEORR<span>OBÔ</span></h1>
+  <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:#446;letter-spacing:3px;text-align:center;">MISSÃO MATRIZ<br><span style="color:#334;font-size:0.6rem;">SEQUÊNCIA DIDÁTICA DE ROBÓTICA</span></div>
+  <div class="header-stats">
+    <div class="stat-box">
+      <div class="stat-label">Pontos</div>
+      <div class="stat-value" id="score-disp">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Fase</div>
+      <div class="stat-value" id="phase-disp">1</div>
+    </div>
+    <div class="battery-wrap" id="battery-toggle" onclick="toggleBattery()">
+      <div class="battery-label">⚡ ENERGIA</div>
+      <div class="battery-btn on" id="battery-btn"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- GAME AREA -->
+  <div id="game-area">
+    <div id="phase-banner">
+      <div>
+        <div id="phase-title">FASE 1 — INICIALIZAÇÃO DO GEORROBÔ</div>
+        <div id="phase-desc">Leve o Georrobô da posição inicial até o destino!</div>
+      </div>
+      <div id="coords-info">
+        🟢 Início: <span id="coord-start">A1</span><br>
+        🎯 Destino: <span id="coord-end">E5</span><br>
+        📍 Atual: <span id="coord-cur">A1</span>
+      </div>
+    </div>
+    <div id="canvas-wrap">
+      <canvas id="gameCanvas" width="680" height="540"></canvas>
+      <div id="msg-overlay">⚠️ Erro!</div>
+    </div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div id="side-panel">
+
+    <!-- Commands -->
+    <div class="panel-card">
+      <h2>🧩 Blocos de Comando</h2>
+      <button class="cmd-btn forward" onclick="addCmd('forward')">
+        <div class="icon">⬆️</div>
+        <div><div style="font-size:0.85rem">Mover para Frente</div><div style="font-size:0.7rem;color:#667;margin-top:2px">Avança 1 casa na direção atual</div></div>
+      </button>
+      <button class="cmd-btn right" onclick="addCmd('right')">
+        <div class="icon">↪️</div>
+        <div><div style="font-size:0.85rem">Girar 90° Direita</div><div style="font-size:0.7rem;color:#667;margin-top:2px">Rotaciona sentido horário</div></div>
+      </button>
+      <button class="cmd-btn left" onclick="addCmd('left')">
+        <div class="icon">↩️</div>
+        <div><div style="font-size:0.85rem">Girar 90° Esquerda</div><div style="font-size:0.7rem;color:#667;margin-top:2px">Rotaciona anti-horário</div></div>
+      </button>
+
+      <!-- SE-ENTÃO -->
+      <div class="logic-block">
+        <label>⚡ BLOCO LÓGICO: SE → ENTÃO</label>
+        <div class="logic-row">
+          <span>SE</span>
+          <select id="logic-if">
+            <option value="circle">Círculo</option>
+            <option value="square">Quadrado</option>
+            <option value="rect">Retângulo</option>
+          </select>
+          <span>ENTÃO</span>
+        </div>
+        <div class="logic-row">
+          <select id="logic-then">
+            <option value="jump">Pular (girar 90° D)</option>
+            <option value="back">Voltar (girar 90° E)</option>
+            <option value="stop">Parar</option>
+          </select>
+        </div>
+        <button class="add-logic-btn" onclick="addLogicCmd()">⊕ ADICIONAR CONDIÇÃO</button>
+      </div>
+    </div>
+
+    <!-- Queue -->
+    <div class="panel-card">
+      <h2>📋 Fila de Algoritmo</h2>
+      <div id="queue-display"><span style="color:#334;font-size:0.75rem;font-family:'Orbitron',monospace;padding:4px">Adicione comandos acima...</span></div>
+    </div>
+
+    <!-- Execute -->
+    <div class="panel-card" style="padding:14px">
+      <button id="exec-btn" onclick="executeAlgorithm()">
+        <span class="btn-icon">▶</span>
+        EXECUTAR ALGORITMO
+      </button>
+      <br>
+      <div class="action-row" style="margin-top:10px">
+        <button class="small-btn" onclick="resetPosition()">↺ REINICIAR</button>
+        <button class="small-btn danger" onclick="clearQueue()">🗑 LIMPAR FILA</button>
+        <button class="small-btn" onclick="nextPhase()">⏭ PRÓXIMA FASE</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- STARTUP POPUP -->
+<div id="popup">
+  <div id="popup-box">
+    <div class="popup-icon" id="popup-icon">🤖</div>
+    <div id="popup-title">FASE 1 — INICIALIZAÇÃO</div>
+    <div id="popup-pillar">VERIFICANDO SISTEMAS...</div>
+    <div id="popup-lines">
+      <div class="popup-line mec">⚙️ <strong>Mecânica:</strong> Verificando estrutura e articulações...</div>
+      <div class="popup-line ele">⚡ <strong>Eletrônica:</strong> Circuitos conectados e bateria carregada!</div>
+      <div class="popup-line prog">💻 <strong>Programação:</strong> Aguardando sequência de algoritmos...</div>
+    </div>
+    <button id="popup-btn" onclick="closePopup()">INICIAR MISSÃO ▶</button>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div id="win-overlay" class="hidden">
+  <div id="win-box">
+    <div class="win-icon">🏆</div>
+    <div id="win-title">MISSÃO COMPLETA!</div>
+    <div id="win-sub" id="win-sub">Georrobô chegou ao destino!</div>
+    <div style="margin-bottom:24px;font-family:'Orbitron',monospace;font-size:0.9rem;color:#7cff6b" id="win-score"></div>
+    <button class="win-btn" onclick="closeWin()">PRÓXIMA FASE ▶</button>
+    <button class="win-btn" style="border-color:var(--accent);color:var(--accent)" onclick="resetPhase()">↺ REPETIR</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//   GEORROBÔ: MISSÃO MATRIZ — GAME ENGINE
+// ═══════════════════════════════════════════
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const COLS = 5, ROWS = 5;
+const COLS_LABELS = ['A','B','C','D','E'];
+
+let score = 0;
+let currentPhase = 0;
+let batteryOn = true;
+let commandQueue = [];
+let isExecuting = false;
+let robotDir = 0; // 0=up,1=right,2=down,3=left
+let robotPos = {col:0, row:4}; // A1
+let particles = [];
+let circuitAnim = 0;
+
+// ── PHASES ──────────────────────────────────
+const phases = [
+  {
+    name: "INICIALIZAÇÃO DO GEORROBÔ",
+    desc: "Leve o Georrobô da posição inicial até o destino!",
+    start: {col:0, row:4}, startDir: 0,
+    end: {col:4, row:0},
+    obstacles: [
+      {col:1, row:3, type:'circle', color:'#00bfff'},
+      {col:2, row:2, type:'square', color:'#ff4d6d'},
+      {col:3, row:1, type:'rect',   color:'#f5c842'},
+    ]
+  },
+  {
+    name: "LABIRINTO DE CIRCUITOS",
+    desc: "Cuidado com os obstáculos! Use a lógica SE-ENTÃO.",
+    start: {col:0, row:0}, startDir: 1,
+    end: {col:4, row:4},
+    obstacles: [
+      {col:1, row:0, type:'square', color:'#ff4d6d'},
+      {col:1, row:1, type:'circle', color:'#00bfff'},
+      {col:2, row:2, type:'rect',   color:'#f5c842'},
+      {col:2, row:3, type:'circle', color:'#00bfff'},
+      {col:3, row:2, type:'square', color:'#ff4d6d'},
+      {col:3, row:3, type:'rect',   color:'#7cff6b'},
+    ]
+  },
+  {
+    name: "MISSÃO FINAL: A GRANDE DIAGONAL",
+    desc: "A rota mais difícil! Programe com cuidado.",
+    start: {col:0, row:4}, startDir: 0,
+    end: {col:4, row:0},
+    obstacles: [
+      {col:0, row:3, type:'rect',   color:'#f5c842'},
+      {col:1, row:3, type:'circle', color:'#00bfff'},
+      {col:1, row:2, type:'square', color:'#ff4d6d'},
+      {col:2, row:2, type:'rect',   color:'#7cff6b'},
+      {col:2, row:1, type:'circle', color:'#00bfff'},
+      {col:3, row:2, type:'square', color:'#ff4d6d'},
+      {col:3, row:1, type:'rect',   color:'#f5c842'},
+      {col:4, row:1, type:'circle', color:'#00bfff'},
+    ]
+  }
+];
+
+function getPhase() { return phases[currentPhase % phases.length]; }
+
+// ── CANVAS SIZING ────────────────────────────
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  const w = wrap.clientWidth - 24;
+  canvas.style.width = w + 'px';
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function getCellSize() {
+  const W = canvas.width, H = canvas.height;
+  const gridW = W * 0.75, gridH = H * 0.75;
+  return { w: gridW / COLS, h: gridH / ROWS, ox: W * 0.13, oy: H * 0.12 };
+}
+
+// ── DRAW FUNCTIONS ───────────────────────────
+function drawGrid() {
+  const {w, h, ox, oy} = getCellSize();
+  const totalW = w * COLS, totalH = h * ROWS;
+
+  // Grid background
+  ctx.fillStyle = '#070c14';
+  ctx.beginPath();
+  ctx.roundRect(ox - 4, oy - 4, totalW + 8, totalH + 8, 8);
+  ctx.fill();
+
+  // Circuit traces in background
+  circuitAnim = (circuitAnim + 0.5) % 100;
+  ctx.save();
+  ctx.globalAlpha = 0.12;
+  for (let i = 0; i < COLS; i++) {
+    for (let j = 0; j < ROWS; j++) {
+      const cx = ox + i * w + w / 2, cy = oy + j * h + h / 2;
+      const t = (circuitAnim + i * 20 + j * 15) % 100;
+      ctx.strokeStyle = t < 50 ? '#00f5ff' : '#7cff6b';
+      ctx.lineWidth = 1;
+      if (i < COLS - 1) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + w * 0.3, cy);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+
+  // Cells
+  const phase = getPhase();
+  for (let c = 0; c < COLS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const x = ox + c * w, y = oy + r * h;
+      const isStart = phase.start.col === c && phase.start.row === r;
+      const isEnd   = phase.end.col   === c && phase.end.row   === r;
+
+      // Cell fill
+      ctx.fillStyle = isEnd ? 'rgba(0,245,255,0.08)' : isStart ? 'rgba(124,255,107,0.06)' : '#0d1b2e';
+      ctx.beginPath();
+      ctx.roundRect(x + 2, y + 2, w - 4, h - 4, 6);
+      ctx.fill();
+
+      // Cell border
+      ctx.strokeStyle = isEnd ? '#00f5ff' : isStart ? '#7cff6b' : '#1e3a5f';
+      ctx.lineWidth = isEnd || isStart ? 2 : 1;
+      ctx.stroke();
+
+      // Start marker
+      if (isStart) {
+        ctx.fillStyle = '#7cff6b';
+        ctx.globalAlpha = 0.3;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#7cff6b';
+        ctx.font = `bold ${w * 0.22}px Orbitron`;
+        ctx.textAlign = 'center';
+        ctx.fillText('START', x + w/2, y + h - 8);
+      }
+
+      // End marker (pulsing)
+      if (isEnd) {
+        const pulse = Math.sin(Date.now() / 300) * 0.3 + 0.7;
+        ctx.fillStyle = `rgba(0,245,255,${pulse * 0.25})`;
+        ctx.beginPath();
+        ctx.roundRect(x + 2, y + 2, w - 4, h - 4, 6);
+        ctx.fill();
+        ctx.fillStyle = '#00f5ff';
+        ctx.font = `bold ${w * 0.22}px Orbitron`;
+        ctx.textAlign = 'center';
+        ctx.fillText('🎯', x + w/2, y + h/2 + 5);
+        ctx.font = `${w * 0.16}px Orbitron`;
+        ctx.fillText('META', x + w/2, y + h - 8);
+      }
+    }
+  }
+
+  // Column labels (A-E) — top and bottom
+  ctx.fillStyle = '#00f5ff';
+  ctx.font = `bold ${w * 0.22}px Orbitron`;
+  ctx.textAlign = 'center';
+  for (let c = 0; c < COLS; c++) {
+    const x = ox + c * w + w / 2;
+    ctx.fillText(COLS_LABELS[c], x, oy - 8);
+    ctx.fillText(COLS_LABELS[c], x, oy + totalH + 20);
+  }
+
+  // Row labels (1-5) — left and right
+  ctx.textAlign = 'right';
+  for (let r = 0; r < ROWS; r++) {
+    const y = oy + r * h + h / 2 + 6;
+    ctx.fillText(ROWS - r, ox - 8, y);
+    ctx.textAlign = 'left';
+    ctx.fillText(ROWS - r, ox + totalW + 8, y);
+    ctx.textAlign = 'right';
+  }
+}
+
+function drawObstacles() {
+  const {w, h, ox, oy} = getCellSize();
+  const phase = getPhase();
+  phase.obstacles.forEach(ob => {
+    const x = ox + ob.col * w + w / 2;
+    const y = oy + ob.row * h + h / 2;
+    ctx.save();
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = ob.color;
+    ctx.fillStyle = ob.color;
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1.5;
+
+    if (ob.type === 'circle') {
+      ctx.beginPath();
+      ctx.arc(x, y, w * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (ob.type === 'square') {
+      const s = w * 0.42;
+      ctx.beginPath();
+      ctx.roundRect(x - s/2, y - s/2, s, s, 4);
+      ctx.fill();
+      ctx.stroke();
+    } else { // rect
+      ctx.beginPath();
+      ctx.roundRect(x - w*0.32, y - h*0.2, w*0.64, h*0.4, 4);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+}
+
+function drawRobot() {
+  const {w, h, ox, oy} = getCellSize();
+  const rx = ox + robotPos.col * w + w / 2;
+  const ry = oy + robotPos.row * h + h / 2;
+
+  ctx.save();
+  ctx.translate(rx, ry);
+  ctx.rotate((robotDir * 90) * Math.PI / 180);
+
+  const s = Math.min(w, h) * 0.38;
+
+  // Glow
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = '#00f5ff';
+
+  // Body
+  ctx.fillStyle = '#1a3a5c';
+  ctx.strokeStyle = '#00f5ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(-s * 0.55, -s * 0.35, s * 1.1, s * 0.9, 6);
+  ctx.fill();
+  ctx.stroke();
+
+  // Circuit lines on body
+  ctx.strokeStyle = 'rgba(0,245,255,0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-s*0.3, -s*0.1);
+  ctx.lineTo(s*0.1, -s*0.1);
+  ctx.lineTo(s*0.1, s*0.15);
+  ctx.lineTo(s*0.3, s*0.15);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-s*0.3, s*0.1);
+  ctx.lineTo(-s*0.05, s*0.1);
+  ctx.stroke();
+  ctx.fillStyle = '#00f5ff';
+  ctx.beginPath();
+  ctx.arc(s*0.3, s*0.15, 3, 0, Math.PI*2);
+  ctx.arc(-s*0.05, s*0.1, 3, 0, Math.PI*2);
+  ctx.fill();
+
+  // Head
+  ctx.fillStyle = '#0d2a44';
+  ctx.strokeStyle = '#00f5ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(-s * 0.38, -s * 0.85, s * 0.76, s * 0.5, 6);
+  ctx.fill();
+  ctx.stroke();
+
+  // Eyes (glowing)
+  const eyePulse = Math.sin(Date.now() / 400) * 0.3 + 0.7;
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = '#00f5ff';
+  ctx.fillStyle = `rgba(0,245,255,${eyePulse})`;
+  ctx.beginPath();
+  ctx.arc(-s * 0.15, -s * 0.63, s * 0.1, 0, Math.PI * 2);
+  ctx.arc( s * 0.15, -s * 0.63, s * 0.1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Smile
+  ctx.strokeStyle = '#7cff6b';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#7cff6b';
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.48, s * 0.15, 0, Math.PI);
+  ctx.stroke();
+
+  // Arms
+  ctx.fillStyle = '#1a3a5c';
+  ctx.strokeStyle = '#00f5ff';
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 8;
+  // Left arm
+  ctx.beginPath();
+  ctx.roundRect(-s * 0.8, -s * 0.25, s * 0.22, s * 0.6, 4);
+  ctx.fill();
+  ctx.stroke();
+  // Right arm
+  ctx.beginPath();
+  ctx.roundRect(s * 0.58, -s * 0.25, s * 0.22, s * 0.6, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  // Legs
+  ctx.beginPath();
+  ctx.roundRect(-s * 0.38, s * 0.55, s * 0.3, s * 0.45, 4);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.roundRect(s * 0.08, s * 0.55, s * 0.3, s * 0.45, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  // Antenna
+  ctx.strokeStyle = '#7cff6b';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#7cff6b';
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.moveTo(0, -s * 0.85);
+  ctx.lineTo(0, -s * 1.15);
+  ctx.stroke();
+  ctx.fillStyle = '#7cff6b';
+  ctx.beginPath();
+  ctx.arc(0, -s * 1.18, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Direction arrow
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(0,245,255,0.6)';
+  ctx.beginPath();
+  ctx.moveTo(0, -s * 0.85);
+  ctx.lineTo(-6, -s * 0.72);
+  ctx.lineTo(6, -s * 0.72);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawParticles() {
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = p.life / p.maxLife;
+    ctx.fillStyle = p.color;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+  });
+}
+
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 3;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      r: 2 + Math.random() * 4,
+      color,
+      life: 30 + Math.random() * 20,
+      maxLife: 50
+    });
+  }
+}
+
+function renderFrame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Dark gradient bg
+  const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
+  grad.addColorStop(0, '#0f1929');
+  grad.addColorStop(1, '#070c14');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawGrid();
+  drawObstacles();
+  drawRobot();
+  drawParticles();
+
+  requestAnimationFrame(renderFrame);
+}
+
+// ── COORDINATE HELPERS ───────────────────────
+function coordLabel(pos) {
+  return COLS_LABELS[pos.col] + (ROWS - pos.row);
+}
+function updateCoordDisplay() {
+  document.getElementById('coord-cur').textContent = coordLabel(robotPos);
+}
+
+// ── BATTERY ──────────────────────────────────
+function toggleBattery() {
+  batteryOn = !batteryOn;
+  document.getElementById('battery-btn').className = 'battery-btn' + (batteryOn ? ' on' : '');
+  showMsg(batteryOn ? '⚡ Energia ativada! Circuitos conectados.' : '🔴 Energia desligada. Georrobô offline.', batteryOn ? '#7cff6b' : '#ff4d6d');
+}
+
+// ── QUEUE ─────────────────────────────────────
+function addCmd(type) {
+  const labels = { forward:'⬆ Frente', right:'↪ Gir. D', left:'↩ Gir. E' };
+  commandQueue.push({type, label: labels[type]});
+  renderQueue();
+}
+function addLogicCmd() {
+  const cond = document.getElementById('logic-if').value;
+  const action = document.getElementById('logic-then').value;
+  const condLabels = { circle:'Círculo', square:'Quadrado', rect:'Retângulo' };
+  const actLabels = { jump:'Gir. 90°D', back:'Gir. 90°E', stop:'Parar' };
+  commandQueue.push({type:'logic', cond, action, label:`SE ${condLabels[cond]}→${actLabels[action]}`});
+  renderQueue();
+}
+function clearQueue() {
+  commandQueue = [];
+  renderQueue();
+}
+function renderQueue() {
+  const d = document.getElementById('queue-display');
+  if (commandQueue.length === 0) {
+    d.innerHTML = '<span style="color:#334;font-size:0.75rem;font-family:\'Orbitron\',monospace;padding:4px">Adicione comandos acima...</span>';
+    return;
+  }
+  d.innerHTML = commandQueue.map((cmd, i) =>
+    `<div class="queue-item" id="qi-${i}">
+      <span style="color:#334;font-size:0.65rem;font-family:Orbitron,monospace">${i+1}</span>
+      <span style="font-size:0.7rem;font-family:Orbitron,monospace;color:${cmd.type==='logic'?'#b66dff':cmd.type==='forward'?'#00f5ff':cmd.type==='right'?'#ff6b35':'#7cff6b'}">${cmd.label}</span>
+      <span style="margin-left:auto;cursor:pointer;color:#446;font-size:0.7rem" onclick="removeCmd(${i})">✕</span>
+    </div>`
+  ).join('');
+}
+function removeCmd(i) {
+  commandQueue.splice(i, 1);
+  renderQueue();
+}
+
+// ── SHOW MESSAGE ─────────────────────────────
+let msgTimer = null;
+function showMsg(text, color='#ff6b35') {
+  const el = document.getElementById('msg-overlay');
+  el.textContent = text;
+  el.style.borderColor = color;
+  el.style.color = color;
+  el.style.boxShadow = `0 0 20px ${color}44`;
+  el.style.display = 'block';
+  if (msgTimer) clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+// ── OBSTACLE CHECK ───────────────────────────
+function getObstacleAt(col, row) {
+  const phase = getPhase();
+  return phase.obstacles.find(ob => ob.col === col && ob.row === row) || null;
+}
+
+// ── EXECUTE ──────────────────────────────────
+function executeAlgorithm() {
+  if (isExecuting) return;
+  if (!batteryOn) {
+    showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
+    return;
+  }
+  if (commandQueue.length === 0) {
+    showMsg('⚠️ Nenhum comando na fila! Adicione blocos.', '#f5c842');
+    return;
+  }
+  isExecuting = true;
+  document.getElementById('exec-btn').disabled = true;
+  runQueue(0);
+}
+
+function runQueue(index) {
+  if (index >= commandQueue.length) {
+    isExecuting = false;
+    document.getElementById('exec-btn').disabled = false;
+    checkWin();
+    return;
+  }
+
+  // Highlight current
+  const items = document.querySelectorAll('.queue-item');
+  items.forEach((el, i) => {
+    el.classList.remove('active');
+    if (i < index) el.classList.add('done');
+  });
+  if (items[index]) items[index].classList.add('active');
+
+  const cmd = commandQueue[index];
+  const {w, h, ox, oy} = getCellSize();
+
+  if (cmd.type === 'forward') {
+    if (!batteryOn) {
+      showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
+      isExecuting = false;
+      document.getElementById('exec-btn').disabled = false;
+      return;
+    }
+    let nc = robotPos.col, nr = robotPos.row;
+    if (robotDir === 0) nr--;
+    else if (robotDir === 1) nc++;
+    else if (robotDir === 2) nr++;
+    else nc--;
+
+    if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) {
+      showMsg('🚧 Erro: Georrobô tentou sair da matriz!', '#ff4d6d');
+    } else {
+      const ob = getObstacleAt(nc, nr);
+      if (ob) {
+        // Don't move, show collision
+        const px = ox + ob.col * w + w / 2;
+        const py = oy + ob.row * h + h / 2;
+        spawnParticles(px, py, ob.color, 20);
+        showMsg(`⚠️ Colisão com ${ob.type === 'circle' ? 'Círculo' : ob.type === 'square' ? 'Quadrado' : 'Retângulo'}! Bloqueado.`, '#f5c842');
+      } else {
+        robotPos = {col: nc, row: nr};
+        const px = ox + nc * w + w / 2;
+        const py = oy + nr * h + h / 2;
+        spawnParticles(px, py, '#00f5ff', 8);
+        updateCoordDisplay();
+      }
+    }
+  } else if (cmd.type === 'right') {
+    robotDir = (robotDir + 1) % 4;
+  } else if (cmd.type === 'left') {
+    robotDir = (robotDir + 3) % 4;
+  } else if (cmd.type === 'logic') {
+    // Check if obstacle ahead matches condition
+    let nc = robotPos.col, nr = robotPos.row;
+    if (robotDir === 0) nr--;
+    else if (robotDir === 1) nc++;
+    else if (robotDir === 2) nr++;
+    else nc--;
+    const ahead = (nc >= 0 && nc < COLS && nr >= 0 && nr < ROWS) ? getObstacleAt(nc, nr) : null;
+    if (ahead && ahead.type === cmd.cond) {
+      if (cmd.action === 'jump') { robotDir = (robotDir + 1) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou direita!`, '#b66dff'); }
+      else if (cmd.action === 'back') { robotDir = (robotDir + 3) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou esquerda!`, '#b66dff'); }
+      else { showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`, '#b66dff'); isExecuting = false; document.getElementById('exec-btn').disabled = false; return; }
+    }
+  }
+
+  setTimeout(() => runQueue(index + 1), 550);
+}
+
+function checkWin() {
+  const phase = getPhase();
+  if (robotPos.col === phase.end.col && robotPos.row === phase.end.row) {
+    const pts = 100 + commandQueue.length * 10;
+    score += pts;
+    document.getElementById('score-disp').textContent = score;
+    const {w, h, ox, oy} = getCellSize();
+    const px = ox + robotPos.col * w + w / 2;
+    const py = oy + robotPos.row * h + h / 2;
+    for (let i = 0; i < 5; i++) setTimeout(() => spawnParticles(px, py, ['#00f5ff','#f5c842','#7cff6b','#ff6b35'][i%4], 20), i*150);
+    document.getElementById('win-score').textContent = `+${pts} pontos! Total: ${score}`;
+    document.getElementById('win-overlay').classList.remove('hidden');
+  }
+}
+
+// ── RESET / NEXT PHASE ───────────────────────
+function resetPosition() {
+  const phase = getPhase();
+  robotPos = {...phase.start};
+  robotDir = phase.startDir || 0;
+  updateCoordDisplay();
+  commandQueue = [];
+  renderQueue();
+  document.getElementById('exec-btn').disabled = false;
+  isExecuting = false;
+}
+function resetPhase() {
+  document.getElementById('win-overlay').classList.add('hidden');
+  resetPosition();
+}
+function nextPhase() {
+  currentPhase++;
+  loadPhase();
+}
+function closeWin() {
+  document.getElementById('win-overlay').classList.add('hidden');
+  nextPhase();
+}
+
+function loadPhase() {
+  const p = getPhase();
+  const idx = currentPhase % phases.length;
+  document.getElementById('phase-title').textContent = `FASE ${idx+1} — ${p.name}`;
+  document.getElementById('phase-desc').textContent = p.desc;
+  document.getElementById('phase-disp').textContent = idx + 1;
+  document.getElementById('coord-start').textContent = coordLabel(p.start);
+  document.getElementById('coord-end').textContent = coordLabel(p.end);
+  resetPosition();
+  showPhasePopup(idx);
+}
+
+// ── POPUP ─────────────────────────────────────
+function showPhasePopup(idx) {
+  const titles = ['INICIALIZAÇÃO', 'LABIRINTO DE CIRCUITOS', 'MISSÃO FINAL'];
+  const icons = ['🤖', '⚡', '🏆'];
+  document.getElementById('popup-icon').textContent = icons[idx % icons.length];
+  document.getElementById('popup-title').textContent = `FASE ${idx+1} — ${titles[idx % titles.length]}`;
+  document.getElementById('popup').classList.remove('hidden');
+}
+function closePopup() {
+  document.getElementById('popup').classList.add('hidden');
+}
+
+// ── INIT ─────────────────────────────────────
+loadPhase();
+renderFrame();
+</script>
+</body>
+</html>
