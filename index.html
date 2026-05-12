@@ -3,1669 +3,495 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Georrobô: Missão Matriz</title>
+<title>Portal de Jogos Educativos</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap');
+/* ─── Reset & Base ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg: #0a0e1a;
-    --panel: #111827;
-    --panel2: #1a2236;
-    --accent: #00f5ff;
-    --accent2: #ff6b35;
-    --accent3: #7cff6b;
-    --accent4: #f5c842;
-    --red: #ff4d6d;
-    --purple: #b66dff;
-    --text: #e8f4f8;
-    --grid-border: #1e3a5f;
-    --cell-bg: #0d1b2e;
-    --cell-hover: #1a2f4a;
-    --neon-glow: 0 0 8px var(--accent), 0 0 20px rgba(0,245,255,0.3);
-    --orange-glow: 0 0 8px var(--accent2), 0 0 20px rgba(255,107,53,0.3);
-  }
+:root {
+  --bg:          #04091f;
+  --bg2:         #070e2e;
+  --grid-line:   rgba(30, 80, 200, 0.18);
+  --text:        #e8f0ff;
+  --text-dim:    rgba(180,200,255,0.55);
+  --gold:        #ffd54f;
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+  /* Card 1 — Georrobô */
+  --geo-a: #00e5ff;
+  --geo-b: #0066ff;
+  --geo-glow: rgba(0,180,255,0.45);
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(0,245,255,0.04) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(182,109,255,0.04) 0%, transparent 60%);
-  }
+  /* Card 2 — Roleta */
+  --rol-a: #ff3d78;
+  --rol-b: #ff9800;
+  --rol-glow: rgba(255,90,30,0.45);
+}
 
-  /* ── HEADER ── */
-  #header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 28px;
-    background: linear-gradient(90deg, #0d1b2e 0%, #111827 50%, #0d1b2e 100%);
-    border-bottom: 2px solid var(--accent);
-    box-shadow: 0 0 24px rgba(0,245,255,0.2);
-    position: relative;
-    z-index: 10;
-  }
-  #header h1 {
-    font-family: 'Orbitron', monospace;
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--accent);
-    text-shadow: var(--neon-glow);
-    letter-spacing: 2px;
-  }
-  #header h1 span { color: var(--accent2); }
-  .header-stats {
-    display: flex;
-    gap: 28px;
-    align-items: center;
-  }
-  .stat-box {
-    text-align: center;
-    background: var(--panel2);
-    border: 1px solid var(--grid-border);
-    border-radius: 10px;
-    padding: 6px 18px;
-  }
-  .stat-label {
-    font-size: 0.65rem;
-    color: var(--accent);
-    font-family: 'Orbitron', monospace;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .stat-value {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--accent4);
-    text-shadow: 0 0 8px var(--accent4);
-  }
+html, body {
+  width: 100%; min-height: 100%;
+  background: var(--bg);
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
 
-  /* ── BATTERY TOGGLE ── */
-  .battery-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .battery-label {
-    font-size: 0.6rem;
-    font-family: 'Orbitron', monospace;
-    color: var(--accent);
-    letter-spacing: 1px;
-  }
-  .battery-btn {
-    width: 64px;
-    height: 30px;
-    border-radius: 15px;
-    background: #1a2236;
-    border: 2px solid var(--grid-border);
-    position: relative;
-    transition: all 0.3s;
-    overflow: visible;
-  }
-  .battery-btn::after {
-    content: '';
-    position: absolute;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    top: 2px; left: 2px;
-    background: var(--red);
-    box-shadow: 0 0 8px var(--red);
-    transition: all 0.3s;
-  }
-  .battery-btn.on { border-color: var(--accent3); background: #1a2e1a; }
-  .battery-btn.on::after {
-    left: 38px;
-    background: var(--accent3);
-    box-shadow: 0 0 8px var(--accent3);
-  }
+/* ─── Starfield ──────────────────────────────────────────────── */
+#starfield {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  overflow: hidden;
+}
+.star {
+  position: absolute; border-radius: 50%; background: #fff;
+  animation: twinkle var(--d,3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes twinkle {
+  0%,100% { opacity: var(--lo,.15); transform: scale(1); }
+  50%      { opacity: var(--hi,.9);  transform: scale(1.4); }
+}
 
-  /* ── MAIN LAYOUT ── */
-  #main {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 20px;
-    padding: 20px 28px;
-    min-height: calc(100vh - 75px);
-  }
+/* Grid perspective lines */
+.grid-overlay {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%);
+}
 
-  /* ── GAME AREA ── */
-  #game-area {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+/* Scanlines texture */
+.scanlines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 2px,
+    rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+  );
+}
 
-  /* Phase banner */
-  #phase-banner {
-    background: var(--panel);
-    border: 1px solid var(--grid-border);
-    border-left: 4px solid var(--accent2);
-    border-radius: 12px;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #phase-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
-    color: var(--accent2);
-    text-shadow: var(--orange-glow);
-  }
-  #phase-desc { font-size: 0.9rem; color: #8aa; }
-  #coords-info {
-    text-align: right;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.85rem;
-    color: var(--accent4);
-  }
+/* ─── Layout ─────────────────────────────────────────────────── */
+.page {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: clamp(24px, 5vh, 64px) clamp(16px, 4vw, 60px) clamp(32px, 6vh, 80px);
+  gap: clamp(24px, 4.5vh, 56px);
+}
 
-  /* Canvas wrapper */
-  #canvas-wrap {
-    position: relative;
-    background: var(--panel);
-    border: 2px solid var(--grid-border);
-    border-radius: 16px;
-    padding: 12px;
-    box-shadow: inset 0 0 30px rgba(0,245,255,0.04), 0 0 0 1px rgba(0,245,255,0.1);
-  }
-  #gameCanvas { display: block; width: 100%; border-radius: 8px; }
+/* ─── Header ─────────────────────────────────────────────────── */
+.header {
+  text-align: center;
+  animation: slideDown 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  /* Message overlay */
-  #msg-overlay {
-    position: absolute;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(10,14,26,0.95);
-    border: 2px solid var(--accent2);
-    border-radius: 12px;
-    padding: 12px 28px;
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    color: var(--accent2);
-    box-shadow: var(--orange-glow);
-    display: none;
-    text-align: center;
-    min-width: 320px;
-    z-index: 20;
-    white-space: nowrap;
-  }
+.badge {
+  display: inline-block;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(0.55rem, 1.2vw, 0.78rem);
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(255,213,79,0.08);
+  border: 1px solid rgba(255,213,79,0.3);
+  border-radius: 30px;
+  padding: 5px 18px;
+  margin-bottom: 14px;
+}
 
-  /* ── SIDE PANEL ── */
-  #side-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
+.site-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.8rem, 5.5vw, 5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #a8d8ff 0%, #ffffff 40%, #ffd54f 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 30px rgba(120,180,255,0.35));
+}
 
-  .panel-card {
-    background: var(--panel);
-    border: 1px solid var(--grid-border);
-    border-radius: 14px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .panel-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.5;
-  }
-  .panel-card h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.75rem;
-    color: var(--accent);
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-  }
+.site-sub {
+  margin-top: 10px;
+  font-size: clamp(0.85rem, 2vw, 1.2rem);
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
 
-  /* Command blocks */
-  .cmd-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    background: var(--panel2);
-    border: 1px solid var(--grid-border);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: left;
-  }
-  .cmd-btn:hover {
-    border-color: var(--accent);
-    background: #1a2f4a;
-    transform: translateX(3px);
-    box-shadow: -3px 0 0 var(--accent);
-  }
-  .cmd-btn .icon {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-  }
-  .cmd-btn.forward .icon { background: rgba(0,245,255,0.15); color: var(--accent); }
-  .cmd-btn.right .icon { background: rgba(255,107,53,0.15); color: var(--accent2); }
-  .cmd-btn.left .icon { background: rgba(124,255,107,0.15); color: var(--accent3); }
+/* ─── Divider ────────────────────────────────────────────────── */
+.divider {
+  width: clamp(120px, 30vw, 320px); height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(100,180,255,0.6), transparent);
+  border-radius: 2px;
+}
 
-  /* Logic block */
-  .logic-block {
-    background: var(--panel2);
-    border: 1px dashed var(--purple);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-  }
-  .logic-block label {
-    font-size: 0.75rem;
-    color: var(--purple);
-    font-family: 'Orbitron', monospace;
-    letter-spacing: 1px;
-    display: block;
-    margin-bottom: 6px;
-  }
-  .logic-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 6px;
-  }
-  .logic-row span {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.7rem;
-    color: var(--accent4);
-  }
-  select {
-    background: #0d1b2e;
-    border: 1px solid var(--purple);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.8rem;
-    padding: 4px 8px;
-    cursor: pointer;
-    outline: none;
-    flex: 1;
-    min-width: 90px;
-  }
-  .add-logic-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 8px;
-    background: rgba(182,109,255,0.1);
-    border: 1px solid var(--purple);
-    border-radius: 8px;
-    color: var(--purple);
-    font-family: 'Orbitron', monospace;
-    font-size: 0.72rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 1px;
-  }
-  .add-logic-btn:hover { background: rgba(182,109,255,0.2); box-shadow: 0 0 10px rgba(182,109,255,0.3); }
+/* ─── Grid ───────────────────────────────────────────────────── */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(260px, 36vw, 480px), 1fr));
+  gap: clamp(20px, 3.5vw, 48px);
+  width: 100%;
+  max-width: 1200px;
+}
 
-  /* Queue display */
-  #queue-display {
-    min-height: 60px;
-    background: #070c14;
-    border: 1px solid var(--grid-border);
-    border-radius: 10px;
-    padding: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-content: flex-start;
-  }
-  .queue-item {
-    background: var(--panel2);
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 0.75rem;
-    font-family: 'Orbitron', monospace;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    border: 1px solid var(--grid-border);
-    position: relative;
-    animation: popIn 0.2s ease;
-  }
-  .queue-item.active { border-color: var(--accent); box-shadow: var(--neon-glow); }
-  .queue-item.done { opacity: 0.4; }
-  @keyframes popIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
+/* ─── Card ───────────────────────────────────────────────────── */
+.card {
+  position: relative;
+  border-radius: 24px;
+  padding: clamp(28px, 4vw, 52px) clamp(24px, 3.5vw, 44px);
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: clamp(14px, 2.5vh, 24px);
+  background: var(--bg2);
+  border: 2px solid transparent;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+  animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
-  /* Buttons */
-  #exec-btn {
-    width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, #003d4d 0%, #00263a 100%);
-    border: 2px solid var(--accent);
-    border-radius: 14px;
-    color: var(--accent);
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 0 20px rgba(0,245,255,0.2);
-    text-transform: uppercase;
-  }
-  #exec-btn:hover {
-    background: linear-gradient(135deg, #005a73 0%, #003352 100%);
-    box-shadow: 0 0 35px rgba(0,245,255,0.5), inset 0 0 20px rgba(0,245,255,0.1);
-    transform: translateY(-2px);
-  }
-  #exec-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-  #exec-btn .btn-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+.card:nth-child(1) { animation-delay: 0.15s; }
+.card:nth-child(2) { animation-delay: 0.28s; }
+.card:nth-child(3) { animation-delay: 0.41s; }
+.card:nth-child(4) { animation-delay: 0.54s; }
 
-  .action-row {
-    display: flex;
-    gap: 8px;
-  }
-  .small-btn {
-    flex: 1;
-    padding: 10px 8px;
-    background: var(--panel2);
-    border: 1px solid var(--grid-border);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 1px;
-    text-align: center;
-  }
-  .small-btn:hover { border-color: var(--accent2); color: var(--accent2); }
-  .small-btn.danger:hover { border-color: var(--red); color: var(--red); }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(36px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-  /* ── POP-UP OVERLAY ── */
-  #popup {
-    position: fixed;
-    inset: 0;
-    background: rgba(5,8,15,0.92);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    backdrop-filter: blur(6px);
-  }
-  #popup.hidden { display: none; }
-  #popup-box {
-    background: var(--panel);
-    border: 2px solid var(--accent);
-    border-radius: 20px;
-    padding: 40px 50px;
-    max-width: 620px;
-    width: 90%;
-    text-align: center;
-    box-shadow: 0 0 60px rgba(0,245,255,0.25), inset 0 0 40px rgba(0,245,255,0.03);
-    animation: popupIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  @keyframes popupIn {
-    from { transform: scale(0.7) translateY(30px); opacity: 0; }
-    to { transform: scale(1) translateY(0); opacity: 1; }
-  }
-  .popup-icon { font-size: 3.5rem; margin-bottom: 16px; }
-  #popup-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: var(--accent);
-    text-shadow: var(--neon-glow);
-    margin-bottom: 8px;
-  }
-  #popup-pillar {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    color: var(--accent2);
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-  }
-  #popup-lines { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-  .popup-line {
-    background: var(--panel2);
-    border-left: 3px solid;
-    border-radius: 0 8px 8px 0;
-    padding: 10px 16px;
-    font-size: 1rem;
-    text-align: left;
-    line-height: 1.5;
-  }
-  .popup-line.mec { border-color: var(--accent2); color: #ffd; }
-  .popup-line.ele { border-color: var(--accent); color: #dff; }
-  .popup-line.prog { border-color: var(--accent3); color: #dfd; }
-  #popup-btn {
-    padding: 14px 44px;
-    background: linear-gradient(135deg, #003d4d, #00263a);
-    border: 2px solid var(--accent);
-    border-radius: 12px;
-    color: var(--accent);
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  #popup-btn:hover {
-    background: #005a73;
-    box-shadow: 0 0 25px rgba(0,245,255,0.5);
-    transform: translateY(-2px);
-  }
+.card:hover {
+  transform: translateY(-8px) scale(1.025);
+}
 
-  /* ── WIN OVERLAY ── */
-  #win-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(5,8,15,0.96);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    backdrop-filter: blur(8px);
-  }
-  #win-overlay.hidden { display: none; }
-  #win-box {
-    text-align: center;
-    animation: winPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  @keyframes winPop {
-    from { transform: scale(0.5); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .win-icon { font-size: 5rem; margin-bottom: 20px; animation: spin 2s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #win-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 3rem;
-    font-weight: 900;
-    color: var(--accent4);
-    text-shadow: 0 0 30px var(--accent4);
-    margin-bottom: 10px;
-  }
-  #win-sub {
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.5rem;
-    color: var(--accent);
-    margin-bottom: 30px;
-  }
-  .win-btn {
-    padding: 16px 50px;
-    background: linear-gradient(135deg, #4a3000, #2a1a00);
-    border: 2px solid var(--accent4);
-    border-radius: 14px;
-    color: var(--accent4);
-    font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 2px;
-    transition: all 0.2s;
-    margin: 0 8px;
-  }
-  .win-btn:hover { box-shadow: 0 0 30px rgba(245,200,66,0.5); transform: translateY(-3px); }
+/* Corner accent */
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  border: 2px solid var(--card-accent, #fff);
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.card:hover::before { opacity: 1; }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--grid-border); border-radius: 3px; }
+/* Sheen sweep on hover */
+.card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255,255,255,0.07) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.55s ease;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.card:hover::after { transform: translateX(100%); }
 
-  /* Circuit background decoration */
-  .circuit-deco {
-    position: fixed;
-    width: 300px;
-    height: 300px;
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 0;
-  }
+/* Neon glow on hover */
+.card--geo {
+  --card-accent: var(--geo-a);
+  background: linear-gradient(160deg, #060e24 0%, #091630 100%);
+}
+.card--geo:hover {
+  box-shadow:
+    0 0 0 1px rgba(0,220,255,0.4),
+    0 12px 50px var(--geo-glow),
+    0 0 80px rgba(0,100,255,0.2);
+}
+
+.card--rol {
+  --card-accent: var(--rol-a);
+  background: linear-gradient(160deg, #1a0810 0%, #1c0f06 100%);
+}
+.card--rol:hover {
+  box-shadow:
+    0 0 0 1px rgba(255,80,80,0.4),
+    0 12px 50px var(--rol-glow),
+    0 0 80px rgba(255,80,0,0.15);
+}
+
+/* Icon */
+.card-icon-wrap {
+  position: relative;
+  width: clamp(80px, 12vw, 130px);
+  height: clamp(80px, 12vw, 130px);
+}
+
+.card-icon-bg {
+  position: absolute; inset: 0; border-radius: 50%;
+  animation: iconPulse 2.8s ease-in-out infinite;
+}
+
+.card--geo .card-icon-bg {
+  background: radial-gradient(circle, rgba(0,200,255,0.22) 0%, transparent 70%);
+}
+.card--rol .card-icon-bg {
+  background: radial-gradient(circle, rgba(255,100,0,0.22) 0%, transparent 70%);
+}
+
+@keyframes iconPulse {
+  0%,100% { transform: scale(1);    opacity: 0.7; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+
+.card-icon {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+  transition: transform 0.3s;
+}
+.card:hover .card-icon { transform: scale(1.1) rotate(-3deg); }
+
+/* Tag */
+.card-tag {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(0.55rem, 1.1vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  padding: 4px 14px; border-radius: 20px;
+}
+.card--geo .card-tag { color: var(--geo-a); background: rgba(0,220,255,0.1); border: 1px solid rgba(0,220,255,0.25); }
+.card--rol .card-tag { color: var(--rol-a); background: rgba(255,60,120,0.1); border: 1px solid rgba(255,60,120,0.25); }
+
+/* Name */
+.card-name {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.1rem, 3vw, 2rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+.card--geo .card-name {
+  background: linear-gradient(135deg, var(--geo-a), #ffffff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.card--rol .card-name {
+  background: linear-gradient(135deg, var(--rol-a), var(--rol-b));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* Description */
+.card-desc {
+  font-size: clamp(0.8rem, 1.7vw, 1.02rem);
+  font-weight: 700;
+  color: var(--text-dim);
+  line-height: 1.5;
+  max-width: 320px;
+}
+
+/* Stars / difficulty */
+.card-meta {
+  display: flex; align-items: center; gap: 8px;
+  font-size: clamp(0.72rem, 1.4vw, 0.88rem);
+  font-weight: 800;
+  color: var(--text-dim);
+}
+.card-meta .dots { display: flex; gap: 4px; }
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  opacity: 0.35;
+}
+.dot.on { opacity: 1; }
+
+/* Play button */
+.btn-play {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(0.82rem, 1.8vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: clamp(12px, 1.8vh, 18px) clamp(28px, 5vw, 52px);
+  border: none; border-radius: 50px; cursor: pointer;
+  text-decoration: none; display: inline-block;
+  position: relative; overflow: hidden;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.btn-play::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+  transform: translateX(-100%); transition: transform 0.4s;
+  border-radius: inherit;
+}
+.btn-play:hover::before { transform: translateX(100%); }
+.btn-play:hover { transform: translateY(-2px) scale(1.04); }
+.btn-play:active { transform: scale(0.97); }
+
+.card--geo .btn-play {
+  background: linear-gradient(135deg, var(--geo-b), var(--geo-a));
+  color: #000;
+  box-shadow: 0 6px 28px rgba(0,150,255,0.5);
+}
+.card--geo .btn-play:hover { box-shadow: 0 10px 40px rgba(0,200,255,0.65); }
+
+.card--rol .btn-play {
+  background: linear-gradient(135deg, var(--rol-a), var(--rol-b));
+  color: #fff;
+  box-shadow: 0 6px 28px rgba(255,60,0,0.5);
+}
+.card--rol .btn-play:hover { box-shadow: 0 10px 40px rgba(255,100,0,0.65); }
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  font-size: clamp(0.7rem, 1.3vw, 0.85rem);
+  font-weight: 700;
+  color: rgba(120,150,200,0.45);
+  letter-spacing: 2px;
+  animation: fadeIn 1.2s 0.8s both;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── Responsive tweaks ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .games-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
-<!-- DECORATIVE CIRCUITS -->
-<svg class="circuit-deco" style="top:0;right:0" viewBox="0 0 300 300">
-  <line x1="50" y1="0" x2="50" y2="100" stroke="#00f5ff" stroke-width="2"/>
-  <line x1="50" y1="100" x2="150" y2="100" stroke="#00f5ff" stroke-width="2"/>
-  <circle cx="150" cy="100" r="5" fill="#00f5ff"/>
-  <line x1="150" y1="100" x2="150" y2="200" stroke="#00f5ff" stroke-width="2"/>
-  <line x1="150" y1="200" x2="300" y2="200" stroke="#00f5ff" stroke-width="2"/>
-  <line x1="200" y1="0" x2="200" y2="60" stroke="#00f5ff" stroke-width="2"/>
-  <circle cx="200" cy="60" r="4" fill="#00f5ff"/>
-  <line x1="200" y1="60" x2="300" y2="60" stroke="#00f5ff" stroke-width="2"/>
-</svg>
-<svg class="circuit-deco" style="bottom:0;left:0" viewBox="0 0 300 300">
-  <line x1="0" y1="200" x2="100" y2="200" stroke="#ff6b35" stroke-width="2"/>
-  <circle cx="100" cy="200" r="5" fill="#ff6b35"/>
-  <line x1="100" y1="200" x2="100" y2="100" stroke="#ff6b35" stroke-width="2"/>
-  <line x1="100" y1="100" x2="250" y2="100" stroke="#ff6b35" stroke-width="2"/>
-  <line x1="0" y1="260" x2="180" y2="260" stroke="#ff6b35" stroke-width="2"/>
-  <circle cx="180" cy="260" r="4" fill="#ff6b35"/>
-  <line x1="180" y1="260" x2="180" y2="300" stroke="#ff6b35" stroke-width="2"/>
-</svg>
+<!-- Background layers -->
+<div id="starfield"></div>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
 
-<!-- HEADER -->
-<div id="header">
-  <h1>⬡ GEORR<span>OBÔ</span></h1>
-  <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:#446;letter-spacing:3px;text-align:center;">MISSÃO MATRIZ<br><span style="color:#334;font-size:0.6rem;">SEQUÊNCIA DIDÁTICA DE ROBÓTICA</span></div>
-  <div class="header-stats">
-    <div class="stat-box">
-      <div class="stat-label">Pontos</div>
-      <div class="stat-value" id="score-disp">0</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-label">Fase</div>
-      <div class="stat-value" id="phase-disp">1</div>
-    </div>
-    <div class="battery-wrap" id="battery-toggle" onclick="toggleBattery()">
-      <div class="battery-label">⚡ ENERGIA</div>
-      <div class="battery-btn on" id="battery-btn"></div>
-    </div>
-  </div>
-</div>
+<main class="page">
 
-<!-- MAIN -->
-<div id="main">
+  <!-- Header -->
+  <header class="header">
+    <div class="badge">🎓 Portal Educativo</div>
+    <h1 class="site-title">ARCADE<br>DO SABER</h1>
+    <p class="site-sub">Selecione um jogo e vamos aprender!</p>
+  </header>
 
-  <!-- GAME AREA -->
-  <div id="game-area">
-    <div id="phase-banner">
-      <div>
-        <div id="phase-title">FASE 1 — INICIALIZAÇÃO DO GEORROBÔ</div>
-        <div id="phase-desc">Leve o Georrobô da posição inicial até o destino!</div>
+  <div class="divider"></div>
+
+  <!-- Games grid -->
+  <section class="games-grid" aria-label="Jogos disponíveis">
+
+    <!-- Card 1: Georrobô -->
+    <article class="card card--geo">
+      <div class="card-icon-wrap">
+        <div class="card-icon-bg"></div>
+        <div class="card-icon">🤖</div>
       </div>
-      <div id="coords-info">
-        🟢 Início: <span id="coord-start">A1</span><br>
-        🎯 Destino: <span id="coord-end">E5</span><br>
-        📍 Atual: <span id="coord-cur">A1</span>
-      </div>
-    </div>
-    <div id="canvas-wrap">
-      <canvas id="gameCanvas" width="680" height="540"></canvas>
-      <div id="msg-overlay">⚠️ Erro!</div>
-    </div>
-  </div>
-
-  <!-- SIDE PANEL -->
-  <div id="side-panel">
-
-    <!-- Commands -->
-    <div class="panel-card">
-      <h2>🧩 Blocos de Comando</h2>
-      <button class="cmd-btn forward" onclick="addCmd('forward')">
-        <div class="icon">⬆️</div>
-        <div><div style="font-size:0.85rem">Mover para Frente</div><div style="font-size:0.7rem;color:#667;margin-top:2px">Avança 1 casa na direção atual</div></div>
-      </button>
-      <button class="cmd-btn right" onclick="addCmd('right')">
-        <div class="icon">↪️</div>
-        <div><div style="font-size:0.85rem">Girar 90° Direita</div><div style="font-size:0.7rem;color:#667;margin-top:2px">Rotaciona sentido horário</div></div>
-      </button>
-      <button class="cmd-btn left" onclick="addCmd('left')">
-        <div class="icon">↩️</div>
-        <div><div style="font-size:0.85rem">Girar 90° Esquerda</div><div style="font-size:0.7rem;color:#667;margin-top:2px">Rotaciona anti-horário</div></div>
-      </button>
-
-      <!-- SE-ENTÃO -->
-      <div class="logic-block">
-        <label>⚡ BLOCO LÓGICO: SE → ENTÃO</label>
-        <div class="logic-row">
-          <span>SE</span>
-          <select id="logic-if">
-            <option value="circle">Círculo</option>
-            <option value="square">Quadrado</option>
-            <option value="rect">Retângulo</option>
-          </select>
-          <span>ENTÃO</span>
+      <span class="card-tag">🗺️ Geografia · Matemática</span>
+      <h2 class="card-name">Georrobô:<br>Missão Matriz</h2>
+      <p class="card-desc">
+        Pilote o Georrobô por uma grade de coordenadas e resolva desafios de localização espacial e raciocínio lógico!
+      </p>
+      <div class="card-meta">
+        <span>Dificuldade</span>
+        <div class="dots">
+          <div class="dot on" style="background:var(--geo-a)"></div>
+          <div class="dot on" style="background:var(--geo-a)"></div>
+          <div class="dot on" style="background:var(--geo-a)"></div>
+          <div class="dot"    style="background:var(--geo-a)"></div>
+          <div class="dot"    style="background:var(--geo-a)"></div>
         </div>
-        <div class="logic-row">
-          <select id="logic-then">
-            <option value="jump">Pular (girar 90° D)</option>
-            <option value="back">Voltar (girar 90° E)</option>
-            <option value="stop">Parar</option>
-          </select>
+      </div>
+      <a class="btn-play" href="georrobo.html">▶ JOGAR AGORA</a>
+    </article>
+
+    <!-- Card 2: Roleta -->
+    <article class="card card--rol">
+      <div class="card-icon-wrap">
+        <div class="card-icon-bg"></div>
+        <div class="card-icon">🎲</div>
+      </div>
+      <span class="card-tag">🏃 Movimento · Números</span>
+      <h2 class="card-name">Roleta do<br>Mestre Mandou</h2>
+      <p class="card-desc">
+        Gire a roleta e cumpra os desafios motores com números! Três níveis de dificuldade para toda a turma.
+      </p>
+      <div class="card-meta">
+        <span>Dificuldade</span>
+        <div class="dots">
+          <div class="dot on" style="background:var(--rol-a)"></div>
+          <div class="dot on" style="background:var(--rol-a)"></div>
+          <div class="dot"    style="background:var(--rol-a)"></div>
+          <div class="dot"    style="background:var(--rol-a)"></div>
+          <div class="dot"    style="background:var(--rol-a)"></div>
         </div>
-        <button class="add-logic-btn" onclick="addLogicCmd()">⊕ ADICIONAR CONDIÇÃO</button>
       </div>
-    </div>
+      <a class="btn-play" href="roleta-mestre-mandou.html">▶ JOGAR AGORA</a>
+    </article>
 
-    <!-- Queue -->
-    <div class="panel-card">
-      <h2>📋 Fila de Algoritmo</h2>
-      <div id="queue-display"><span style="color:#334;font-size:0.75rem;font-family:'Orbitron',monospace;padding:4px">Adicione comandos acima...</span></div>
-    </div>
+  </section>
 
-    <!-- Execute -->
-    <div class="panel-card" style="padding:14px">
-      <button id="exec-btn" onclick="executeAlgorithm()">
-        <span class="btn-icon">▶</span>
-        EXECUTAR ALGORITMO
-      </button>
-      <br>
-      <div class="action-row" style="margin-top:10px">
-        <button class="small-btn" onclick="resetPosition()">↺ REINICIAR</button>
-        <button class="small-btn danger" onclick="clearQueue()">🗑 LIMPAR FILA</button>
-        <button class="small-btn" onclick="nextPhase()">⏭ PRÓXIMA FASE</button>
-      </div>
-    </div>
+  <!-- Footer -->
+  <footer class="footer">
+    <p>✦ ARCADE DO SABER &nbsp;·&nbsp; Jogos Educativos &nbsp;·&nbsp; GitHub Pages ✦</p>
+  </footer>
 
-  </div>
-</div>
-
-<!-- STARTUP POPUP -->
-<div id="popup">
-  <div id="popup-box">
-    <div class="popup-icon" id="popup-icon">🤖</div>
-    <div id="popup-title">FASE 1 — INICIALIZAÇÃO</div>
-    <div id="popup-pillar">VERIFICANDO SISTEMAS...</div>
-    <div id="popup-lines">
-      <div class="popup-line mec">⚙️ <strong>Mecânica:</strong> Verificando estrutura e articulações...</div>
-      <div class="popup-line ele">⚡ <strong>Eletrônica:</strong> Circuitos conectados e bateria carregada!</div>
-      <div class="popup-line prog">💻 <strong>Programação:</strong> Aguardando sequência de algoritmos...</div>
-    </div>
-    <button id="popup-btn" onclick="closePopup()">INICIAR MISSÃO ▶</button>
-  </div>
-</div>
-
-<!-- WIN OVERLAY -->
-<div id="win-overlay" class="hidden">
-  <div id="win-box">
-    <div class="win-icon">🏆</div>
-    <div id="win-title">MISSÃO COMPLETA!</div>
-    <div id="win-sub" id="win-sub">Georrobô chegou ao destino!</div>
-    <div style="margin-bottom:24px;font-family:'Orbitron',monospace;font-size:0.9rem;color:#7cff6b" id="win-score"></div>
-    <button class="win-btn" onclick="closeWin()">PRÓXIMA FASE ▶</button>
-    <button class="win-btn" style="border-color:var(--accent);color:var(--accent)" onclick="resetPhase()">↺ REPETIR</button>
-  </div>
-</div>
+</main>
 
 <script>
-// ═══════════════════════════════════════════
-//   GEORROBÔ: MISSÃO MATRIZ — GAME ENGINE
-// ═══════════════════════════════════════════
-
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const COLS = 5, ROWS = 5;
-const COLS_LABELS = ['A','B','C','D','E'];
-
-let score = 0;
-let currentPhase = 0;
-let batteryOn = true;
-let commandQueue = [];
-let isExecuting = false;
-let robotDir = 0; // 0=up,1=right,2=down,3=left
-let robotPos = {col:0, row:4}; // A1
-let particles = [];
-let circuitAnim = 0;
-
-// ── COORDINATE SYSTEM ───────────────────────
-// col: 0=A ... 4=E  (esquerda→direita)
-// row: 0=linha5(topo) ... 4=linha1(base)
-// robotDir: 0=norte(↑) 1=leste(→) 2=sul(↓) 3=oeste(←)
-//
-// FASE 1 — A1→E5  dir Norte
-//   Fila: F×4, GD, F×4  (sobe col A, cruza linha 5)
-//
-// FASE 2 — A1→E5  dir Leste
-//   Fila: F×4, GE, F×4  (cruza linha 1, sobe col E)
-//
-// FASE 3 — A1→E5  dir Norte  zigue-zague
-//   Fila: F×4, GD, F, GD, F, GE, F×3, GE, F
-//
-// FASE 4 — E1→A5  dir Norte  (começa no canto oposto)
-//   Rota: E1→E5 (col E, 4F norte), GE→Oeste, E5→D5→C5→B5→A5 (4F)
-//   Fila: F×4, GE, F×4
-//
-// FASE 5 — C1→C5  dir Leste  (centro→centro, corredor em S)
-//   Rota: C1→D1 (1F leste), GE→Norte, D1→D2→D3 (2F), GD→Leste,
-//         D3→E3 (1F), GE→Norte, E3→E4→E5? não chega C5...
-//   Melhor: C1(dir Norte), C1→C2→C3(bloqueado) → desvio
-//   Rota: C1(Norte)→C2, GD→Leste, C2→D2→E2, GE→Norte,
-//         E2→E3→E4→E5? meta é C5...
-//   Rota válida para C1→C5: C1(Leste)→D1, GE→Norte, D1→D2→D3→D4→D5,
-//         GE→Oeste, D5→C5. Fila: F, GE, F×4, GE, F
-//
-// FASE 6 — A3→E3  dir Leste  (travessia horizontal do meio)
-//   Rota: A3→B3→C3→D3→E3 (4F). Obstáculos fora da linha 3.
-//   Fila: F×4  (simples, mas com SE-ENTÃO para desvios opcionais)
-
-const phases = [
-  {
-    // ── FASE 1 ──────────────────────────────────────────────────────
-    // Rota: A1(N)→A5, GD(L), A5→E5
-    // Fila: F F F F GD F F F F
-    name: "INICIALIZAÇÃO DO GEORROBÔ",
-    desc: "Leve o Georrobô de A1 até E5. Suba pela borda esquerda e cruze o topo!",
-    start: {col:0, row:4}, startDir: 0,
-    end:   {col:4, row:0},
-    obstacles: [
-      {col:1, row:3, type:'circle', color:'#00bfff'},  // B4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-    ]
-  },
-  {
-    // ── FASE 2 ──────────────────────────────────────────────────────
-    // Dir inicial: Leste. Rota: A1(L)→E1, GE(N), E1→E5
-    // Fila: F F F F GE F F F F
-    name: "LABIRINTO DE CIRCUITOS",
-    desc: "Georrobô aponta para o Leste! Cruze a linha 1 e suba pela coluna E.",
-    start: {col:0, row:4}, startDir: 1,
-    end:   {col:4, row:0},
-    obstacles: [
-      {col:1, row:3, type:'square', color:'#ff4d6d'},  // B4
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:3, row:2, type:'circle', color:'#00bfff'},  // D3
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-    ]
-  },
-  {
-    // ── FASE 3 ──────────────────────────────────────────────────────
-    // Dir inicial: Norte. Zigue-zague:
-    // A1→A5(4F), GD→B5(1F), GD(sul)→B4(1F), GE(L)→E4(3F), GE(N)→E5(1F)
-    // Fila: F F F F GD F GD F GE F F F GE F
-    name: "O ZIGUE-ZAGUE",
-    desc: "Atenção ao corredor! Suba, desvie pelo meio e chegue à meta.",
-    start: {col:0, row:4}, startDir: 0,
-    end:   {col:4, row:0},
-    obstacles: [
-      {col:2, row:0, type:'square', color:'#ff4d6d'},  // C5 — bloqueia linha 5
-      {col:3, row:0, type:'rect',   color:'#f5c842'},  // D5
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3 — bloqueia col B acima B4
-      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3 — bloqueia interior
-      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
-      {col:3, row:2, type:'rect',   color:'#f5c842'},  // D3
-    ]
-  },
-  {
-    // ── FASE 4 ──────────────────────────────────────────────────────
-    // INVERTIDO: começa em E1, chega em A5. Dir inicial: Norte.
-    // Rota: E1(N)→E5(4F), GE(L→vira oeste), E5→A5(4F oeste)
-    // Fila: F F F F GE F F F F
-    name: "CAMINHO INVERSO",
-    desc: "Agora o Georrobô começa no canto direito! Suba pela coluna E e cruze até A5.",
-    start: {col:4, row:4}, startDir: 0,   // E1, olhando Norte
-    end:   {col:0, row:0},                 // A5
-    obstacles: [
-      {col:3, row:3, type:'circle', color:'#00bfff'},  // D4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:1, row:1, type:'rect',   color:'#f5c842'},  // B2
-      {col:3, row:1, type:'circle', color:'#b66dff'},  // D2
-      {col:1, row:3, type:'square', color:'#ff4d6d'},  // B4
-    ]
-  },
-  {
-    // ── FASE 5 ──────────────────────────────────────────────────────
-    // Centro→Centro: C1→C5. Dir inicial: Leste.
-    // Rota: C1(L)→D1(1F), GE(N)→D1→D2→D3→D4→D5(4F), GE(O)→D5→C5(1F)
-    // Fila: F GE F F F F GE F
-    name: "ROTA DO CENTRO",
-    desc: "Do centro à meta! Desvie pelo corredor D e chegue em C5.",
-    start: {col:2, row:4}, startDir: 1,   // C1, olhando Leste
-    end:   {col:2, row:0},                 // C5
-    obstacles: [
-      {col:2, row:3, type:'square', color:'#ff4d6d'},  // C4 — bloqueia subida direta col C
-      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3
-      {col:2, row:1, type:'rect',   color:'#f5c842'},  // C2
-      {col:0, row:2, type:'square', color:'#ff4d6d'},  // A3 — fecha esquerda
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
-      {col:4, row:2, type:'rect',   color:'#f5c842'},  // E3 — fecha direita
-    ]
-  },
-  {
-    // ── FASE 6 ──────────────────────────────────────────────────────
-    // Travessia horizontal: A3→E3. Dir inicial: Leste.
-    // Linha 3 totalmente livre. Obstáculos acima e abaixo tentam distrair.
-    // Rota direta: A3(L)→B3→C3→D3→E3 (4F)
-    // Mas col A linha 3 = row:2. start {col:0,row:2} end {col:4,row:2}
-    // Fila: F F F F  — simples! Foco pedagógico: usar SE-ENTÃO para
-    // ignorar obstáculos laterais que não bloqueiam o caminho.
-    name: "TRAVESSIA DO MEIO",
-    desc: "Cruze de ponta a ponta pelo meio da matriz! A linha 3 está livre.",
-    start: {col:0, row:2}, startDir: 1,   // A3, olhando Leste
-    end:   {col:4, row:2},                 // E3
-    obstacles: [
-      {col:1, row:3, type:'circle', color:'#00bfff'},  // B4 — abaixo da rota
-      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2 — acima da rota
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:1, type:'circle', color:'#00bfff'},  // C2
-      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-      {col:4, row:3, type:'circle', color:'#b66dff'},  // E4
-      {col:4, row:1, type:'square', color:'#ff4d6d'},  // E2
-    ]
-  }
-];
-
-// ── FASES 7–10 ──────────────────────────────────────────────────────────────
-// Rota verificada coordenada a coordenada (col/row internos):
-// col: 0=A…4=E  |  row: 0=linha5(topo)…4=linha1(base)  |  dir: 0=N 1=L 2=S 3=O
-//
-// FASE 7 — E5→A1  dir Sul(2)
-//   E5={col4,row0}. Rota: (S)→E4→E3→E2→E1[row4] (4F), GD→Oeste, →D1→C1→B1→A1 (4F)
-//   Fila: F×4, GD, F×4
-//
-// FASE 8 — A5→E1  dir Leste(1)
-//   A5={col0,row0}. Rota: (L)→B5→C5→D5→E5[col4,row0] (4F), GD→Sul, →E4→E3→E2→E1[row4] (4F)
-//   Fila: F×4, GD, F×4
-//
-// FASE 9 — B2→D4  dir Norte(0)
-//   B2={col1,row3}. D4={col3,row1}.
-//   Rota: (N)→B3→B4→B5[row0] (3F), GD→Leste, →C5→D5[col3,row0] (2F), GD→Sul, →D4[col3,row1] (1F)
-//   Fila: F×3, GD, F×2, GD, F
-//
-// FASE 10 — A1→E5  dir Norte(0)  ESPIRAL
-//   A1={col0,row4}. Rota espiral:
-//   (N)→A2[row3]→A3[row2]→A4[row1] (3F),
-//   GD(L)→B4[col1,row1]→C4[col2,row1] (2F),
-//   GD(S)→C3[col2,row2]→C2[col2,row3] (2F),
-//   GE(L)→D2[col3,row3]→E2[col4,row3] (2F),
-//   GE(N)→E3[col4,row2]→E4[col4,row1]→E5[col4,row0] (3F)
-//   Fila: F×3, GD, F×2, GD, F×2, GE, F×2, GE, F×3
-
-phases.push(
-  {
-    // FASE 7 — Descida Total: E5(Sul)→E1, GD(Oeste)→A1
-    name: "DESCIDA TOTAL",
-    desc: "O Georrobô está no topo direito! Desça pela col E e cruze a base até A1.",
-    start: {col:4, row:0}, startDir: 2,  // E5 olhando Sul
-    end:   {col:0, row:4},               // A1
-    obstacles: [
-      {col:3, row:1, type:'circle', color:'#00bfff'},  // D2
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:1, row:3, type:'rect',   color:'#f5c842'},  // B4
-      {col:3, row:3, type:'circle', color:'#b66dff'},  // D4
-      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2
-    ]
-  },
-  {
-    // FASE 8 — Diagonal Anti-Horária: A5(Leste)→E5, GD(Sul)→E1
-    name: "A DIAGONAL ANTI-HORÁRIA",
-    desc: "De A5 a E1! Cruze o topo até E5, depois desça toda a coluna E.",
-    start: {col:0, row:0}, startDir: 1,  // A5 olhando Leste
-    end:   {col:4, row:4},               // E1
-    obstacles: [
-      {col:1, row:1, type:'rect',   color:'#f5c842'},  // B2
-      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3
-      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
-      {col:1, row:3, type:'circle', color:'#b66dff'},  // B4
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-    ]
-  },
-  {
-    // FASE 9 — Rota Interior: B2(Norte)→B5, GD→D5, GD(Sul)→D4
-    name: "ROTA INTERIOR",
-    desc: "Partida no interior da matriz! Suba col B, desvie pela borda e chegue em D4.",
-    start: {col:1, row:3}, startDir: 0,  // B2 olhando Norte
-    end:   {col:3, row:1},               // D4
-    obstacles: [
-      {col:0, row:2, type:'square', color:'#ff4d6d'},  // A3
-      {col:0, row:1, type:'circle', color:'#00bfff'},  // A2 — fecha esquerda
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3 — fecha meio
-      {col:4, row:2, type:'circle', color:'#b66dff'},  // E3
-      {col:4, row:3, type:'rect',   color:'#f5c842'},  // E4 — fecha direita
-    ]
-  },
-  {
-    // FASE 10 — Maestro: A Espiral (A1 Norte, rota em espiral)
-    name: "MAESTRO: A ESPIRAL",
-    desc: "Fase máxima! O algoritmo traça uma espiral pelo interior da matriz.",
-    start: {col:0, row:4}, startDir: 0,  // A1 olhando Norte
-    end:   {col:4, row:0},               // E5
-    obstacles: [
-      // Bloqueia linha base (exceto A1=start)
-      {col:1, row:4, type:'square', color:'#ff4d6d'},  // B1
-      {col:2, row:4, type:'circle', color:'#00bfff'},  // C1
-      {col:3, row:4, type:'rect',   color:'#f5c842'},  // D1
-      // Bloqueia linha 5 (exceto E5=end)
-      {col:0, row:0, type:'square', color:'#ff4d6d'},  // A5
-      {col:1, row:0, type:'circle', color:'#00bfff'},  // B5
-      {col:2, row:0, type:'rect',   color:'#f5c842'},  // C5
-      {col:3, row:0, type:'square', color:'#b66dff'},  // D5
-      // Bloqueia atalhos interiores (todos fora da rota espiral)
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
-      {col:1, row:3, type:'rect',   color:'#f5c842'},  // B2
-      {col:3, row:1, type:'square', color:'#ff4d6d'},  // D4
-      {col:3, row:2, type:'circle', color:'#b66dff'},  // D3
-    ]
-  }
-);
-
-function getPhase() { return phases[currentPhase % phases.length]; }
-
-// ── AUDIO SYSTEM (Web Audio API) ─────────────
-let audioCtx = null;
-
-function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-
-function playTone(type, opts = {}) {
-  try {
-    const ctx = getAudioCtx();
-    const { freq = 440, freq2, duration = 0.18, volume = 0.28, wave = 'sine', delay = 0 } = opts;
-
-    const startAt = ctx.currentTime + delay;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const dist = ctx.createWaveShaper();
-
-    // Gentle distortion for robot character
-    const curve = new Float32Array(256);
-    for (let i = 0; i < 256; i++) {
-      const x = (i * 2) / 256 - 1;
-      curve[i] = (Math.PI + (opts.distortion || 0)) * x / (Math.PI + (opts.distortion || 0) * Math.abs(x));
-    }
-    dist.curve = curve;
-
-    osc.connect(dist);
-    dist.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.type = wave;
-    osc.frequency.setValueAtTime(freq, startAt);
-    if (freq2) osc.frequency.linearRampToValueAtTime(freq2, startAt + duration);
-
-    gain.gain.setValueAtTime(0, startAt);
-    gain.gain.linearRampToValueAtTime(volume, startAt + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
-
-    osc.start(startAt);
-    osc.stop(startAt + duration + 0.05);
-  } catch(e) {}
-}
-
-function playNoise(duration = 0.08, volume = 0.15, delay = 0) {
-  try {
-    const ctx = getAudioCtx();
-    const startAt = ctx.currentTime + delay;
-    const bufSize = ctx.sampleRate * duration;
-    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 800;
-    filter.Q.value = 0.5;
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(volume, startAt);
-    gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
-    src.start(startAt);
-    src.stop(startAt + duration + 0.02);
-  } catch(e) {}
-}
-
-// Som: movimento do robô (passo eletrônico)
-function soundMove() {
-  playTone('move', { freq: 330, freq2: 440, duration: 0.12, volume: 0.22, wave: 'square', distortion: 20 });
-  playNoise(0.04, 0.08, 0.08);
-}
-
-// Som: girar (clique mecânico + sweep)
-function soundTurn() {
-  playTone('turn', { freq: 520, freq2: 380, duration: 0.15, volume: 0.2, wave: 'sawtooth', distortion: 30 });
-  playNoise(0.03, 0.1, 0);
-}
-
-// Som: colisão / erro
-function soundError() {
-  playTone('err1', { freq: 180, freq2: 120, duration: 0.25, volume: 0.35, wave: 'sawtooth', distortion: 80 });
-  playTone('err2', { freq: 140, freq2: 80,  duration: 0.3,  volume: 0.3,  wave: 'square',   distortion: 80, delay: 0.1 });
-  playNoise(0.12, 0.2, 0.05);
-}
-
-// Som: bateria ligada/desligada
-function soundBattery(on) {
-  if (on) {
-    playTone('bat', { freq: 440, freq2: 880, duration: 0.2, volume: 0.25, wave: 'sine' });
-  } else {
-    playTone('bat', { freq: 440, freq2: 220, duration: 0.25, volume: 0.25, wave: 'sine' });
-  }
-}
-
-// Som: vitória (fanfarra eletrônica em cascata)
-function soundWin() {
-  const notes = [523, 659, 784, 1047];
-  notes.forEach((freq, i) => {
-    playTone('win', { freq, freq2: freq * 1.02, duration: 0.22, volume: 0.3, wave: 'square', distortion: 15, delay: i * 0.13 });
-  });
-  // Acorde final
-  [523, 659, 784].forEach((f, i) => {
-    playTone('winChord', { freq: f, duration: 0.6, volume: 0.2, wave: 'sine', delay: 0.55 + i * 0.01 });
-  });
-  // Ruído de celebração
-  [0.52, 0.65, 0.78].forEach(d => playNoise(0.06, 0.12, d));
-}
-
-// ── CANVAS SIZING ────────────────────────────
-function resizeCanvas() {
-  const wrap = document.getElementById('canvas-wrap');
-  const w = wrap.clientWidth - 24;
-  canvas.style.width = w + 'px';
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-function getCellSize() {
-  const W = canvas.width, H = canvas.height;
-  const gridW = W * 0.75, gridH = H * 0.75;
-  return { w: gridW / COLS, h: gridH / ROWS, ox: W * 0.13, oy: H * 0.12 };
-}
-
-// ── DRAW FUNCTIONS ───────────────────────────
-function drawGrid() {
-  const {w, h, ox, oy} = getCellSize();
-  const totalW = w * COLS, totalH = h * ROWS;
-
-  // Grid background
-  ctx.fillStyle = '#070c14';
-  ctx.beginPath();
-  ctx.roundRect(ox - 4, oy - 4, totalW + 8, totalH + 8, 8);
-  ctx.fill();
-
-  // Circuit traces in background
-  circuitAnim = (circuitAnim + 0.5) % 100;
-  ctx.save();
-  ctx.globalAlpha = 0.12;
-  for (let i = 0; i < COLS; i++) {
-    for (let j = 0; j < ROWS; j++) {
-      const cx = ox + i * w + w / 2, cy = oy + j * h + h / 2;
-      const t = (circuitAnim + i * 20 + j * 15) % 100;
-      ctx.strokeStyle = t < 50 ? '#00f5ff' : '#7cff6b';
-      ctx.lineWidth = 1;
-      if (i < COLS - 1) {
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + w * 0.3, cy);
-        ctx.stroke();
-      }
-    }
-  }
-  ctx.restore();
-
-  // Cells
-  const phase = getPhase();
-  for (let c = 0; c < COLS; c++) {
-    for (let r = 0; r < ROWS; r++) {
-      const x = ox + c * w, y = oy + r * h;
-      const isStart = phase.start.col === c && phase.start.row === r;
-      const isEnd   = phase.end.col   === c && phase.end.row   === r;
-
-      // Cell fill
-      ctx.fillStyle = isEnd ? 'rgba(0,245,255,0.08)' : isStart ? 'rgba(124,255,107,0.06)' : '#0d1b2e';
-      ctx.beginPath();
-      ctx.roundRect(x + 2, y + 2, w - 4, h - 4, 6);
-      ctx.fill();
-
-      // Cell border
-      ctx.strokeStyle = isEnd ? '#00f5ff' : isStart ? '#7cff6b' : '#1e3a5f';
-      ctx.lineWidth = isEnd || isStart ? 2 : 1;
-      ctx.stroke();
-
-      // Start marker
-      if (isStart) {
-        ctx.fillStyle = '#7cff6b';
-        ctx.globalAlpha = 0.3;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = '#7cff6b';
-        ctx.font = `bold ${w * 0.22}px Orbitron`;
-        ctx.textAlign = 'center';
-        ctx.fillText('START', x + w/2, y + h - 8);
-      }
-
-      // End marker (pulsing)
-      if (isEnd) {
-        const pulse = Math.sin(Date.now() / 300) * 0.3 + 0.7;
-        ctx.fillStyle = `rgba(0,245,255,${pulse * 0.25})`;
-        ctx.beginPath();
-        ctx.roundRect(x + 2, y + 2, w - 4, h - 4, 6);
-        ctx.fill();
-        ctx.fillStyle = '#00f5ff';
-        ctx.font = `bold ${w * 0.22}px Orbitron`;
-        ctx.textAlign = 'center';
-        ctx.fillText('🎯', x + w/2, y + h/2 + 5);
-        ctx.font = `${w * 0.16}px Orbitron`;
-        ctx.fillText('META', x + w/2, y + h - 8);
-      }
-    }
-  }
-
-  // Column labels (A-E) — top and bottom
-  ctx.fillStyle = '#00f5ff';
-  ctx.font = `bold ${w * 0.22}px Orbitron`;
-  ctx.textAlign = 'center';
-  for (let c = 0; c < COLS; c++) {
-    const x = ox + c * w + w / 2;
-    ctx.fillText(COLS_LABELS[c], x, oy - 8);
-    ctx.fillText(COLS_LABELS[c], x, oy + totalH + 20);
-  }
-
-  // Row labels (1-5) — left and right
-  ctx.textAlign = 'right';
-  for (let r = 0; r < ROWS; r++) {
-    const y = oy + r * h + h / 2 + 6;
-    ctx.fillText(ROWS - r, ox - 8, y);
-    ctx.textAlign = 'left';
-    ctx.fillText(ROWS - r, ox + totalW + 8, y);
-    ctx.textAlign = 'right';
-  }
-}
-
-function drawObstacles() {
-  const {w, h, ox, oy} = getCellSize();
-  const phase = getPhase();
-  phase.obstacles.forEach(ob => {
-    const x = ox + ob.col * w + w / 2;
-    const y = oy + ob.row * h + h / 2;
-    ctx.save();
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = ob.color;
-    ctx.fillStyle = ob.color;
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 1.5;
-
-    if (ob.type === 'circle') {
-      ctx.beginPath();
-      ctx.arc(x, y, w * 0.28, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    } else if (ob.type === 'square') {
-      const s = w * 0.42;
-      ctx.beginPath();
-      ctx.roundRect(x - s/2, y - s/2, s, s, 4);
-      ctx.fill();
-      ctx.stroke();
-    } else { // rect
-      ctx.beginPath();
-      ctx.roundRect(x - w*0.32, y - h*0.2, w*0.64, h*0.4, 4);
-      ctx.fill();
-      ctx.stroke();
-    }
-    ctx.restore();
-  });
-}
-
-function drawRobot() {
-  const {w, h, ox, oy} = getCellSize();
-  const rx = ox + robotPos.col * w + w / 2;
-  const ry = oy + robotPos.row * h + h / 2;
-
-  ctx.save();
-  ctx.translate(rx, ry);
-  ctx.rotate((robotDir * 90) * Math.PI / 180);
-
-  const s = Math.min(w, h) * 0.38;
-
-  // Glow
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = '#00f5ff';
-
-  // Body
-  ctx.fillStyle = '#1a3a5c';
-  ctx.strokeStyle = '#00f5ff';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.55, -s * 0.35, s * 1.1, s * 0.9, 6);
-  ctx.fill();
-  ctx.stroke();
-
-  // Circuit lines on body
-  ctx.strokeStyle = 'rgba(0,245,255,0.5)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(-s*0.3, -s*0.1);
-  ctx.lineTo(s*0.1, -s*0.1);
-  ctx.lineTo(s*0.1, s*0.15);
-  ctx.lineTo(s*0.3, s*0.15);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(-s*0.3, s*0.1);
-  ctx.lineTo(-s*0.05, s*0.1);
-  ctx.stroke();
-  ctx.fillStyle = '#00f5ff';
-  ctx.beginPath();
-  ctx.arc(s*0.3, s*0.15, 3, 0, Math.PI*2);
-  ctx.arc(-s*0.05, s*0.1, 3, 0, Math.PI*2);
-  ctx.fill();
-
-  // Head
-  ctx.fillStyle = '#0d2a44';
-  ctx.strokeStyle = '#00f5ff';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.38, -s * 0.85, s * 0.76, s * 0.5, 6);
-  ctx.fill();
-  ctx.stroke();
-
-  // Eyes (glowing)
-  const eyePulse = Math.sin(Date.now() / 400) * 0.3 + 0.7;
-  ctx.shadowBlur = 12;
-  ctx.shadowColor = '#00f5ff';
-  ctx.fillStyle = `rgba(0,245,255,${eyePulse})`;
-  ctx.beginPath();
-  ctx.arc(-s * 0.15, -s * 0.63, s * 0.1, 0, Math.PI * 2);
-  ctx.arc( s * 0.15, -s * 0.63, s * 0.1, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Smile
-  ctx.strokeStyle = '#7cff6b';
-  ctx.lineWidth = 1.5;
-  ctx.shadowColor = '#7cff6b';
-  ctx.beginPath();
-  ctx.arc(0, -s * 0.48, s * 0.15, 0, Math.PI);
-  ctx.stroke();
-
-  // Arms
-  ctx.fillStyle = '#1a3a5c';
-  ctx.strokeStyle = '#00f5ff';
-  ctx.lineWidth = 1.5;
-  ctx.shadowBlur = 8;
-  // Left arm
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.8, -s * 0.25, s * 0.22, s * 0.6, 4);
-  ctx.fill();
-  ctx.stroke();
-  // Right arm
-  ctx.beginPath();
-  ctx.roundRect(s * 0.58, -s * 0.25, s * 0.22, s * 0.6, 4);
-  ctx.fill();
-  ctx.stroke();
-
-  // Legs
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.38, s * 0.55, s * 0.3, s * 0.45, 4);
-  ctx.fill();
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.roundRect(s * 0.08, s * 0.55, s * 0.3, s * 0.45, 4);
-  ctx.fill();
-  ctx.stroke();
-
-  // Antenna
-  ctx.strokeStyle = '#7cff6b';
-  ctx.lineWidth = 2;
-  ctx.shadowColor = '#7cff6b';
-  ctx.shadowBlur = 10;
-  ctx.beginPath();
-  ctx.moveTo(0, -s * 0.85);
-  ctx.lineTo(0, -s * 1.15);
-  ctx.stroke();
-  ctx.fillStyle = '#7cff6b';
-  ctx.beginPath();
-  ctx.arc(0, -s * 1.18, 4, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Direction arrow
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = 'rgba(0,245,255,0.6)';
-  ctx.beginPath();
-  ctx.moveTo(0, -s * 0.85);
-  ctx.lineTo(-6, -s * 0.72);
-  ctx.lineTo(6, -s * 0.72);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.restore();
-}
-
-function drawParticles() {
-  particles = particles.filter(p => p.life > 0);
-  particles.forEach(p => {
-    ctx.save();
-    ctx.globalAlpha = p.life / p.maxLife;
-    ctx.fillStyle = p.color;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life--;
-  });
-}
-
-function spawnParticles(x, y, color, count) {
+// ── Starfield generator ──────────────────────────────────────
+(function () {
+  const container = document.getElementById('starfield');
+  const count = 130;
   for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 1 + Math.random() * 3;
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      r: 2 + Math.random() * 4,
-      color,
-      life: 30 + Math.random() * 20,
-      maxLife: 50
-    });
-  }
-}
-
-function renderFrame() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // Dark gradient bg
-  const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
-  grad.addColorStop(0, '#0f1929');
-  grad.addColorStop(1, '#070c14');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  drawGrid();
-  drawObstacles();
-  drawRobot();
-  drawParticles();
-
-  requestAnimationFrame(renderFrame);
-}
-
-// ── COORDINATE HELPERS ───────────────────────
-function coordLabel(pos) {
-  return COLS_LABELS[pos.col] + (ROWS - pos.row);
-}
-function updateCoordDisplay() {
-  document.getElementById('coord-cur').textContent = coordLabel(robotPos);
-}
-
-// ── BATTERY ──────────────────────────────────
-function toggleBattery() {
-  batteryOn = !batteryOn;
-  document.getElementById('battery-btn').className = 'battery-btn' + (batteryOn ? ' on' : '');
-  soundBattery(batteryOn);
-  showMsg(batteryOn ? '⚡ Energia ativada! Circuitos conectados.' : '🔴 Energia desligada. Georrobô offline.', batteryOn ? '#7cff6b' : '#ff4d6d');
-}
-
-// ── QUEUE ─────────────────────────────────────
-function addCmd(type) {
-  const labels = { forward:'⬆ Frente', right:'↪ Gir. D', left:'↩ Gir. E' };
-  commandQueue.push({type, label: labels[type]});
-  renderQueue();
-}
-function addLogicCmd() {
-  const cond = document.getElementById('logic-if').value;
-  const action = document.getElementById('logic-then').value;
-  const condLabels = { circle:'Círculo', square:'Quadrado', rect:'Retângulo' };
-  const actLabels = { jump:'Gir. 90°D', back:'Gir. 90°E', stop:'Parar' };
-  commandQueue.push({type:'logic', cond, action, label:`SE ${condLabels[cond]}→${actLabels[action]}`});
-  renderQueue();
-}
-function clearQueue() {
-  commandQueue = [];
-  renderQueue();
-}
-function renderQueue() {
-  const d = document.getElementById('queue-display');
-  if (commandQueue.length === 0) {
-    d.innerHTML = '<span style="color:#334;font-size:0.75rem;font-family:\'Orbitron\',monospace;padding:4px">Adicione comandos acima...</span>';
-    return;
-  }
-  d.innerHTML = commandQueue.map((cmd, i) =>
-    `<div class="queue-item" id="qi-${i}">
-      <span style="color:#334;font-size:0.65rem;font-family:Orbitron,monospace">${i+1}</span>
-      <span style="font-size:0.7rem;font-family:Orbitron,monospace;color:${cmd.type==='logic'?'#b66dff':cmd.type==='forward'?'#00f5ff':cmd.type==='right'?'#ff6b35':'#7cff6b'}">${cmd.label}</span>
-      <span style="margin-left:auto;cursor:pointer;color:#446;font-size:0.7rem" onclick="removeCmd(${i})">✕</span>
-    </div>`
-  ).join('');
-}
-function removeCmd(i) {
-  commandQueue.splice(i, 1);
-  renderQueue();
-}
-
-// ── SHOW MESSAGE ─────────────────────────────
-let msgTimer = null;
-function showMsg(text, color='#ff6b35') {
-  const el = document.getElementById('msg-overlay');
-  el.textContent = text;
-  el.style.borderColor = color;
-  el.style.color = color;
-  el.style.boxShadow = `0 0 20px ${color}44`;
-  el.style.display = 'block';
-  if (msgTimer) clearTimeout(msgTimer);
-  msgTimer = setTimeout(() => { el.style.display = 'none'; }, 3000);
-}
-
-// ── OBSTACLE CHECK ───────────────────────────
-function getObstacleAt(col, row) {
-  const phase = getPhase();
-  return phase.obstacles.find(ob => ob.col === col && ob.row === row) || null;
-}
-
-// ── EXECUTE ──────────────────────────────────
-function executeAlgorithm() {
-  if (isExecuting) return;
-  if (!batteryOn) {
-    soundError();
-    showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
-    return;
-  }
-  if (commandQueue.length === 0) {
-    soundError();
-    showMsg('⚠️ Nenhum comando na fila! Adicione blocos.', '#f5c842');
-    return;
-  }
-  isExecuting = true;
-  document.getElementById('exec-btn').disabled = true;
-  runQueue(0);
-}
-
-function runQueue(index) {
-  if (index >= commandQueue.length) {
-    isExecuting = false;
-    document.getElementById('exec-btn').disabled = false;
-    checkWin();
-    return;
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size  = 0.8 + Math.random() * 2.8;
+    const lo    = (0.08 + Math.random() * 0.15).toFixed(2);
+    const hi    = (0.5  + Math.random() * 0.5).toFixed(2);
+    const dur   = (2    + Math.random() * 5).toFixed(1);
+    const delay = (Math.random() * 6).toFixed(2);
+    s.style.cssText = [
+      `width:${size}px`, `height:${size}px`,
+      `left:${(Math.random()*100).toFixed(2)}%`,
+      `top:${(Math.random()*100).toFixed(2)}%`,
+      `--d:${dur}s`, `--delay:${delay}s`,
+      `--lo:${lo}`, `--hi:${hi}`,
+    ].join(';');
+    container.appendChild(s);
   }
 
-  // Highlight current
-  const items = document.querySelectorAll('.queue-item');
-  items.forEach((el, i) => {
-    el.classList.remove('active');
-    if (i < index) el.classList.add('done');
-  });
-  if (items[index]) items[index].classList.add('active');
-
-  const cmd = commandQueue[index];
-  const {w, h, ox, oy} = getCellSize();
-
-  if (cmd.type === 'forward') {
-    if (!batteryOn) {
-      soundError();
-      showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
-      isExecuting = false;
-      document.getElementById('exec-btn').disabled = false;
-      return;
-    }
-    let nc = robotPos.col, nr = robotPos.row;
-    if (robotDir === 0) nr--;
-    else if (robotDir === 1) nc++;
-    else if (robotDir === 2) nr++;
-    else nc--;
-
-    if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) {
-      soundError();
-      showMsg('🚧 Erro: Georrobô tentou sair da matriz!', '#ff4d6d');
-    } else {
-      const ob = getObstacleAt(nc, nr);
-      if (ob) {
-        const px = ox + ob.col * w + w / 2;
-        const py = oy + ob.row * h + h / 2;
-        spawnParticles(px, py, ob.color, 20);
-        soundError();
-        showMsg(`⚠️ Colisão com ${ob.type === 'circle' ? 'Círculo' : ob.type === 'square' ? 'Quadrado' : 'Retângulo'}! Bloqueado.`, '#f5c842');
-      } else {
-        robotPos = {col: nc, row: nr};
-        const px = ox + nc * w + w / 2;
-        const py = oy + nr * h + h / 2;
-        spawnParticles(px, py, '#00f5ff', 8);
-        soundMove();
-        updateCoordDisplay();
-      }
-    }
-  } else if (cmd.type === 'right') {
-    soundTurn();
-    robotDir = (robotDir + 1) % 4;
-  } else if (cmd.type === 'left') {
-    soundTurn();
-    robotDir = (robotDir + 3) % 4;
-  } else if (cmd.type === 'logic') {
-    let nc = robotPos.col, nr = robotPos.row;
-    if (robotDir === 0) nr--;
-    else if (robotDir === 1) nc++;
-    else if (robotDir === 2) nr++;
-    else nc--;
-    const ahead = (nc >= 0 && nc < COLS && nr >= 0 && nr < ROWS) ? getObstacleAt(nc, nr) : null;
-    if (ahead && ahead.type === cmd.cond) {
-      soundTurn();
-      if (cmd.action === 'jump') { robotDir = (robotDir + 1) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou direita!`, '#b66dff'); }
-      else if (cmd.action === 'back') { robotDir = (robotDir + 3) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou esquerda!`, '#b66dff'); }
-      else { soundError(); showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`, '#b66dff'); isExecuting = false; document.getElementById('exec-btn').disabled = false; return; }
-    }
+  // Shooting star
+  function shootingStar() {
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position:absolute;
+      height:1.5px;
+      background:linear-gradient(90deg,rgba(255,255,255,0.9),transparent);
+      border-radius:2px;
+      top:${(Math.random()*60).toFixed(1)}%;
+      left:${(10+Math.random()*30).toFixed(1)}%;
+      width:${80+Math.random()*120}px;
+      transform:rotate(-20deg);
+      opacity:0;
+      animation:shoot 0.7s ease-out forwards;
+    `;
+    const style = document.createElement('style');
+    style.textContent = `@keyframes shoot{0%{opacity:0;transform:translateX(0) rotate(-20deg)}20%{opacity:1}100%{opacity:0;transform:translateX(300px) rotate(-20deg)}}`;
+    document.head.appendChild(style);
+    container.appendChild(el);
+    setTimeout(() => { el.remove(); style.remove(); }, 750);
   }
 
-  setTimeout(() => runQueue(index + 1), 550);
-}
-
-function checkWin() {
-  const phase = getPhase();
-  if (robotPos.col === phase.end.col && robotPos.row === phase.end.row) {
-    const pts = 100 + commandQueue.length * 10;
-    score += pts;
-    document.getElementById('score-disp').textContent = score;
-    const {w, h, ox, oy} = getCellSize();
-    const px = ox + robotPos.col * w + w / 2;
-    const py = oy + robotPos.row * h + h / 2;
-    for (let i = 0; i < 5; i++) setTimeout(() => spawnParticles(px, py, ['#00f5ff','#f5c842','#7cff6b','#ff6b35'][i%4], 20), i*150);
-    soundWin();
-    document.getElementById('win-score').textContent = `+${pts} pontos! Total: ${score}`;
-    document.getElementById('win-overlay').classList.remove('hidden');
-  }
-}
-
-// ── RESET / NEXT PHASE ───────────────────────
-function resetPosition() {
-  const phase = getPhase();
-  robotPos = {...phase.start};
-  robotDir = phase.startDir || 0;
-  updateCoordDisplay();
-  commandQueue = [];
-  renderQueue();
-  document.getElementById('exec-btn').disabled = false;
-  isExecuting = false;
-}
-function resetPhase() {
-  document.getElementById('win-overlay').classList.add('hidden');
-  resetPosition();
-}
-function nextPhase() {
-  currentPhase++;
-  loadPhase();
-}
-function closeWin() {
-  document.getElementById('win-overlay').classList.add('hidden');
-  nextPhase();
-}
-
-function loadPhase() {
-  const p = getPhase();
-  const idx = currentPhase % phases.length;
-  const dirNames = ['⬆ Norte', '→ Leste', '↓ Sul', '← Oeste'];
-  document.getElementById('phase-title').textContent = `FASE ${idx+1} — ${p.name}`;
-  document.getElementById('phase-desc').textContent = p.desc;
-  document.getElementById('phase-disp').textContent = idx + 1;
-  document.getElementById('coord-start').textContent = coordLabel(p.start) + ' ' + dirNames[p.startDir || 0];
-  document.getElementById('coord-end').textContent = coordLabel(p.end);
-  resetPosition();
-  showPhasePopup(idx);
-}
-
-// ── POPUP ─────────────────────────────────────
-function showPhasePopup(idx) {
-  const titles = [
-    'INICIALIZAÇÃO', 'LABIRINTO DE CIRCUITOS', 'O ZIGUE-ZAGUE',
-    'CAMINHO INVERSO', 'ROTA DO CENTRO', 'TRAVESSIA DO MEIO',
-    'DESCIDA TOTAL', 'A DIAGONAL ANTI-HORÁRIA', 'ROTA INTERIOR', 'MAESTRO: A ESPIRAL'
-  ];
-  const icons = ['🤖', '⚡', '🌀', '🔄', '🎯', '➡️', '⬇️', '↙️', '🔲', '🌀'];
-  const hints = [
-    'Dir. Norte. Suba pela coluna A até A5, gire à Direita e avance até E5. Fila: F×4, GD, F×4.',
-    'Dir. Leste! Avance pela linha 1 até E1, gire à Esquerda (Norte) e suba até E5. Fila: F×4, GE, F×4.',
-    'Dir. Norte. Zigue-zague: suba col A, desvie em B5, desça p/ B4, cruze linha 4 até E4, suba p/ E5.',
-    'Dir. Norte — começa em E1! Suba pela col E até E5, gire à Esquerda (Oeste) e cruze até A5. F×4, GE, F×4.',
-    'Dir. Leste — começa em C1! Avance p/ D1, gire Norte, suba col D até D5, gire Oeste, chegue em C5. F, GE, F×4, GE, F.',
-    'Dir. Leste — começa em A3! Linha 3 está livre. Avance direto 4 casas até E3. Fila: F×4.',
-    'Dir. Sul — começa em E5! Desça pela col E até E1, gire à Direita (Oeste) e cruze até A1. F×4, GD, F×4.',
-    'Dir. Leste — começa em A5! Cruze o topo até E5, gire à Direita (Sul) e desça até E1. F×4, GD, F×4.',
-    'Dir. Norte — começa em B2! Suba col B até B5, gire Direita p/ D5 (2F), gire Direita (Sul), desça 1 casa p/ D4. F×3, GD, F×2, GD, F.',
-    'Dir. Norte — ESPIRAL! A1→A4(3F), GD→C4(2F), GD→C2(2F), GE→E2(2F), GE→E5(3F). Máxima atenção às direções!'
-  ];
-  const dirLabels = ['⬆ Norte','→ Leste','⬆ Norte','⬆ Norte','→ Leste','→ Leste','↓ Sul','→ Leste','⬆ Norte','⬆ Norte'];
-  const n = idx % 10;
-  document.getElementById('popup-icon').textContent = icons[n];
-  document.getElementById('popup-title').textContent = `FASE ${idx+1} — ${titles[n]}`;
-  document.getElementById('popup-pillar').textContent = `Direção inicial: ${dirLabels[n]}`;
-  document.getElementById('popup-lines').innerHTML = `
-    <div class="popup-line mec">⚙️ <strong>Mecânica:</strong> Verificando estrutura e articulações...</div>
-    <div class="popup-line ele">⚡ <strong>Eletrônica:</strong> Circuitos conectados e bateria carregada!</div>
-    <div class="popup-line prog">💻 <strong>Programação:</strong> ${hints[n]}</div>
-  `;
-  document.getElementById('popup').classList.remove('hidden');
-}
-function closePopup() {
-  document.getElementById('popup').classList.add('hidden');
-}
-
-// ── INIT ─────────────────────────────────────
-loadPhase();
-renderFrame();
+  // Fire shooting star randomly
+  setInterval(() => {
+    if (Math.random() < 0.4) shootingStar();
+  }, 3500);
+})();
 </script>
 </body>
 </html>
