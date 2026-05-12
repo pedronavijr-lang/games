@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roleta do Mestre Mandou</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #FF3366; --c2: #FF9500; --c3: #FFDD00;
+    --c4: #00C853; --c5: #00B0FF; --c6: #D500F9;
+    --bg: #0D0D2B; --panel: #16163A; --gold: #FFD700; --white: #FFFFFF;
+    --easy: #00C853; --medium: #FF9500; --hard: #FF3366;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(100,0,200,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,100,255,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, rgba(255,50,100,0.1) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .star  {
+    position: absolute; background: white; border-radius: 50%;
+    animation: twinkle var(--d, 3s) ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0.2; transform: scale(1); }
+    50%     { opacity: 1;   transform: scale(1.3); }
+  }
+
+  /* Layout */
+  .wrapper {
+    position: relative; z-index: 1;
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: clamp(5px, 1.1vh, 16px);
+    padding: clamp(6px, 1.4vw, 22px);
+  }
+
+  /* Title */
+  .title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.7rem, 4.2vw, 3.8rem);
+    color: var(--white); text-align: center;
+    text-shadow: 0 0 20px rgba(255,220,0,0.8), 0 0 60px rgba(255,150,0,0.4), 4px 4px 0 rgba(0,0,0,0.4);
+    letter-spacing: 2px; line-height: 1.1;
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+  .title span { color: var(--gold); display: inline-block; animation: bounce 2s ease-in-out infinite; }
+  @keyframes titlePulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
+  @keyframes bounce     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+  /* Difficulty tabs */
+  .diff-tabs {
+    display: flex; gap: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50px; padding: 5px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .diff-tab {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.8rem, 1.7vw, 1.1rem);
+    padding: 7px 20px; border-radius: 40px; border: none;
+    cursor: pointer; letter-spacing: 1px; transition: all 0.25s;
+    background: transparent; color: rgba(255,255,255,0.45);
+  }
+  .diff-tab:hover { color: rgba(255,255,255,0.8); }
+  .diff-tab.active[data-diff="easy"]   { background: var(--easy);   color:#fff; box-shadow: 0 4px 18px rgba(0,200,83,0.5); }
+  .diff-tab.active[data-diff="medium"] { background: var(--medium); color:#fff; box-shadow: 0 4px 18px rgba(255,149,0,0.5); }
+  .diff-tab.active[data-diff="hard"]   { background: var(--hard);   color:#fff; box-shadow: 0 4px 18px rgba(255,51,102,0.5); }
+
+  /* Wheel area */
+  .wheel-area {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .wheel-glow {
+    position: absolute; border-radius: 50%;
+    width: calc(100% + 20px); height: calc(100% + 20px);
+    background: conic-gradient(
+      var(--c1) 0deg 60deg, var(--c2) 60deg 120deg, var(--c3) 120deg 180deg,
+      var(--c4) 180deg 240deg, var(--c5) 240deg 300deg, var(--c6) 300deg 360deg
+    );
+    filter: blur(15px); opacity: 0.6;
+    animation: glowRotate 8s linear infinite; z-index: -1;
+  }
+  @keyframes glowRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  #wheelCanvas {
+    border-radius: 50%; display: block; cursor: pointer;
+    filter: drop-shadow(0 0 30px rgba(255,220,0,0.3));
+    transition: filter 0.3s;
+    width:  clamp(230px, 39vh, 490px);
+    height: clamp(230px, 39vh, 490px);
+  }
+  #wheelCanvas:hover { filter: drop-shadow(0 0 40px rgba(255,220,0,0.6)); }
+
+  .pointer-wrap {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10; pointer-events: none;
+  }
+  .pointer {
+    width: 0; height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-bottom: 36px solid white;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.9));
+    transform: translateY(calc(-50% - clamp(115px, 19.5vh, 248px)));
+    animation: pointerPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pointerPulse {
+    0%,100% { filter: drop-shadow(0 0 8px rgba(255,255,0,0.7)); }
+    50%     { filter: drop-shadow(0 0 20px rgba(255,255,0,1)); }
+  }
+
+  .center-circle {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(44px, 7.2vh, 72px); height: clamp(44px, 7.2vh, 72px);
+    background: radial-gradient(circle at 40% 40%, #fff 0%, #e0c030 40%, #b8860b 100%);
+    border-radius: 50%; border: 4px solid rgba(255,255,255,0.4);
+    box-shadow: 0 0 20px rgba(255,220,0,0.8), inset 0 0 10px rgba(0,0,0,0.2);
+    z-index: 11; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(1.2rem, 2.7vh, 1.9rem);
+    animation: starSpin 10s linear infinite;
+  }
+  @keyframes starSpin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* Button */
+  .btn-spin {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.2rem, 3vw, 2.5rem);
+    padding: clamp(10px, 1.7vh, 20px) clamp(26px, 5vw, 68px);
+    background: linear-gradient(135deg, #FF3366 0%, #FF9500 50%, #FFDD00 100%);
+    color: white; border: none; border-radius: 60px; cursor: pointer;
+    letter-spacing: 3px; text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 30px rgba(255,80,0,0.5), 0 0 0 4px rgba(255,200,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .btn-spin::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+    border-radius: inherit;
+  }
+  .btn-spin:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 14px 40px rgba(255,80,0,0.6), 0 0 0 6px rgba(255,200,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .btn-spin:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
+  .btn-spin:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .spin-indicator {
+    position: absolute; bottom: -36px; left: 50%; transform: translateX(-50%);
+    font-size: 0.9rem; font-weight: 800; color: rgba(255,255,255,0.5);
+    letter-spacing: 3px; text-transform: uppercase;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .spin-indicator.show { opacity: 1; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(5,5,25,0.88);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; opacity: 0; pointer-events: none;
+    transition: opacity 0.4s; backdrop-filter: blur(6px);
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal-card {
+    position: relative; background: var(--panel); border-radius: 30px;
+    padding: clamp(22px, 4vw, 58px) clamp(26px, 5vw, 76px);
+    text-align: center; max-width: 88vw;
+    border: 3px solid rgba(255,220,0,0.5);
+    box-shadow: 0 0 60px rgba(255,200,0,0.3), 0 0 120px rgba(255,100,0,0.15), 0 30px 80px rgba(0,0,0,0.6);
+    transform: scale(0.7) translateY(40px);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-overlay.show .modal-card { transform: scale(1) translateY(0); }
+
+  .modal-emoji {
+    font-size: clamp(2.6rem, 6.5vw, 6rem); display: block; margin-bottom: 6px;
+    animation: emojiDance 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes emojiDance {
+    from { transform: rotate(-10deg) scale(1); }
+    to   { transform: rotate(10deg)  scale(1.15); }
+  }
+
+  .diff-badge {
+    display: inline-block;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.72rem, 1.5vw, 1rem);
+    letter-spacing: 3px; padding: 4px 16px; border-radius: 30px; margin-bottom: 8px;
+  }
+  .diff-badge.easy   { background: rgba(0,200,83,0.18);  color: #00e676; border: 1.5px solid #00C853; }
+  .diff-badge.medium { background: rgba(255,149,0,0.18); color: #FFB300; border: 1.5px solid #FF9500; }
+  .diff-badge.hard   { background: rgba(255,51,102,0.18); color: #FF6090; border: 1.5px solid #FF3366; }
+
+  .modal-label {
+    font-size: clamp(0.82rem, 1.7vw, 1.25rem); font-weight: 800;
+    color: var(--gold); text-transform: uppercase; letter-spacing: 6px;
+    margin-bottom: 12px; opacity: 0.85;
+  }
+  .modal-color-bar {
+    height: 7px; border-radius: 4px; margin: 0 auto 20px; width: 60%;
+    animation: barGrow 0.5s ease-out 0.2s both;
+  }
+  @keyframes barGrow { from { width:0; opacity:0; } to { width:60%; opacity:1; } }
+
+  .modal-command {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 5.8rem);
+    color: white; line-height: 1.1;
+    text-shadow: 0 0 30px rgba(255,220,0,0.7), 0 0 80px rgba(255,100,0,0.4), 4px 4px 0 rgba(0,0,0,0.3);
+    margin-bottom: 24px;
+    animation: commandPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes commandPop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+  .btn-close {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(0.95rem, 2.2vw, 1.6rem);
+    padding: 12px 46px; background: transparent;
+    border: 3px solid rgba(255,255,255,0.3); border-radius: 50px;
+    color: white; cursor: pointer; letter-spacing: 2px; transition: all 0.2s;
+  }
+  .btn-close:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.7); transform: scale(1.05); }
+
+  /* Confetti */
+  #confettiCanvas { position: fixed; inset: 0; z-index: 99; pointer-events: none; }
+
+  /* Corner deco */
+  .corner { position: fixed; font-size: clamp(1.7rem, 4vw, 3.2rem); opacity: 0.14; pointer-events: none; z-index: 0; animation: float 4s ease-in-out infinite; }
+  .corner.tl { top:2vw; left:2vw; animation-delay:0s; }
+  .corner.tr { top:2vw; right:2vw; animation-delay:1s; }
+  .corner.bl { bottom:2vw; left:2vw; animation-delay:2s; }
+  .corner.br { bottom:2vw; right:2vw; animation-delay:3s; }
+  @keyframes float { 0%,100% { transform:translateY(0) rotate(0deg); } 50% { transform:translateY(-11px) rotate(9deg); } }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="corner tl">⭐</div>
+<div class="corner tr">🎯</div>
+<div class="corner bl">🏆</div>
+<div class="corner br">🎉</div>
+<canvas id="confettiCanvas"></canvas>
+
+<div class="wrapper">
+  <h1 class="title">🎲 <span>Roleta do</span> Mestre Mandou! 🎲</h1>
+
+  <div class="diff-tabs">
+    <button class="diff-tab active" data-diff="easy"   onclick="setDifficulty('easy')">😊 Fácil</button>
+    <button class="diff-tab"        data-diff="medium" onclick="setDifficulty('medium')">🔥 Médio</button>
+    <button class="diff-tab"        data-diff="hard"   onclick="setDifficulty('hard')">💪 Difícil</button>
+  </div>
+
+  <div class="wheel-area" id="wheelArea">
+    <div class="wheel-glow"></div>
+    <canvas id="wheelCanvas"></canvas>
+    <div class="pointer-wrap"><div class="pointer"></div></div>
+    <div class="center-circle">⭐</div>
+    <div class="spin-indicator" id="spinIndicator">Girando...</div>
+  </div>
+
+  <button class="btn-spin" id="btnSpin" onclick="spinWheel()">🎯 GIRAR ROLETA 🎯</button>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-card">
+    <span class="modal-emoji" id="modalEmoji">🎉</span>
+    <div class="diff-badge easy" id="modalDiffBadge">😊 Fácil</div>
+    <div class="modal-label">✨ Mestre Mandou ✨</div>
+    <div class="modal-color-bar" id="modalBar"></div>
+    <div class="modal-command" id="modalCommand">Pule 5 vezes!</div>
+    <button class="btn-close" onclick="closeModal()">✅ Entendido!</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  CHALLENGES  (faixa 11–12 anos, 3 níveis × 6 desafios)
+// ═══════════════════════════════════════════════════════════════
+const CHALLENGES = {
+  easy: [
+    { label:'Pule\n5 vezes!',                   emoji:'🦘', color:'#FF3366', textColor:'#fff' },
+    { label:'Bata palmas\n10 vezes!',            emoji:'👏', color:'#FF9500', textColor:'#fff' },
+    { label:'Toque nos\npés 6 vezes!',           emoji:'🖐️', color:'#FFDD00', textColor:'#1a1a1a' },
+    { label:'Gire\n2 vezes\nno lugar!',          emoji:'🌀', color:'#00C853', textColor:'#fff' },
+    { label:'Faça\n4 agacha-\nmentos!',          emoji:'🏋️', color:'#00B0FF', textColor:'#fff' },
+    { label:'Pise no\nlugar por\n10 segundos!',  emoji:'🚶', color:'#D500F9', textColor:'#fff' },
+  ],
+  medium: [
+    { label:'Dê 12\npolichi-\nnelos!',           emoji:'⚡', color:'#FF3366', textColor:'#fff' },
+    { label:'Equilíbrio\nem 1 pé\npor 10 seg!', emoji:'🧘', color:'#FF9500', textColor:'#fff' },
+    { label:'Faça\n8 abdomi-\nnais!',            emoji:'💪', color:'#FFDD00', textColor:'#1a1a1a' },
+    { label:'Dê 5\nsaltos\npara frente!',        emoji:'🚀', color:'#00C853', textColor:'#fff' },
+    { label:'Gire 4×\ne agache\n2 vezes!',       emoji:'🌪️', color:'#00B0FF', textColor:'#fff' },
+    { label:'Corra no\nlugar por\n20 segundos!', emoji:'🏃', color:'#D500F9', textColor:'#fff' },
+  ],
+  hard: [
+    { label:'15\nagacha-\nmentos!',              emoji:'🔥', color:'#FF3366', textColor:'#fff' },
+    { label:'20 polichi-\nnelos o +\nrápido!',   emoji:'⚡', color:'#FF9500', textColor:'#fff' },
+    { label:'1 pé c/\nolhos\nfechados\n15 seg!', emoji:'🧘', color:'#FFDD00', textColor:'#1a1a1a' },
+    { label:'5 flexões\nde braço\ncompletas!',   emoji:'💪', color:'#00C853', textColor:'#fff' },
+    { label:'10 pulos\n+ 5\nagacham.!',          emoji:'🦘', color:'#00B0FF', textColor:'#fff' },
+    { label:'Corra no\nlugar 30 seg\nsem parar!',emoji:'🏆', color:'#D500F9', textColor:'#fff' },
+  ],
+};
+
+const DIFF_LABEL = { easy:'😊 Fácil', medium:'🔥 Médio', hard:'💪 Difícil' };
+
+let currentDiff = 'easy';
+let SLICES = CHALLENGES[currentDiff];
+
+function setDifficulty(diff) {
+  if (spinning) return;
+  currentDiff = diff;
+  SLICES = CHALLENGES[diff];
+  document.querySelectorAll('.diff-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.diff === diff)
+  );
+  drawWheel(currentAngle);
+  playClick();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WEB AUDIO  (zero dependências externas, tudo sintetizado)
+// ═══════════════════════════════════════════════════════════════
+let AC = null;
+function ac() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+
+// Tick rápido ao cruzar cada fatia durante o giro
+function playTick(speed) {
+  try {
+    const a = ac(), now = a.currentTime;
+    const osc  = a.createOscillator();
+    const gain = a.createGain();
+    osc.connect(gain); gain.connect(a.destination);
+    osc.type = 'square';
+    const freq = 400 + speed * 600;          // mais agudo quando rápido
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.4, now + 0.035);
+    gain.gain.setValueAtTime(0.14, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    osc.start(now); osc.stop(now + 0.045);
+  } catch(_) {}
+}
+
+// Whoosh no início do giro
+function playWhoosh() {
+  try {
+    const a = ac(), now = a.currentTime;
+    const bufSize = Math.floor(a.sampleRate * 0.45);
+    const buf  = a.createBuffer(1, bufSize, a.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufSize);
+    const src = a.createBufferSource(); src.buffer = buf;
+    const bpf = a.createBiquadFilter();
+    bpf.type = 'bandpass';
+    bpf.frequency.setValueAtTime(900, now);
+    bpf.frequency.exponentialRampToValueAtTime(180, now + 0.45);
+    bpf.Q.value = 2.5;
+    const gain = a.createGain();
+    gain.gain.setValueAtTime(0.55, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+    src.connect(bpf); bpf.connect(gain); gain.connect(a.destination);
+    src.start(now);
+  } catch(_) {}
+}
+
+// Fanfarra ascendente ao abrir o modal
+function playFanfare() {
+  try {
+    const a = ac(), now = a.currentTime;
+    const master = a.createGain(); master.gain.value = 0.28;
+    master.connect(a.destination);
+
+    // Reverb simples via convolver
+    const cvSize = Math.floor(a.sampleRate * 1.2);
+    const cvBuf  = a.createBuffer(2, cvSize, a.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = cvBuf.getChannelData(c);
+      for (let i = 0; i < cvSize; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/cvSize, 2);
+    }
+    const conv = a.createConvolver(); conv.buffer = cvBuf;
+    const cvG  = a.createGain(); cvG.gain.value = 0.22;
+    conv.connect(cvG); cvG.connect(master);
+
+    // Arpejo ascendente: C5 E5 G5 C6 E6
+    [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((freq, i) => {
+      const t   = now + i * 0.10;
+      const osc = a.createOscillator();
+      const g   = a.createGain();
+      osc.type = 'triangle'; osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.65, t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.58);
+      osc.connect(g); g.connect(master); g.connect(conv);
+      osc.start(t); osc.stop(t + 0.62);
+    });
+
+    // Acorde sustentado após arpejo
+    [523.25, 659.25, 783.99].forEach(freq => {
+      const t   = now + 0.52;
+      const osc = a.createOscillator();
+      const g   = a.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq;
+      g.gain.setValueAtTime(0.45, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+      osc.connect(g); g.connect(master); g.connect(conv);
+      osc.start(t); osc.stop(t + 1.6);
+    });
+  } catch(_) {}
+}
+
+// Click suave para botões da UI
+function playClick() {
+  try {
+    const a = ac(), now = a.currentTime;
+    const osc = a.createOscillator(); const g = a.createGain();
+    osc.connect(g); g.connect(a.destination);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(820, now);
+    osc.frequency.exponentialRampToValueAtTime(410, now + 0.08);
+    g.gain.setValueAtTime(0.18, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc.start(now); osc.stop(now + 0.12);
+  } catch(_) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CANVAS / WHEEL
+// ═══════════════════════════════════════════════════════════════
+const canvas = document.getElementById('wheelCanvas');
+const ctx    = canvas.getContext('2d');
+let size, R, cx, cy;
+let currentAngle = 0;
+let spinning = false;
+
+const N   = 6;
+const ARC = (2 * Math.PI) / N;
+const POINTER_OFFSET = -Math.PI / 2;
+
+function resizeCanvas() {
+  const area = document.getElementById('wheelArea');
+  const raw  = Math.min(area.offsetWidth || 300, area.offsetHeight || 300, window.innerHeight * 0.49);
+  const s    = Math.max(raw, 100);
+  canvas.width = canvas.height = s;
+  size = s; R = s / 2; cx = cy = R;
+  drawWheel(currentAngle);
+}
+
+function drawWheel(rotation) {
+  ctx.clearRect(0, 0, size, size);
+  const outerR = Math.max(R - 4, 1);
+
+  for (let i = 0; i < N; i++) {
+    const startAngle = rotation + i * ARC;
+    const endAngle   = startAngle + ARC;
+    const slice = SLICES[i];
+
+    // Fatia
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, outerR, startAngle, endAngle);
+    ctx.closePath(); ctx.fillStyle = slice.color; ctx.fill();
+
+    // Borda
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, outerR, startAngle, endAngle);
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 3; ctx.stroke();
+
+    // Texto
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(startAngle + ARC / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = slice.textColor;
+    const lines    = slice.label.split('\n');
+    const baseSize = Math.max(R * 0.10, 8);
+    ctx.font = `900 ${baseSize}px 'Nunito', sans-serif`;
+    const lineH  = baseSize * 1.22;
+    const totalH = lines.length * lineH;
+    const textX  = R * 0.50;
+    lines.forEach((line, li) => {
+      const y = -totalH / 2 + li * lineH + lineH / 2;
+      ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4;
+      ctx.fillText(line, textX, y);
+    });
+    ctx.shadowBlur = 0;
+    ctx.font = `${Math.max(R * 0.078, 6)}px serif`;
+    ctx.fillText(slice.emoji, R * 0.85, 0);
+    ctx.restore();
+  }
+
+  // Anel externo
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(R - 3, 1), 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 6; ctx.stroke();
+
+  // Hub interno
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(R * 0.18, 1), 0, Math.PI * 2);
+  ctx.fillStyle = '#0D0D2B'; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,220,0,0.6)'; ctx.lineWidth = 4; ctx.stroke();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SPIN LOGIC
+// ═══════════════════════════════════════════════════════════════
+function spinWheel() {
+  if (spinning) return;
+  spinning = true;
+  document.getElementById('btnSpin').disabled = true;
+  document.getElementById('spinIndicator').classList.add('show');
+
+  playWhoosh();
+
+  const targetIdx     = Math.floor(Math.random() * N);
+  const extraTurns    = (5 + Math.floor(Math.random() * 4)) * 2 * Math.PI;
+  const targetCenter  = targetIdx * ARC + ARC / 2;
+  const targetRot     = POINTER_OFFSET - targetCenter;
+  const totalRotation = currentAngle + extraTurns +
+    ((targetRot - currentAngle % (2 * Math.PI) + 4 * Math.PI) % (2 * Math.PI));
+
+  const duration   = 4300 + Math.random() * 1400;
+  const startAngle = currentAngle;
+  const startTime  = performance.now();
+
+  let lastTickSlice = -1;
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const t       = Math.min(elapsed / duration, 1);
+    const eased   = easeOut(t);
+    currentAngle  = startAngle + (totalRotation - startAngle) * eased;
+    drawWheel(currentAngle);
+
+    // Tick quando muda de fatia (proporcional à velocidade)
+    const a       = (POINTER_OFFSET - currentAngle % (2 * Math.PI) + 4 * Math.PI) % (2 * Math.PI);
+    const sliceNow = Math.floor(a / ARC) % N;
+    if (sliceNow !== lastTickSlice) {
+      lastTickSlice = sliceNow;
+      const speed = 1 - eased;        // 1 = rápido, 0 = parado
+      if (speed > 0.05) playTick(speed);
+    }
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      currentAngle = totalRotation;
+      drawWheel(currentAngle);
+      spinning = false;
+      document.getElementById('spinIndicator').classList.remove('show');
+      setTimeout(() => showResult(targetIdx), 280);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════════════
+function showResult(idx) {
+  const slice = SLICES[idx];
+  document.getElementById('modalEmoji').textContent   = slice.emoji;
+  document.getElementById('modalCommand').textContent = slice.label.replace(/\n/g, ' ');
+  document.getElementById('modalBar').style.background =
+    `linear-gradient(90deg, ${slice.color}, ${slice.color}99)`;
+  const badge = document.getElementById('modalDiffBadge');
+  badge.textContent = DIFF_LABEL[currentDiff];
+  badge.className   = `diff-badge ${currentDiff}`;
+  document.getElementById('modal').classList.add('show');
+  playFanfare();
+  launchConfetti(slice.color);
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  document.getElementById('btnSpin').disabled = false;
+  playClick();
+  stopConfetti();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CONFETTI
+// ═══════════════════════════════════════════════════════════════
+const cCanvas = document.getElementById('confettiCanvas');
+const cCtx    = cCanvas.getContext('2d');
+let particles = [], confettiAF, confettiActive = false;
+
+function resizeConfetti() {
+  cCanvas.width  = window.innerWidth;
+  cCanvas.height = window.innerHeight;
+}
+
+function launchConfetti(baseColor) {
+  resizeConfetti(); particles = []; confettiActive = true;
+  const colors = [baseColor,'#FFD700','#FFFFFF','#FF3366','#00FF99','#00B0FF'];
+  for (let i = 0; i < 230; i++) {
+    particles.push({
+      x: Math.random() * cCanvas.width, y: -10 - Math.random() * 220,
+      w: 8 + Math.random() * 13, h: 4 + Math.random() * 9,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      vx: (Math.random() - 0.5) * 6,
+      vy: 2 + Math.random() * 5.5,
+      vr: (Math.random() - 0.5) * 8,
+      opacity: 1,
+    });
+  }
+  animateConfetti();
+}
+
+function animateConfetti() {
+  if (!confettiActive) return;
+  cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+  let alive = false;
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.rotation += p.vr;
+    if (p.y > cCanvas.height * 0.58) p.opacity -= 0.022;
+    if (p.opacity > 0) alive = true;
+    cCtx.save();
+    cCtx.translate(p.x, p.y);
+    cCtx.rotate(p.rotation * Math.PI / 180);
+    cCtx.globalAlpha = Math.max(0, p.opacity);
+    cCtx.fillStyle = p.color;
+    cCtx.beginPath();
+    cCtx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2);
+    cCtx.fill();
+    cCtx.restore();
+  });
+  if (alive) confettiAF = requestAnimationFrame(animateConfetti);
+  else cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+}
+
+function stopConfetti() {
+  confettiActive = false;
+  cancelAnimationFrame(confettiAF);
+  cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STARS & INIT
+// ═══════════════════════════════════════════════════════════════
+function createStars() {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div'); s.className = 'star';
+    const sz = 1 + Math.random() * 3;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;animation-delay:${Math.random()*4}s;opacity:${0.2+Math.random()*0.5};`;
+    c.appendChild(s);
+  }
+}
+
+createStars();
+document.fonts.ready.then(() => resizeCanvas());
+window.addEventListener('resize', () => { resizeCanvas(); resizeConfetti(); });
+canvas.addEventListener('click', spinWheel);
+</script>
+</body>
+</html>
