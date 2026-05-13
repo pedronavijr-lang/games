@@ -555,6 +555,62 @@
     pointer-events: none;
     z-index: 0;
   }
+
+ #win-overlay.hidden { display: none; }
+  #win-box {
+    text-align: center;
+    animation: winPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes winPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .win-icon { font-size: 5rem; margin-bottom: 20px; animation: spin 2s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #win-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent4);
+    text-shadow: 0 0 30px var(--accent4);
+    margin-bottom: 10px;
+  }
+  #win-sub {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin-bottom: 30px;
+  }
+  .win-btn {
+    padding: 16px 50px;
+    background: linear-gradient(135deg, #4a3000, #2a1a00);
+    border: 2px solid var(--accent4);
+    border-radius: 14px;
+    color: var(--accent4);
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    margin: 0 8px;
+  }
+  .win-btn:hover { box-shadow: 0 0 30px rgba(245,200,66,0.5); transform: translateY(-3px); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--grid-border); border-radius: 3px; }
+
+  /* Circuit background decoration */
+  .circuit-deco {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
 .btn-back {
   position: fixed;
   bottom: 25px;
@@ -600,12 +656,16 @@
     font-size: 0.65rem;
   }
 }
+
 </style>
 </head>
 <body>
+
 <a href="index.html" class="btn-back">
   <span class="icon">❮</span> Página inicial
 </a>
+
+
 <!-- DECORATIVE CIRCUITS -->
 <svg class="circuit-deco" style="top:0;right:0" viewBox="0 0 300 300">
   <line x1="50" y1="0" x2="50" y2="100" stroke="#00f5ff" stroke-width="2"/>
@@ -924,7 +984,212 @@ const phases = [
   }
 ];
 
+// ── FASES 7–10 ──────────────────────────────────────────────────────────────
+// Rota verificada coordenada a coordenada (col/row internos):
+// col: 0=A…4=E  |  row: 0=linha5(topo)…4=linha1(base)  |  dir: 0=N 1=L 2=S 3=O
+//
+// FASE 7 — E5→A1  dir Sul(2)
+//   E5={col4,row0}. Rota: (S)→E4→E3→E2→E1[row4] (4F), GD→Oeste, →D1→C1→B1→A1 (4F)
+//   Fila: F×4, GD, F×4
+//
+// FASE 8 — A5→E1  dir Leste(1)
+//   A5={col0,row0}. Rota: (L)→B5→C5→D5→E5[col4,row0] (4F), GD→Sul, →E4→E3→E2→E1[row4] (4F)
+//   Fila: F×4, GD, F×4
+//
+// FASE 9 — B2→D4  dir Norte(0)
+//   B2={col1,row3}. D4={col3,row1}.
+//   Rota: (N)→B3→B4→B5[row0] (3F), GD→Leste, →C5→D5[col3,row0] (2F), GD→Sul, →D4[col3,row1] (1F)
+//   Fila: F×3, GD, F×2, GD, F
+//
+// FASE 10 — A1→E5  dir Norte(0)  ESPIRAL
+//   A1={col0,row4}. Rota espiral:
+//   (N)→A2[row3]→A3[row2]→A4[row1] (3F),
+//   GD(L)→B4[col1,row1]→C4[col2,row1] (2F),
+//   GD(S)→C3[col2,row2]→C2[col2,row3] (2F),
+//   GE(L)→D2[col3,row3]→E2[col4,row3] (2F),
+//   GE(N)→E3[col4,row2]→E4[col4,row1]→E5[col4,row0] (3F)
+//   Fila: F×3, GD, F×2, GD, F×2, GE, F×2, GE, F×3
+
+phases.push(
+  {
+    // FASE 7 — Descida Total: E5(Sul)→E1, GD(Oeste)→A1
+    name: "DESCIDA TOTAL",
+    desc: "O Georrobô está no topo direito! Desça pela col E e cruze a base até A1.",
+    start: {col:4, row:0}, startDir: 2,  // E5 olhando Sul
+    end:   {col:0, row:4},               // A1
+    obstacles: [
+      {col:3, row:1, type:'circle', color:'#00bfff'},  // D2
+      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
+      {col:1, row:3, type:'rect',   color:'#f5c842'},  // B4
+      {col:3, row:3, type:'circle', color:'#b66dff'},  // D4
+      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2
+    ]
+  },
+  {
+    // FASE 8 — Diagonal Anti-Horária: A5(Leste)→E5, GD(Sul)→E1
+    name: "A DIAGONAL ANTI-HORÁRIA",
+    desc: "De A5 a E1! Cruze o topo até E5, depois desça toda a coluna E.",
+    start: {col:0, row:0}, startDir: 1,  // A5 olhando Leste
+    end:   {col:4, row:4},               // E1
+    obstacles: [
+      {col:1, row:1, type:'rect',   color:'#f5c842'},  // B2
+      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3
+      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
+      {col:1, row:3, type:'circle', color:'#b66dff'},  // B4
+      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
+    ]
+  },
+  {
+    // FASE 9 — Rota Interior: B2(Norte)→B5, GD→D5, GD(Sul)→D4
+    name: "ROTA INTERIOR",
+    desc: "Partida no interior da matriz! Suba col B, desvie pela borda e chegue em D4.",
+    start: {col:1, row:3}, startDir: 0,  // B2 olhando Norte
+    end:   {col:3, row:1},               // D4
+    obstacles: [
+      {col:0, row:2, type:'square', color:'#ff4d6d'},  // A3
+      {col:0, row:1, type:'circle', color:'#00bfff'},  // A2 — fecha esquerda
+      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
+      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3 — fecha meio
+      {col:4, row:2, type:'circle', color:'#b66dff'},  // E3
+      {col:4, row:3, type:'rect',   color:'#f5c842'},  // E4 — fecha direita
+    ]
+  },
+  {
+    // FASE 10 — Maestro: A Espiral (A1 Norte, rota em espiral)
+    name: "MAESTRO: A ESPIRAL",
+    desc: "Fase máxima! O algoritmo traça uma espiral pelo interior da matriz.",
+    start: {col:0, row:4}, startDir: 0,  // A1 olhando Norte
+    end:   {col:4, row:0},               // E5
+    obstacles: [
+      // Bloqueia linha base (exceto A1=start)
+      {col:1, row:4, type:'square', color:'#ff4d6d'},  // B1
+      {col:2, row:4, type:'circle', color:'#00bfff'},  // C1
+      {col:3, row:4, type:'rect',   color:'#f5c842'},  // D1
+      // Bloqueia linha 5 (exceto E5=end)
+      {col:0, row:0, type:'square', color:'#ff4d6d'},  // A5
+      {col:1, row:0, type:'circle', color:'#00bfff'},  // B5
+      {col:2, row:0, type:'rect',   color:'#f5c842'},  // C5
+      {col:3, row:0, type:'square', color:'#b66dff'},  // D5
+      // Bloqueia atalhos interiores (todos fora da rota espiral)
+      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
+      {col:1, row:3, type:'rect',   color:'#f5c842'},  // B2
+      {col:3, row:1, type:'square', color:'#ff4d6d'},  // D4
+      {col:3, row:2, type:'circle', color:'#b66dff'},  // D3
+    ]
+  }
+);
+
 function getPhase() { return phases[currentPhase % phases.length]; }
+
+// ── AUDIO SYSTEM (Web Audio API) ─────────────
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(type, opts = {}) {
+  try {
+    const ctx = getAudioCtx();
+    const { freq = 440, freq2, duration = 0.18, volume = 0.28, wave = 'sine', delay = 0 } = opts;
+
+    const startAt = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const dist = ctx.createWaveShaper();
+
+    // Gentle distortion for robot character
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+      const x = (i * 2) / 256 - 1;
+      curve[i] = (Math.PI + (opts.distortion || 0)) * x / (Math.PI + (opts.distortion || 0) * Math.abs(x));
+    }
+    dist.curve = curve;
+
+    osc.connect(dist);
+    dist.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = wave;
+    osc.frequency.setValueAtTime(freq, startAt);
+    if (freq2) osc.frequency.linearRampToValueAtTime(freq2, startAt + duration);
+
+    gain.gain.setValueAtTime(0, startAt);
+    gain.gain.linearRampToValueAtTime(volume, startAt + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
+
+    osc.start(startAt);
+    osc.stop(startAt + duration + 0.05);
+  } catch(e) {}
+}
+
+function playNoise(duration = 0.08, volume = 0.15, delay = 0) {
+  try {
+    const ctx = getAudioCtx();
+    const startAt = ctx.currentTime + delay;
+    const bufSize = ctx.sampleRate * duration;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 800;
+    filter.Q.value = 0.5;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(volume, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
+    src.start(startAt);
+    src.stop(startAt + duration + 0.02);
+  } catch(e) {}
+}
+
+// Som: movimento do robô (passo eletrônico)
+function soundMove() {
+  playTone('move', { freq: 330, freq2: 440, duration: 0.12, volume: 0.22, wave: 'square', distortion: 20 });
+  playNoise(0.04, 0.08, 0.08);
+}
+
+// Som: girar (clique mecânico + sweep)
+function soundTurn() {
+  playTone('turn', { freq: 520, freq2: 380, duration: 0.15, volume: 0.2, wave: 'sawtooth', distortion: 30 });
+  playNoise(0.03, 0.1, 0);
+}
+
+// Som: colisão / erro
+function soundError() {
+  playTone('err1', { freq: 180, freq2: 120, duration: 0.25, volume: 0.35, wave: 'sawtooth', distortion: 80 });
+  playTone('err2', { freq: 140, freq2: 80,  duration: 0.3,  volume: 0.3,  wave: 'square',   distortion: 80, delay: 0.1 });
+  playNoise(0.12, 0.2, 0.05);
+}
+
+// Som: bateria ligada/desligada
+function soundBattery(on) {
+  if (on) {
+    playTone('bat', { freq: 440, freq2: 880, duration: 0.2, volume: 0.25, wave: 'sine' });
+  } else {
+    playTone('bat', { freq: 440, freq2: 220, duration: 0.25, volume: 0.25, wave: 'sine' });
+  }
+}
+
+// Som: vitória (fanfarra eletrônica em cascata)
+function soundWin() {
+  const notes = [523, 659, 784, 1047];
+  notes.forEach((freq, i) => {
+    playTone('win', { freq, freq2: freq * 1.02, duration: 0.22, volume: 0.3, wave: 'square', distortion: 15, delay: i * 0.13 });
+  });
+  // Acorde final
+  [523, 659, 784].forEach((f, i) => {
+    playTone('winChord', { freq: f, duration: 0.6, volume: 0.2, wave: 'sine', delay: 0.55 + i * 0.01 });
+  });
+  // Ruído de celebração
+  [0.52, 0.65, 0.78].forEach(d => playNoise(0.06, 0.12, d));
+}
 
 // ── CANVAS SIZING ────────────────────────────
 function resizeCanvas() {
@@ -1261,6 +1526,7 @@ function updateCoordDisplay() {
 function toggleBattery() {
   batteryOn = !batteryOn;
   document.getElementById('battery-btn').className = 'battery-btn' + (batteryOn ? ' on' : '');
+  soundBattery(batteryOn);
   showMsg(batteryOn ? '⚡ Energia ativada! Circuitos conectados.' : '🔴 Energia desligada. Georrobô offline.', batteryOn ? '#7cff6b' : '#ff4d6d');
 }
 
@@ -1324,10 +1590,12 @@ function getObstacleAt(col, row) {
 function executeAlgorithm() {
   if (isExecuting) return;
   if (!batteryOn) {
+    soundError();
     showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
     return;
   }
   if (commandQueue.length === 0) {
+    soundError();
     showMsg('⚠️ Nenhum comando na fila! Adicione blocos.', '#f5c842');
     return;
   }
@@ -1357,6 +1625,7 @@ function runQueue(index) {
 
   if (cmd.type === 'forward') {
     if (!batteryOn) {
+      soundError();
       showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
       isExecuting = false;
       document.getElementById('exec-btn').disabled = false;
@@ -1369,29 +1638,32 @@ function runQueue(index) {
     else nc--;
 
     if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) {
+      soundError();
       showMsg('🚧 Erro: Georrobô tentou sair da matriz!', '#ff4d6d');
     } else {
       const ob = getObstacleAt(nc, nr);
       if (ob) {
-        // Don't move, show collision
         const px = ox + ob.col * w + w / 2;
         const py = oy + ob.row * h + h / 2;
         spawnParticles(px, py, ob.color, 20);
+        soundError();
         showMsg(`⚠️ Colisão com ${ob.type === 'circle' ? 'Círculo' : ob.type === 'square' ? 'Quadrado' : 'Retângulo'}! Bloqueado.`, '#f5c842');
       } else {
         robotPos = {col: nc, row: nr};
         const px = ox + nc * w + w / 2;
         const py = oy + nr * h + h / 2;
         spawnParticles(px, py, '#00f5ff', 8);
+        soundMove();
         updateCoordDisplay();
       }
     }
   } else if (cmd.type === 'right') {
+    soundTurn();
     robotDir = (robotDir + 1) % 4;
   } else if (cmd.type === 'left') {
+    soundTurn();
     robotDir = (robotDir + 3) % 4;
   } else if (cmd.type === 'logic') {
-    // Check if obstacle ahead matches condition
     let nc = robotPos.col, nr = robotPos.row;
     if (robotDir === 0) nr--;
     else if (robotDir === 1) nc++;
@@ -1399,9 +1671,10 @@ function runQueue(index) {
     else nc--;
     const ahead = (nc >= 0 && nc < COLS && nr >= 0 && nr < ROWS) ? getObstacleAt(nc, nr) : null;
     if (ahead && ahead.type === cmd.cond) {
+      soundTurn();
       if (cmd.action === 'jump') { robotDir = (robotDir + 1) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou direita!`, '#b66dff'); }
       else if (cmd.action === 'back') { robotDir = (robotDir + 3) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou esquerda!`, '#b66dff'); }
-      else { showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`, '#b66dff'); isExecuting = false; document.getElementById('exec-btn').disabled = false; return; }
+      else { soundError(); showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`, '#b66dff'); isExecuting = false; document.getElementById('exec-btn').disabled = false; return; }
     }
   }
 
@@ -1418,6 +1691,7 @@ function checkWin() {
     const px = ox + robotPos.col * w + w / 2;
     const py = oy + robotPos.row * h + h / 2;
     for (let i = 0; i < 5; i++) setTimeout(() => spawnParticles(px, py, ['#00f5ff','#f5c842','#7cff6b','#ff6b35'][i%4], 20), i*150);
+    soundWin();
     document.getElementById('win-score').textContent = `+${pts} pontos! Total: ${score}`;
     document.getElementById('win-overlay').classList.remove('hidden');
   }
@@ -1464,19 +1738,24 @@ function loadPhase() {
 function showPhasePopup(idx) {
   const titles = [
     'INICIALIZAÇÃO', 'LABIRINTO DE CIRCUITOS', 'O ZIGUE-ZAGUE',
-    'CAMINHO INVERSO', 'ROTA DO CENTRO', 'TRAVESSIA DO MEIO'
+    'CAMINHO INVERSO', 'ROTA DO CENTRO', 'TRAVESSIA DO MEIO',
+    'DESCIDA TOTAL', 'A DIAGONAL ANTI-HORÁRIA', 'ROTA INTERIOR', 'MAESTRO: A ESPIRAL'
   ];
-  const icons = ['🤖', '⚡', '🌀', '🔄', '🎯', '➡️'];
+  const icons = ['🤖', '⚡', '🌀', '🔄', '🎯', '➡️', '⬇️', '↙️', '🔲', '🌀'];
   const hints = [
-    'Dir. Norte. Suba pela coluna A até A5, gire à Direita e avance até E5. Fila: F×4, Girar D, F×4.',
-    'Dir. Leste! Avance pela linha 1 até E1, gire à Esquerda (Norte) e suba até E5. Fila: F×4, Girar E, F×4.',
+    'Dir. Norte. Suba pela coluna A até A5, gire à Direita e avance até E5. Fila: F×4, GD, F×4.',
+    'Dir. Leste! Avance pela linha 1 até E1, gire à Esquerda (Norte) e suba até E5. Fila: F×4, GE, F×4.',
     'Dir. Norte. Zigue-zague: suba col A, desvie em B5, desça p/ B4, cruze linha 4 até E4, suba p/ E5.',
-    'Dir. Norte — mas começa em E1! Suba pela col E até E5, gire à Esquerda (Oeste) e cruze até A5.',
-    'Dir. Leste — começa em C1! Avance p/ D1, gire Norte, suba col D até D5, gire Oeste, chegue em C5.',
-    'Dir. Leste — começa em A3! Linha 3 está livre. Avance direto 4 casas até E3. Cuidado com as armadilhas laterais!'
+    'Dir. Norte — começa em E1! Suba pela col E até E5, gire à Esquerda (Oeste) e cruze até A5. F×4, GE, F×4.',
+    'Dir. Leste — começa em C1! Avance p/ D1, gire Norte, suba col D até D5, gire Oeste, chegue em C5. F, GE, F×4, GE, F.',
+    'Dir. Leste — começa em A3! Linha 3 está livre. Avance direto 4 casas até E3. Fila: F×4.',
+    'Dir. Sul — começa em E5! Desça pela col E até E1, gire à Direita (Oeste) e cruze até A1. F×4, GD, F×4.',
+    'Dir. Leste — começa em A5! Cruze o topo até E5, gire à Direita (Sul) e desça até E1. F×4, GD, F×4.',
+    'Dir. Norte — começa em B2! Suba col B até B5, gire Direita p/ D5 (2F), gire Direita (Sul), desça 1 casa p/ D4. F×3, GD, F×2, GD, F.',
+    'Dir. Norte — ESPIRAL! A1→A4(3F), GD→C4(2F), GD→C2(2F), GE→E2(2F), GE→E5(3F). Máxima atenção às direções!'
   ];
-  const dirLabels = ['⬆ Norte', '→ Leste', '⬆ Norte', '⬆ Norte', '→ Leste', '→ Leste'];
-  const n = idx % 6;
+  const dirLabels = ['⬆ Norte','→ Leste','⬆ Norte','⬆ Norte','→ Leste','→ Leste','↓ Sul','→ Leste','⬆ Norte','⬆ Norte'];
+  const n = idx % 10;
   document.getElementById('popup-icon').textContent = icons[n];
   document.getElementById('popup-title').textContent = `FASE ${idx+1} — ${titles[n]}`;
   document.getElementById('popup-pillar').textContent = `Direção inicial: ${dirLabels[n]}`;
