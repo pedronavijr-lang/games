@@ -555,10 +555,57 @@
     pointer-events: none;
     z-index: 0;
   }
+.btn-back {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  text-decoration: none;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  
+  padding: 10px 20px;
+  background: rgba(4, 9, 31, 0.8);
+  border: 1px solid rgba(180, 200, 255, 0.3);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  color: var(--geo-a);
+  background: rgba(0, 229, 255, 0.1);
+  border-color: var(--geo-a);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+  transform: translateX(-3px);
+}
+
+.btn-back .icon {
+  font-size: 1rem;
+}
+
+/* Ajuste para telas pequenas */
+@media (max-width: 600px) {
+  .btn-back {
+    top: 15px;
+    left: 15px;
+    padding: 6px 10px;
+    font-size: 0.65rem;
+  }
+}
 </style>
 </head>
 <body>
-
+<a href="index.html" class="btn-back">
+  <span class="icon">❮</span> Página inicial
+</a>
 <!-- DECORATIVE CIRCUITS -->
 <svg class="circuit-deco" style="top:0;right:0" viewBox="0 0 300 300">
   <line x1="50" y1="0" x2="50" y2="100" stroke="#00f5ff" stroke-width="2"/>
@@ -1450,3 +1497,4 @@ renderFrame();
 </script>
 </body>
 </html>
+
