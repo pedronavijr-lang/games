@@ -96,6 +96,30 @@ html, body {
 .card-desc { font-size: clamp(0.8rem, 1.7vw, 1.02rem); font-weight: 700; color: var(--text-dim); }
 .btn-play { font-family: 'Orbitron', monospace; font-size: clamp(0.82rem, 1.8vw, 1.05rem); padding: 15px 40px; border-radius: 50px; text-decoration: none; color: #fff; background: var(--geo-b); transition: 0.3s; }
 .footer { text-align: center; color: rgba(120,150,200,0.45); padding: 20px; }
+/* Adicione estas variáveis ao :root */
+:root {
+  /* ... cores anteriores ... */
+  --def-a: #bc13fe;
+  --def-b: #7000ff;
+  --def-glow: rgba(188, 19, 254, 0.45);
+}
+
+/* Estilo específico para o card Defensores */
+.card--def { 
+  --card-accent: var(--def-a); 
+  background: linear-gradient(160deg, #120524 0%, #1a0a3a 100%); 
+}
+
+.card--def:hover { 
+  box-shadow: 0 0 0 1px rgba(188, 19, 254, 0.4), 0 12px 50px var(--def-glow), 0 0 80px rgba(112, 0, 255, 0.2); 
+}
+
+/* Ajuste na Grid para acomodar 3 itens ou mais */
+.games-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+
 </style>
 </head>
 <body>
@@ -136,6 +160,13 @@ html, body {
       <h2 class="card-name">Roleta do<br>Mestre Mandou</h2>
       <p class="card-desc">Gire a roleta e cumpra os desafios motores!</p>
       <a class="btn-play" href="roleta-mestre-mandou.html">▶ JOGAR AGORA</a>
+    </article>
+
+    <article class="card card--def">
+      <div class="card-icon-wrap"><div class="card-icon">🚀</div></div>
+      <h2 class="card-name">Defensores da<br>Multiplicação</h2>
+      <p class="card-desc">Pilote sua nave e neutralize alienígenas resolvendo a tabuada!</p>
+      <a class="btn-play" href="defensores-multiplicacao.html">▶ JOGAR AGORA</a>
     </article>
   </section>
 
