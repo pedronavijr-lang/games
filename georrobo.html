@@ -541,61 +541,160 @@
   }
   .win-btn:hover { box-shadow: 0 0 30px rgba(245,200,66,0.5); transform: translateY(-3px); }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--grid-border); border-radius: 3px; }
-
-  /* Circuit background decoration */
-  .circuit-deco {
+  /* ── LEVEL SELECTOR OVERLAY ── */
+  #level-select {
     position: fixed;
-    width: 300px;
-    height: 300px;
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 0;
+    inset: 0;
+    background: rgba(5,8,15,0.97);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    backdrop-filter: blur(8px);
   }
-
- #win-overlay.hidden { display: none; }
-  #win-box {
+  #level-select.hidden { display: none; }
+  .ls-box {
     text-align: center;
-    animation: winPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 820px;
+    width: 95%;
+    animation: popupIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
   }
-  @keyframes winPop {
-    from { transform: scale(0.5); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .win-icon { font-size: 5rem; margin-bottom: 20px; animation: spin 2s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #win-title {
+  .ls-title {
     font-family: 'Orbitron', monospace;
-    font-size: 3rem;
+    font-size: 2.2rem;
     font-weight: 900;
-    color: var(--accent4);
-    text-shadow: 0 0 30px var(--accent4);
-    margin-bottom: 10px;
-  }
-  #win-sub {
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.5rem;
     color: var(--accent);
-    margin-bottom: 30px;
+    text-shadow: var(--neon-glow);
+    margin-bottom: 6px;
+    letter-spacing: 3px;
   }
-  .win-btn {
-    padding: 16px 50px;
-    background: linear-gradient(135deg, #4a3000, #2a1a00);
-    border: 2px solid var(--accent4);
-    border-radius: 14px;
-    color: var(--accent4);
+  .ls-sub {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: #667;
+    margin-bottom: 32px;
+  }
+  .ls-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .ls-card {
+    background: var(--panel);
+    border: 2px solid var(--grid-border);
+    border-radius: 18px;
+    padding: 28px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ls-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .ls-card.easy { border-color: #3a9e3a; }
+  .ls-card.easy::before { background: radial-gradient(ellipse at 50% 0%, rgba(124,255,107,0.12), transparent 70%); }
+  .ls-card.easy:hover { border-color: #7cff6b; box-shadow: 0 0 30px rgba(124,255,107,0.3); transform: translateY(-4px); }
+  .ls-card.easy:hover::before { opacity: 1; }
+  .ls-card.medium { border-color: #9e7a3a; }
+  .ls-card.medium::before { background: radial-gradient(ellipse at 50% 0%, rgba(245,200,66,0.12), transparent 70%); }
+  .ls-card.medium:hover { border-color: #f5c842; box-shadow: 0 0 30px rgba(245,200,66,0.3); transform: translateY(-4px); }
+  .ls-card.medium:hover::before { opacity: 1; }
+  .ls-card.hard { border-color: #9e3a3a; }
+  .ls-card.hard::before { background: radial-gradient(ellipse at 50% 0%, rgba(255,77,109,0.12), transparent 70%); }
+  .ls-card.hard:hover { border-color: #ff4d6d; box-shadow: 0 0 30px rgba(255,77,109,0.3); transform: translateY(-4px); }
+  .ls-card.hard:hover::before { opacity: 1; }
+  .ls-card-icon { font-size: 3rem; margin-bottom: 12px; }
+  .ls-card-name {
     font-family: 'Orbitron', monospace;
     font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .ls-card.easy .ls-card-name { color: #7cff6b; }
+  .ls-card.medium .ls-card-name { color: #f5c842; }
+  .ls-card.hard .ls-card-name { color: #ff4d6d; }
+  .ls-card-desc {
+    font-size: 0.8rem;
+    color: #667;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .ls-card-info {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: #445;
+    letter-spacing: 1px;
+  }
+  .ls-stars { font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 6px; }
+
+  /* Difficulty badge in header */
+  #diff-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 2px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #diff-badge.easy  { color: #7cff6b; border-color: #3a9e3a; background: rgba(124,255,107,0.08); }
+  #diff-badge.medium{ color: #f5c842; border-color: #9e7a3a; background: rgba(245,200,66,0.08); }
+  #diff-badge.hard  { color: #ff4d6d; border-color: #9e3a3a; background: rgba(255,77,109,0.08); }
+  #diff-badge:hover { filter: brightness(1.3); }
+
+  /* Level-complete overlay */
+  #levelcomplete-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,8,15,0.97);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 250;
+    backdrop-filter: blur(8px);
+  }
+  #levelcomplete-overlay.hidden { display: none; }
+  .lc-box {
+    text-align: center;
+    animation: winPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  .lc-icon { font-size: 5rem; margin-bottom: 16px; }
+  .lc-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+  .lc-title.easy   { color: #7cff6b; text-shadow: 0 0 30px #7cff6b; }
+  .lc-title.medium { color: #f5c842; text-shadow: 0 0 30px #f5c842; }
+  .lc-title.hard   { color: #ff4d6d; text-shadow: 0 0 30px #ff4d6d; }
+  .lc-sub { font-family:'Fredoka One',cursive; font-size:1.3rem; color:var(--accent); margin-bottom:8px; }
+  .lc-score { font-family:'Orbitron',monospace; font-size:1rem; color:#7cff6b; margin-bottom:28px; }
+  .lc-btn {
+    padding: 16px 44px;
+    border-radius: 14px;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
     letter-spacing: 2px;
     transition: all 0.2s;
     margin: 0 8px;
+    border: 2px solid;
   }
-  .win-btn:hover { box-shadow: 0 0 30px rgba(245,200,66,0.5); transform: translateY(-3px); }
+  .lc-btn.next { background: linear-gradient(135deg,#4a3000,#2a1a00); border-color: #f5c842; color: #f5c842; }
+  .lc-btn.next:hover { box-shadow: 0 0 30px rgba(245,200,66,0.5); transform: translateY(-3px); }
+  .lc-btn.menu { background: linear-gradient(135deg,#0a1f30,#050e1a); border-color: var(--accent); color: var(--accent); }
+  .lc-btn.menu:hover { box-shadow: 0 0 30px rgba(0,245,255,0.4); transform: translateY(-3px); }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
@@ -611,60 +710,35 @@
     pointer-events: none;
     z-index: 0;
   }
-.btn-back {
-  position: fixed;
-  bottom: 25px;
-  left: 25px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  text-decoration: none;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  
-  padding: 10px 20px;
-  background: rgba(4, 9, 31, 0.8);
-  border: 1px solid rgba(180, 200, 255, 0.3);
-  border-radius: 8px;
-  backdrop-filter: blur(4px);
-  transition: all 0.3s ease;
-}
 
-.btn-back:hover {
-  color: var(--geo-a);
-  background: rgba(0, 229, 255, 0.1);
-  border-color: var(--geo-a);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-  transform: translateX(-3px);
-}
-
-.btn-back .icon {
-  font-size: 1rem;
-}
-
-/* Ajuste para telas pequenas */
-@media (max-width: 600px) {
-  .btn-back {
-    top: 15px;
-    left: 15px;
-    padding: 6px 10px;
-    font-size: 0.65rem;
+  /* ── RESPONSIVE: tablets and below ── */
+  @media (max-width: 960px) {
+    #main {
+      grid-template-columns: 1fr;
+      padding: 14px 16px;
+      gap: 16px;
+    }
+    #header {
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 16px;
+    }
+    #header h1 { font-size: 1.4rem; letter-spacing: 1px; }
+    .header-stats { gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+    .stat-box { padding: 4px 12px; }
+    .stat-value { font-size: 1.1rem; }
+    #side-panel, .side-panel { width: 100%; max-width: 100%; }
   }
-}
+  @media (max-width: 600px) {
+    #header h1 { font-size: 1.1rem; }
+    #main { padding: 10px; }
+    .stat-label { font-size: 0.55rem; }
+    .stat-value { font-size: 0.95rem; }
+  }
 
 </style>
 </head>
 <body>
-
-<a href="index.html" class="btn-back">
-  <span class="icon">❮</span> Página inicial
-</a>
-
 
 <!-- DECORATIVE CIRCUITS -->
 <svg class="circuit-deco" style="top:0;right:0" viewBox="0 0 300 300">
@@ -700,6 +774,7 @@
       <div class="stat-label">Fase</div>
       <div class="stat-value" id="phase-disp">1</div>
     </div>
+    <div id="diff-badge" class="easy" onclick="showLevelSelect()">⭐ FÁCIL</div>
     <div class="battery-wrap" id="battery-toggle" onclick="toggleBattery()">
       <div class="battery-label">⚡ ENERGIA</div>
       <div class="battery-btn on" id="battery-btn"></div>
@@ -821,6 +896,51 @@
   </div>
 </div>
 
+<!-- LEVEL COMPLETE OVERLAY -->
+<div id="levelcomplete-overlay" class="hidden">
+  <div class="lc-box">
+    <div class="lc-icon">🎉</div>
+    <div class="lc-title easy" id="lc-title">NÍVEL COMPLETO!</div>
+    <div class="lc-sub" id="lc-sub">Todas as fases concluídas!</div>
+    <div class="lc-score" id="lc-score"></div>
+    <div>
+      <button class="lc-btn next" id="lc-next-btn" onclick="goNextLevel()">PRÓXIMO NÍVEL ▶</button>
+      <button class="lc-btn menu" onclick="showLevelSelect()">☰ MENU DE NÍVEIS</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEVEL SELECT OVERLAY -->
+<div id="level-select">
+  <div class="ls-box">
+    <div class="ls-title">⬡ GEORROBÔ</div>
+    <div class="ls-sub">Missão Matriz — Selecione o nível de dificuldade</div>
+    <div class="ls-cards">
+      <div class="ls-card easy" onclick="startLevel('easy')">
+        <div class="ls-card-icon">🟢</div>
+        <div class="ls-stars">⭐☆☆</div>
+        <div class="ls-card-name">FÁCIL</div>
+        <div class="ls-card-desc">Rotas simples pelas bordas da matriz. Perfeito para aprender os comandos básicos.</div>
+        <div class="ls-card-info">10 FASES · 1–2 GIROS · ≤3 OBSTÁCULOS</div>
+      </div>
+      <div class="ls-card medium" onclick="startLevel('medium')">
+        <div class="ls-card-icon">🟡</div>
+        <div class="ls-stars">⭐⭐☆</div>
+        <div class="ls-card-name">MÉDIO</div>
+        <div class="ls-card-desc">Zigue-zagues, mudanças de direção múltiplas e uso do bloco SE→ENTÃO.</div>
+        <div class="ls-card-info">10 FASES · 3–5 GIROS · 5–8 OBSTÁCULOS</div>
+      </div>
+      <div class="ls-card hard" onclick="startLevel('hard')">
+        <div class="ls-card-icon">🔴</div>
+        <div class="ls-stars">⭐⭐⭐</div>
+        <div class="ls-card-name">DIFÍCIL</div>
+        <div class="ls-card-desc">Espirais, labirintos e lógica condicional obrigatória. Somente para mestres!</div>
+        <div class="ls-card-info">10 FASES · 6+ GIROS · 8–12 OBSTÁCULOS</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════
 //   GEORROBÔ: MISSÃO MATRIZ — GAME ENGINE
@@ -831,947 +951,612 @@ const ctx = canvas.getContext('2d');
 const COLS = 5, ROWS = 5;
 const COLS_LABELS = ['A','B','C','D','E'];
 
-let score = 0;
+// ── LEVEL SYSTEM ─────────────────────────────
+let difficulty   = 'easy';
+let score        = 0;
 let currentPhase = 0;
-let batteryOn = true;
+const DIFF_COLOR = { easy:'#7cff6b', medium:'#f5c842', hard:'#ff4d6d' };
+const DIFF_LABEL = { easy:'⭐ FÁCIL', medium:'⭐⭐ MÉDIO', hard:'⭐⭐⭐ DIFÍCIL' };
+
+// ── GAME STATE ───────────────────────────────
+let batteryOn    = true;
 let commandQueue = [];
-let isExecuting = false;
-let robotDir = 0; // 0=up,1=right,2=down,3=left
-let robotPos = {col:0, row:4}; // A1
-let particles = [];
-let circuitAnim = 0;
+let isExecuting  = false;
+let robotDir     = 0;       // 0=Norte 1=Leste 2=Sul 3=Oeste
+let robotPos     = {col:0, row:4};
+let particles    = [];
+let circuitAnim  = 0;
+let msgTimer     = null;
 
-// ── COORDINATE SYSTEM ───────────────────────
-// col: 0=A ... 4=E  (esquerda→direita)
-// row: 0=linha5(topo) ... 4=linha1(base)
-// robotDir: 0=norte(↑) 1=leste(→) 2=sul(↓) 3=oeste(←)
-//
-// FASE 1 — A1→E5  dir Norte
-//   Fila: F×4, GD, F×4  (sobe col A, cruza linha 5)
-//
-// FASE 2 — A1→E5  dir Leste
-//   Fila: F×4, GE, F×4  (cruza linha 1, sobe col E)
-//
-// FASE 3 — A1→E5  dir Norte  zigue-zague
-//   Fila: F×4, GD, F, GD, F, GE, F×3, GE, F
-//
-// FASE 4 — E1→A5  dir Norte  (começa no canto oposto)
-//   Rota: E1→E5 (col E, 4F norte), GE→Oeste, E5→D5→C5→B5→A5 (4F)
-//   Fila: F×4, GE, F×4
-//
-// FASE 5 — C1→C5  dir Leste  (centro→centro, corredor em S)
-//   Rota: C1→D1 (1F leste), GE→Norte, D1→D2→D3 (2F), GD→Leste,
-//         D3→E3 (1F), GE→Norte, E3→E4→E5? não chega C5...
-//   Melhor: C1(dir Norte), C1→C2→C3(bloqueado) → desvio
-//   Rota: C1(Norte)→C2, GD→Leste, C2→D2→E2, GE→Norte,
-//         E2→E3→E4→E5? meta é C5...
-//   Rota válida para C1→C5: C1(Leste)→D1, GE→Norte, D1→D2→D3→D4→D5,
-//         GE→Oeste, D5→C5. Fila: F, GE, F×4, GE, F
-//
-// FASE 6 — A3→E3  dir Leste  (travessia horizontal do meio)
-//   Rota: A3→B3→C3→D3→E3 (4F). Obstáculos fora da linha 3.
-//   Fila: F×4  (simples, mas com SE-ENTÃO para desvios opcionais)
+// ── PHASE BANK ───────────────────────────────
+// col: 0=A…4=E | row: 0=topo(linha5)…4=base(linha1) | dir: 0=N 1=L 2=S 3=O
+// Cada fase tem: name, desc, start{col,row}, startDir, end{col,row}, obstacles[]
+// hint: gabarito da fila para o professor (string)
 
-const phases = [
-  {
-    // ── FASE 1 ──────────────────────────────────────────────────────
-    // Rota: A1(N)→A5, GD(L), A5→E5
-    // Fila: F F F F GD F F F F
-    name: "INICIALIZAÇÃO DO GEORROBÔ",
-    desc: "Leve o Georrobô de A1 até E5. Suba pela borda esquerda e cruze o topo!",
-    start: {col:0, row:4}, startDir: 0,
-    end:   {col:4, row:0},
-    obstacles: [
-      {col:1, row:3, type:'circle', color:'#00bfff'},  // B4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-    ]
-  },
-  {
-    // ── FASE 2 ──────────────────────────────────────────────────────
-    // Dir inicial: Leste. Rota: A1(L)→E1, GE(N), E1→E5
-    // Fila: F F F F GE F F F F
-    name: "LABIRINTO DE CIRCUITOS",
-    desc: "Georrobô aponta para o Leste! Cruze a linha 1 e suba pela coluna E.",
-    start: {col:0, row:4}, startDir: 1,
-    end:   {col:4, row:0},
-    obstacles: [
-      {col:1, row:3, type:'square', color:'#ff4d6d'},  // B4
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:3, row:2, type:'circle', color:'#00bfff'},  // D3
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-    ]
-  },
-  {
-    // ── FASE 3 ──────────────────────────────────────────────────────
-    // Dir inicial: Norte. Zigue-zague:
-    // A1→A5(4F), GD→B5(1F), GD(sul)→B4(1F), GE(L)→E4(3F), GE(N)→E5(1F)
-    // Fila: F F F F GD F GD F GE F F F GE F
-    name: "O ZIGUE-ZAGUE",
-    desc: "Atenção ao corredor! Suba, desvie pelo meio e chegue à meta.",
-    start: {col:0, row:4}, startDir: 0,
-    end:   {col:4, row:0},
-    obstacles: [
-      {col:2, row:0, type:'square', color:'#ff4d6d'},  // C5 — bloqueia linha 5
-      {col:3, row:0, type:'rect',   color:'#f5c842'},  // D5
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3 — bloqueia col B acima B4
-      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3 — bloqueia interior
-      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
-      {col:3, row:2, type:'rect',   color:'#f5c842'},  // D3
-    ]
-  },
-  {
-    // ── FASE 4 ──────────────────────────────────────────────────────
-    // INVERTIDO: começa em E1, chega em A5. Dir inicial: Norte.
-    // Rota: E1(N)→E5(4F), GE(L→vira oeste), E5→A5(4F oeste)
-    // Fila: F F F F GE F F F F
-    name: "CAMINHO INVERSO",
-    desc: "Agora o Georrobô começa no canto direito! Suba pela coluna E e cruze até A5.",
-    start: {col:4, row:4}, startDir: 0,   // E1, olhando Norte
-    end:   {col:0, row:0},                 // A5
-    obstacles: [
-      {col:3, row:3, type:'circle', color:'#00bfff'},  // D4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:1, row:1, type:'rect',   color:'#f5c842'},  // B2
-      {col:3, row:1, type:'circle', color:'#b66dff'},  // D2
-      {col:1, row:3, type:'square', color:'#ff4d6d'},  // B4
-    ]
-  },
-  {
-    // ── FASE 5 ──────────────────────────────────────────────────────
-    // Centro→Centro: C1→C5. Dir inicial: Leste.
-    // Rota: C1(L)→D1(1F), GE(N)→D1→D2→D3→D4→D5(4F), GE(O)→D5→C5(1F)
-    // Fila: F GE F F F F GE F
-    name: "ROTA DO CENTRO",
-    desc: "Do centro à meta! Desvie pelo corredor D e chegue em C5.",
-    start: {col:2, row:4}, startDir: 1,   // C1, olhando Leste
-    end:   {col:2, row:0},                 // C5
-    obstacles: [
-      {col:2, row:3, type:'square', color:'#ff4d6d'},  // C4 — bloqueia subida direta col C
-      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3
-      {col:2, row:1, type:'rect',   color:'#f5c842'},  // C2
-      {col:0, row:2, type:'square', color:'#ff4d6d'},  // A3 — fecha esquerda
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
-      {col:4, row:2, type:'rect',   color:'#f5c842'},  // E3 — fecha direita
-    ]
-  },
-  {
-    // ── FASE 6 ──────────────────────────────────────────────────────
-    // Travessia horizontal: A3→E3. Dir inicial: Leste.
-    // Linha 3 totalmente livre. Obstáculos acima e abaixo tentam distrair.
-    // Rota direta: A3(L)→B3→C3→D3→E3 (4F)
-    // Mas col A linha 3 = row:2. start {col:0,row:2} end {col:4,row:2}
-    // Fila: F F F F  — simples! Foco pedagógico: usar SE-ENTÃO para
-    // ignorar obstáculos laterais que não bloqueiam o caminho.
-    name: "TRAVESSIA DO MEIO",
-    desc: "Cruze de ponta a ponta pelo meio da matriz! A linha 3 está livre.",
-    start: {col:0, row:2}, startDir: 1,   // A3, olhando Leste
-    end:   {col:4, row:2},                 // E3
-    obstacles: [
-      {col:1, row:3, type:'circle', color:'#00bfff'},  // B4 — abaixo da rota
-      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2 — acima da rota
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:1, type:'circle', color:'#00bfff'},  // C2
-      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-      {col:4, row:3, type:'circle', color:'#b66dff'},  // E4
-      {col:4, row:1, type:'square', color:'#ff4d6d'},  // E2
-    ]
-  }
+const phasesEasy = [
+  // F1 — A1→E5 Norte. Sobe col A, cruza linha 5. F×4 GD F×4
+  { name:"INICIALIZAÇÃO DO GEORROBÔ", desc:"Suba pela borda esquerda e cruze o topo!",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:0},
+    hint:"F×4, Girar D, F×4",
+    obstacles:[{col:1,row:3,type:'circle',color:'#00bfff'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:3,row:1,type:'rect',color:'#f5c842'}] },
+  // F2 — A1→E5 Leste. Cruza linha 1, sobe col E. F×4 GE F×4
+  { name:"LABIRINTO DE CIRCUITOS", desc:"Georrobô aponta para o Leste! Cruze a linha 1 e suba pela coluna E.",
+    start:{col:0,row:4}, startDir:1, end:{col:4,row:0},
+    hint:"F×4, Girar E, F×4",
+    obstacles:[{col:1,row:3,type:'square',color:'#ff4d6d'},{col:1,row:2,type:'circle',color:'#00bfff'},{col:2,row:3,type:'rect',color:'#f5c842'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:3,row:2,type:'circle',color:'#00bfff'},{col:3,row:1,type:'rect',color:'#f5c842'}] },
+  // F3 — A1→E5 Norte. Zigue-zague obrigatório. F×4 GD F GD F GE F×3 GE F
+  { name:"O ZIGUE-ZAGUE", desc:"Suba, desvie pelo corredor e chegue à meta!",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:0},
+    hint:"F×4, GD, F, GD, F, GE, F×3, GE, F",
+    obstacles:[{col:2,row:0,type:'square',color:'#ff4d6d'},{col:3,row:0,type:'rect',color:'#f5c842'},{col:1,row:2,type:'circle',color:'#00bfff'},{col:1,row:1,type:'square',color:'#ff4d6d'},{col:2,row:3,type:'rect',color:'#f5c842'},{col:2,row:2,type:'circle',color:'#00bfff'},{col:3,row:3,type:'square',color:'#ff4d6d'},{col:3,row:2,type:'rect',color:'#f5c842'}] },
+  // F4 — E1→A5 Norte. Sobe col E, cruza linha 5 para oeste. F×4 GE F×4
+  { name:"CAMINHO INVERSO", desc:"Começa no canto direito! Suba pela coluna E e cruze até A5.",
+    start:{col:4,row:4}, startDir:0, end:{col:0,row:0},
+    hint:"F×4, Girar E, F×4",
+    obstacles:[{col:3,row:3,type:'circle',color:'#00bfff'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:1,row:1,type:'rect',color:'#f5c842'},{col:3,row:1,type:'circle',color:'#b66dff'},{col:1,row:3,type:'square',color:'#ff4d6d'}] },
+  // F5 — C1→C5 Leste. F GE F×4 GE F
+  { name:"ROTA DO CENTRO", desc:"Desvie pelo corredor D e chegue em C5.",
+    start:{col:2,row:4}, startDir:1, end:{col:2,row:0},
+    hint:"F, GE, F×4, GE, F",
+    obstacles:[{col:2,row:3,type:'square',color:'#ff4d6d'},{col:2,row:2,type:'circle',color:'#00bfff'},{col:2,row:1,type:'rect',color:'#f5c842'},{col:0,row:2,type:'square',color:'#ff4d6d'},{col:1,row:2,type:'circle',color:'#00bfff'},{col:4,row:2,type:'rect',color:'#f5c842'}] },
+  // F6 — A3→E3 Leste. Linha 3 livre. F×4
+  { name:"TRAVESSIA DO MEIO", desc:"A linha 3 está completamente livre. Cruze de ponta a ponta!",
+    start:{col:0,row:2}, startDir:1, end:{col:4,row:2},
+    hint:"F×4",
+    obstacles:[{col:1,row:3,type:'circle',color:'#00bfff'},{col:1,row:1,type:'square',color:'#ff4d6d'},{col:2,row:3,type:'rect',color:'#f5c842'},{col:2,row:1,type:'circle',color:'#00bfff'},{col:3,row:3,type:'square',color:'#ff4d6d'},{col:3,row:1,type:'rect',color:'#f5c842'},{col:4,row:3,type:'circle',color:'#b66dff'},{col:4,row:1,type:'square',color:'#ff4d6d'}] },
+  // F7 — E5→A1 Sul. Desce col E, cruza linha 1 para oeste. F×4 GD F×4
+  { name:"DESCIDA TOTAL", desc:"Começa no topo direito! Desça pela col E e cruze a base até A1.",
+    start:{col:4,row:0}, startDir:2, end:{col:0,row:4},
+    hint:"F×4, Girar D, F×4",
+    obstacles:[{col:3,row:1,type:'circle',color:'#00bfff'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:1,row:3,type:'rect',color:'#f5c842'},{col:3,row:3,type:'circle',color:'#b66dff'},{col:1,row:1,type:'square',color:'#ff4d6d'}] },
+  // F8 — A5→E1 Leste. Cruza linha 5, desce col E. F×4 GD F×4
+  { name:"A DIAGONAL ANTI-HORÁRIA", desc:"De A5 a E1! Cruze o topo até E5 e desça pela coluna E.",
+    start:{col:0,row:0}, startDir:1, end:{col:4,row:4},
+    hint:"F×4, Girar D, F×4",
+    obstacles:[{col:1,row:1,type:'rect',color:'#f5c842'},{col:2,row:2,type:'circle',color:'#00bfff'},{col:3,row:3,type:'square',color:'#ff4d6d'},{col:1,row:3,type:'circle',color:'#b66dff'},{col:3,row:1,type:'rect',color:'#f5c842'}] },
+  // F9 — B2→D4 Norte. F×3 GD F×2 GD F
+  { name:"ROTA INTERIOR", desc:"Partida no interior! Suba col B, desvie pela borda e chegue em D4.",
+    start:{col:1,row:3}, startDir:0, end:{col:3,row:1},
+    hint:"F×3, GD, F×2, GD, F",
+    obstacles:[{col:0,row:2,type:'square',color:'#ff4d6d'},{col:0,row:1,type:'circle',color:'#00bfff'},{col:2,row:3,type:'rect',color:'#f5c842'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:4,row:2,type:'circle',color:'#b66dff'},{col:4,row:3,type:'rect',color:'#f5c842'}] },
+  // F10 — A1→E5 Norte Espiral. F×3 GD F×2 GD F×2 GE F×2 GE F×3
+  { name:"MAESTRO: A ESPIRAL", desc:"Fase máxima fácil! O algoritmo traça uma espiral pelo interior.",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:0},
+    hint:"F×3, GD, F×2, GD, F×2, GE, F×2, GE, F×3",
+    obstacles:[{col:1,row:4,type:'square',color:'#ff4d6d'},{col:2,row:4,type:'circle',color:'#00bfff'},{col:3,row:4,type:'rect',color:'#f5c842'},{col:0,row:0,type:'square',color:'#ff4d6d'},{col:1,row:0,type:'circle',color:'#00bfff'},{col:2,row:0,type:'rect',color:'#f5c842'},{col:3,row:0,type:'square',color:'#b66dff'},{col:1,row:2,type:'circle',color:'#00bfff'},{col:1,row:3,type:'rect',color:'#f5c842'},{col:3,row:1,type:'square',color:'#ff4d6d'},{col:3,row:2,type:'circle',color:'#b66dff'}] },
 ];
 
-// ── FASES 7–10 ──────────────────────────────────────────────────────────────
-// Rota verificada coordenada a coordenada (col/row internos):
-// col: 0=A…4=E  |  row: 0=linha5(topo)…4=linha1(base)  |  dir: 0=N 1=L 2=S 3=O
-//
-// FASE 7 — E5→A1  dir Sul(2)
-//   E5={col4,row0}. Rota: (S)→E4→E3→E2→E1[row4] (4F), GD→Oeste, →D1→C1→B1→A1 (4F)
-//   Fila: F×4, GD, F×4
-//
-// FASE 8 — A5→E1  dir Leste(1)
-//   A5={col0,row0}. Rota: (L)→B5→C5→D5→E5[col4,row0] (4F), GD→Sul, →E4→E3→E2→E1[row4] (4F)
-//   Fila: F×4, GD, F×4
-//
-// FASE 9 — B2→D4  dir Norte(0)
-//   B2={col1,row3}. D4={col3,row1}.
-//   Rota: (N)→B3→B4→B5[row0] (3F), GD→Leste, →C5→D5[col3,row0] (2F), GD→Sul, →D4[col3,row1] (1F)
-//   Fila: F×3, GD, F×2, GD, F
-//
-// FASE 10 — A1→E5  dir Norte(0)  ESPIRAL
-//   A1={col0,row4}. Rota espiral:
-//   (N)→A2[row3]→A3[row2]→A4[row1] (3F),
-//   GD(L)→B4[col1,row1]→C4[col2,row1] (2F),
-//   GD(S)→C3[col2,row2]→C2[col2,row3] (2F),
-//   GE(L)→D2[col3,row3]→E2[col4,row3] (2F),
-//   GE(N)→E3[col4,row2]→E4[col4,row1]→E5[col4,row0] (3F)
-//   Fila: F×3, GD, F×2, GD, F×2, GE, F×2, GE, F×3
+// ── MÉDIO ────────────────────────────────────
+// Zigue-zagues, múltiplos giros, inícios centrais, uso de SE→ENTÃO
+// col/row: mesmo sistema. Rotas todas verificadas.
+const phasesMedium = [
+  // M1 — A1→E3 Norte. Sobe col A→A5, vira L→C5(2F), vira S→C3(2F), vira L→E3(2F)
+  // F×4, GD, F×2, GD, F×2, GE, F×2
+  { name:"CRUZAMENTO EM L", desc:"Suba, dobre duas vezes e chegue ao centro da coluna E.",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:2},
+    hint:"F×4, GD, F×2, GD, F×2, GE, F×2",
+    obstacles:[{col:1,row:0,type:'square',color:'#ff4d6d'},{col:2,row:0,type:'circle',color:'#00bfff'},{col:3,row:0,type:'rect',color:'#f5c842'},{col:4,row:0,type:'square',color:'#b66dff'},{col:1,row:1,type:'circle',color:'#00bfff'},{col:3,row:3,type:'rect',color:'#f5c842'},{col:4,row:4,type:'square',color:'#ff4d6d'}] },
+  // M2 — E5→A1 Oeste. Cruza linha 5→A5, desce col A, cruza linha 1→E1.
+  // F×4, GD, F×4, GD, F×4
+  { name:"O U INVERTIDO", desc:"Percorra o U ao contrário: topo→esquerda→base→direita!",
+    start:{col:4,row:0}, startDir:3, end:{col:4,row:4},
+    hint:"F×4, GD, F×4, GD, F×4",
+    obstacles:[{col:1,row:1,type:'circle',color:'#00bfff'},{col:2,row:1,type:'square',color:'#ff4d6d'},{col:3,row:1,type:'rect',color:'#f5c842'},{col:1,row:3,type:'rect',color:'#f5c842'},{col:2,row:3,type:'circle',color:'#00bfff'},{col:3,row:3,type:'square',color:'#ff4d6d'}] },
+  // M3 — C3→C3? Não. C1→E5 via espiral curta. Leste→Norte→Leste→Norte
+  // C1(L)→E1(2F), GE→N, E1→E3(2F), GE→O, E3→C3(2F), GE→N, C3→C5(2F)
+  // F×2, GE, F×2, GE, F×2, GE, F×2
+  { name:"A SERPENTINA", desc:"Avance em zigue-zague horizontal até C5!",
+    start:{col:2,row:4}, startDir:1, end:{col:2,row:0},
+    hint:"F×2, GE, F×2, GE, F×2, GE, F×2",
+    obstacles:[{col:0,row:4,type:'square',color:'#ff4d6d'},{col:1,row:4,type:'circle',color:'#00bfff'},{col:0,row:2,type:'rect',color:'#f5c842'},{col:1,row:2,type:'square',color:'#ff4d6d'},{col:3,row:2,type:'circle',color:'#00bfff'},{col:4,row:2,type:'rect',color:'#f5c842'},{col:3,row:0,type:'square',color:'#b66dff'},{col:4,row:0,type:'circle',color:'#00bfff'}] },
+  // M4 — A5→E1 Sul→Leste→Sul. Espiral descendente.
+  // A5(S)→A3(2F), GE(L)→C3(2F), GE(S)→C1(2F), GE(L)→E1(2F)
+  { name:"ESPIRAL DESCENDENTE", desc:"Desvio em espiral! Desça e avance até chegar em E1.",
+    start:{col:0,row:0}, startDir:2, end:{col:4,row:4},
+    hint:"F×2, GE, F×2, GE, F×2, GE, F×2",
+    obstacles:[{col:3,row:0,type:'rect',color:'#f5c842'},{col:4,row:0,type:'circle',color:'#00bfff'},{col:1,row:3,type:'square',color:'#ff4d6d'},{col:2,row:3,type:'rect',color:'#f5c842'},{col:4,row:3,type:'square',color:'#ff4d6d'}] },
+  // M5 — B1→D5 Norte. Sobe B até B5(4F), GD→Leste, B5→D5(2F).
+  { name:"CORREDOR VERTICAL", desc:"Suba pela coluna B e atravesse o topo até D5!",
+    start:{col:1,row:4}, startDir:0, end:{col:3,row:0},
+    hint:"F×4, GD, F×2",
+    obstacles:[{col:0,row:3,type:'square',color:'#ff4d6d'},{col:0,row:2,type:'circle',color:'#00bfff'},{col:0,row:1,type:'rect',color:'#f5c842'},{col:2,row:3,type:'circle',color:'#00bfff'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'rect',color:'#f5c842'},{col:4,row:2,type:'circle',color:'#b66dff'},{col:4,row:1,type:'square',color:'#ff4d6d'}] },
+  // M6 — A1→E1 Norte+Desvio. A1→A3(2F N), GD(L)→E3(4F), GD(S)→E1(2F S)
+  { name:"O GANCHO", desc:"Suba um pouco, desvie até o fim e desça até E1.",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:4},
+    hint:"F×2, GD, F×4, GD, F×2",
+    obstacles:[{col:0,row:1,type:'square',color:'#ff4d6d'},{col:0,row:0,type:'circle',color:'#00bfff'},{col:1,row:2,type:'rect',color:'#f5c842'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:3,row:2,type:'circle',color:'#00bfff'},{col:1,row:4,type:'rect',color:'#f5c842'},{col:2,row:4,type:'square',color:'#b66dff'},{col:3,row:4,type:'circle',color:'#00bfff'}] },
+  // M7 — C3→E5 Leste. C3→E3(2F), GE(N)→E5(2F)
+  { name:"O COTOVELO", desc:"Saia do centro, avance para a direita e suba até E5.",
+    start:{col:2,row:2}, startDir:1, end:{col:4,row:0},
+    hint:"F×2, GE, F×2",
+    obstacles:[{col:0,row:2,type:'square',color:'#ff4d6d'},{col:1,row:2,type:'circle',color:'#00bfff'},{col:2,row:1,type:'rect',color:'#f5c842'},{col:2,row:3,type:'square',color:'#ff4d6d'},{col:4,row:3,type:'circle',color:'#b66dff'},{col:4,row:4,type:'square',color:'#ff4d6d'}] },
+  // M8 — A1→E5 com SE→ENTÃO. Usa bloco lógico para desvio automático.
+  // Rota normal bloqueada por quadrados — SE Quadrado ENTÃO GirarD + frente extra.
+  // Rota manual: A1(N)→A3(2F), GD→C3(2F), GD(S)→C1(2F)? não chega E5.
+  // Rota: A1(N)→A5(4F), GD→B5(1F), GE(N)? dir atual L após GD... 
+  // Rota limpa: A1(N)→A4(3F), GD(L)→B4→C4→D4(3F), GE(N)→D5(1F), GD(L)→E5(1F)
+  { name:"A CURVA DUPLA", desc:"Suba, vire, avance pelo meio e chegue a E5 pela linha 5.",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:0},
+    hint:"F×3, GD, F×3, GE, F, GD, F",
+    obstacles:[{col:0,row:0,type:'square',color:'#ff4d6d'},{col:1,row:0,type:'circle',color:'#00bfff'},{col:2,row:0,type:'rect',color:'#f5c842'},{col:3,row:0,type:'square',color:'#b66dff'},{col:1,row:4,type:'circle',color:'#00bfff'},{col:2,row:4,type:'square',color:'#ff4d6d'},{col:3,row:4,type:'rect',color:'#f5c842'},{col:4,row:4,type:'circle',color:'#b66dff'},{col:1,row:2,type:'square',color:'#ff4d6d'},{col:2,row:2,type:'circle',color:'#00bfff'},{col:3,row:2,type:'rect',color:'#f5c842'}] },
+  // M9 — E3→A3 Oeste. Cruza linha 3. F×4
+  { name:"TRAVESSIA INVERTIDA", desc:"Cruze do lado direito para o esquerdo pela linha 3!",
+    start:{col:4,row:2}, startDir:3, end:{col:0,row:2},
+    hint:"F×4",
+    obstacles:[{col:4,row:1,type:'square',color:'#ff4d6d'},{col:4,row:3,type:'circle',color:'#00bfff'},{col:3,row:1,type:'rect',color:'#f5c842'},{col:3,row:3,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'circle',color:'#00bfff'},{col:2,row:3,type:'rect',color:'#f5c842'},{col:1,row:1,type:'square',color:'#b66dff'},{col:1,row:3,type:'circle',color:'#00bfff'}] },
+  // M10 — A3→E3 Norte+zigue. A3(N)→A5(2F), GD→C5(2F), GD(S)→C3(2F), GD(O)→? não. 
+  // A3(N)→A5(2F), GD(L)→C5(2F), GD(S)→C3(2F), GE(L)→E3(2F)
+  { name:"LABIRINTO MÉDIO", desc:"Navegue pelos corredores centrais até E3!",
+    start:{col:0,row:2}, startDir:0, end:{col:4,row:2},
+    hint:"F×2, GD, F×2, GD, F×2, GE, F×2",
+    obstacles:[{col:1,row:2,type:'square',color:'#ff4d6d'},{col:2,row:4,type:'square',color:'#b66dff'},{col:3,row:4,type:'circle',color:'#00bfff'},{col:4,row:4,type:'rect',color:'#f5c842'},{col:4,row:3,type:'square',color:'#ff4d6d'}] },
+];
 
-phases.push(
-  {
-    // FASE 7 — Descida Total: E5(Sul)→E1, GD(Oeste)→A1
-    name: "DESCIDA TOTAL",
-    desc: "O Georrobô está no topo direito! Desça pela col E e cruze a base até A1.",
-    start: {col:4, row:0}, startDir: 2,  // E5 olhando Sul
-    end:   {col:0, row:4},               // A1
-    obstacles: [
-      {col:3, row:1, type:'circle', color:'#00bfff'},  // D2
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3
-      {col:1, row:3, type:'rect',   color:'#f5c842'},  // B4
-      {col:3, row:3, type:'circle', color:'#b66dff'},  // D4
-      {col:1, row:1, type:'square', color:'#ff4d6d'},  // B2
-    ]
-  },
-  {
-    // FASE 8 — Diagonal Anti-Horária: A5(Leste)→E5, GD(Sul)→E1
-    name: "A DIAGONAL ANTI-HORÁRIA",
-    desc: "De A5 a E1! Cruze o topo até E5, depois desça toda a coluna E.",
-    start: {col:0, row:0}, startDir: 1,  // A5 olhando Leste
-    end:   {col:4, row:4},               // E1
-    obstacles: [
-      {col:1, row:1, type:'rect',   color:'#f5c842'},  // B2
-      {col:2, row:2, type:'circle', color:'#00bfff'},  // C3
-      {col:3, row:3, type:'square', color:'#ff4d6d'},  // D4
-      {col:1, row:3, type:'circle', color:'#b66dff'},  // B4
-      {col:3, row:1, type:'rect',   color:'#f5c842'},  // D2
-    ]
-  },
-  {
-    // FASE 9 — Rota Interior: B2(Norte)→B5, GD→D5, GD(Sul)→D4
-    name: "ROTA INTERIOR",
-    desc: "Partida no interior da matriz! Suba col B, desvie pela borda e chegue em D4.",
-    start: {col:1, row:3}, startDir: 0,  // B2 olhando Norte
-    end:   {col:3, row:1},               // D4
-    obstacles: [
-      {col:0, row:2, type:'square', color:'#ff4d6d'},  // A3
-      {col:0, row:1, type:'circle', color:'#00bfff'},  // A2 — fecha esquerda
-      {col:2, row:3, type:'rect',   color:'#f5c842'},  // C4
-      {col:2, row:2, type:'square', color:'#ff4d6d'},  // C3 — fecha meio
-      {col:4, row:2, type:'circle', color:'#b66dff'},  // E3
-      {col:4, row:3, type:'rect',   color:'#f5c842'},  // E4 — fecha direita
-    ]
-  },
-  {
-    // FASE 10 — Maestro: A Espiral (A1 Norte, rota em espiral)
-    name: "MAESTRO: A ESPIRAL",
-    desc: "Fase máxima! O algoritmo traça uma espiral pelo interior da matriz.",
-    start: {col:0, row:4}, startDir: 0,  // A1 olhando Norte
-    end:   {col:4, row:0},               // E5
-    obstacles: [
-      // Bloqueia linha base (exceto A1=start)
-      {col:1, row:4, type:'square', color:'#ff4d6d'},  // B1
-      {col:2, row:4, type:'circle', color:'#00bfff'},  // C1
-      {col:3, row:4, type:'rect',   color:'#f5c842'},  // D1
-      // Bloqueia linha 5 (exceto E5=end)
-      {col:0, row:0, type:'square', color:'#ff4d6d'},  // A5
-      {col:1, row:0, type:'circle', color:'#00bfff'},  // B5
-      {col:2, row:0, type:'rect',   color:'#f5c842'},  // C5
-      {col:3, row:0, type:'square', color:'#b66dff'},  // D5
-      // Bloqueia atalhos interiores (todos fora da rota espiral)
-      {col:1, row:2, type:'circle', color:'#00bfff'},  // B3
-      {col:1, row:3, type:'rect',   color:'#f5c842'},  // B2
-      {col:3, row:1, type:'square', color:'#ff4d6d'},  // D4
-      {col:3, row:2, type:'circle', color:'#b66dff'},  // D3
-    ]
-  }
-);
+// ── DIFÍCIL ──────────────────────────────────
+// Espirais complexas, labirintos densos, SE→ENTÃO obrigatório, rotas longas
+const phasesHard = [
+  // H1 — A1→E5 Espiral dupla ampla.
+  // A1(N)→A4(3F), GD(L)→D4(3F), GD(S)→D2(2F), GE(L)→E2(1F), GE(N)→E5(3F)
+  { name:"LABIRINTO DO CIRCUITO", desc:"Espiral densa! Percorra o interior com precisão.",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:0},
+    hint:"F×3, GD, F×3, GD, F×2, GE, F, GE, F×3",
+    obstacles:[{col:1,row:4,type:'square',color:'#ff4d6d'},{col:2,row:4,type:'circle',color:'#00bfff'},{col:3,row:4,type:'rect',color:'#f5c842'},{col:4,row:4,type:'square',color:'#b66dff'},{col:0,row:0,type:'circle',color:'#00bfff'},{col:1,row:0,type:'square',color:'#ff4d6d'},{col:2,row:0,type:'rect',color:'#f5c842'},{col:3,row:0,type:'circle',color:'#b66dff'},{col:1,row:3,type:'rect',color:'#f5c842'},{col:1,row:2,type:'square',color:'#ff4d6d'},{col:2,row:3,type:'square',color:'#ff4d6d'}] },
+  // H2 — A5→E1. Leste→A5→E5(4F), Sul→E5→E2(3F), Oeste→E2→B2(3F), Sul→B2→B1(1F), Leste→B1→E1(3F)
+  { name:"O LABIRINTO DOS MESTRES", desc:"Percurso longo e denso. Planeje cada giro!",
+    start:{col:0,row:0}, startDir:1, end:{col:4,row:4},
+    hint:"F×4, GD, F×3, GD, F×3, GD, F, GE, F×3",
+    obstacles:[{col:1,row:1,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'circle',color:'#00bfff'},{col:3,row:1,type:'rect',color:'#f5c842'},{col:1,row:2,type:'rect',color:'#f5c842'},{col:2,row:2,type:'square',color:'#b66dff'},{col:3,row:2,type:'circle',color:'#00bfff'},{col:0,row:2,type:'square',color:'#ff4d6d'},{col:0,row:3,type:'circle',color:'#00bfff'},{col:0,row:4,type:'rect',color:'#f5c842'},{col:2,row:3,type:'square',color:'#ff4d6d'},{col:3,row:3,type:'rect',color:'#f5c842'}] },
+  // H3 — C3→C3? Não. B1→D5. Norte na col B até B5, leste até D5.
+  // B1(N)→B5(4F), GD(L)→D5(2F). Simples mas com interior bloqueado forçando col B.
+  { name:"CORREDOR MINADO", desc:"O interior está minado! Suba pela col B e avance até D5.",
+    start:{col:1,row:4}, startDir:0, end:{col:3,row:0},
+    hint:"F×4, GD, F×2",
+    obstacles:[{col:0,row:3,type:'circle',color:'#00bfff'},{col:0,row:2,type:'square',color:'#ff4d6d'},{col:0,row:1,type:'rect',color:'#f5c842'},{col:2,row:3,type:'rect',color:'#f5c842'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'circle',color:'#00bfff'},{col:3,row:3,type:'square',color:'#b66dff'},{col:3,row:2,type:'circle',color:'#00bfff'},{col:3,row:1,type:'rect',color:'#f5c842'},{col:4,row:3,type:'square',color:'#ff4d6d'},{col:4,row:2,type:'rect',color:'#f5c842'},{col:4,row:1,type:'circle',color:'#b66dff'}] },
+  // H4 — A3→E3 via espiral longa.
+  // A3(N)→A5(2F), GD(L)→E5(4F), GD(S)→E3(2F). Linha 5 e col E livres.
+  { name:"A ALÇA EXTERNA", desc:"Percorra a borda superior e a coluna E para chegar em E3!",
+    start:{col:0,row:2}, startDir:0, end:{col:4,row:2},
+    hint:"F×2, GD, F×4, GD, F×2",
+    obstacles:[{col:1,row:2,type:'square',color:'#ff4d6d'},{col:2,row:2,type:'circle',color:'#00bfff'},{col:3,row:2,type:'rect',color:'#f5c842'},{col:1,row:1,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'rect',color:'#f5c842'},{col:3,row:1,type:'circle',color:'#b66dff'},{col:0,row:3,type:'square',color:'#ff4d6d'},{col:1,row:3,type:'rect',color:'#f5c842'},{col:2,row:3,type:'circle',color:'#00bfff'},{col:3,row:3,type:'square',color:'#b66dff'}] },
+  // H5 — A1→E5 via borda direita subindo.
+  // A1(L)→E1(4F), GE(N)→E5(4F). Mas interior e diagonal bloqueados.
+  { name:"FORTALEZA DO CIRCUITO", desc:"Interior completamente bloqueado! Use as bordas.",
+    start:{col:0,row:4}, startDir:1, end:{col:4,row:0},
+    hint:"F×4, GE, F×4",
+    obstacles:[{col:1,row:3,type:'circle',color:'#00bfff'},{col:2,row:3,type:'square',color:'#ff4d6d'},{col:3,row:3,type:'rect',color:'#f5c842'},{col:1,row:2,type:'rect',color:'#f5c842'},{col:2,row:2,type:'circle',color:'#b66dff'},{col:3,row:2,type:'square',color:'#ff4d6d'},{col:1,row:1,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'rect',color:'#f5c842'},{col:3,row:1,type:'circle',color:'#00bfff'},{col:0,row:3,type:'square',color:'#b66dff'},{col:0,row:2,type:'circle',color:'#00bfff'},{col:0,row:1,type:'rect',color:'#f5c842'}] },
+  // H6 — B5→D1 Sul+Leste. B5(S)→B3(2F), GE(L)→D3(2F), GE(S)→D1(2F).
+  { name:"O CARACOL", desc:"Deça em espiral do centro superior até D1.",
+    start:{col:1,row:0}, startDir:2, end:{col:3,row:4},
+    hint:"F×2, GE, F×2, GE, F×2",
+    obstacles:[{col:0,row:0,type:'square',color:'#ff4d6d'},{col:2,row:0,type:'circle',color:'#00bfff'},{col:4,row:0,type:'square',color:'#b66dff'},{col:2,row:1,type:'square',color:'#ff4d6d'},{col:0,row:3,type:'rect',color:'#f5c842'},{col:1,row:4,type:'circle',color:'#00bfff'},{col:2,row:4,type:'square',color:'#ff4d6d'},{col:4,row:4,type:'rect',color:'#b66dff'},{col:4,row:3,type:'circle',color:'#00bfff'},{col:4,row:2,type:'square',color:'#ff4d6d'}] },
+  // H7 — A1→E5 Espiral nível 2: borda completa em L duplo
+  // A1(N)→A5(4F), GD(L)→E5(4F). Borda esquerda+topo. Interior bloqueado.
+  { name:"BORDA DUPLA", desc:"Percorra a borda esquerda e o topo completos!",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:0},
+    hint:"F×4, GD, F×4",
+    obstacles:[{col:1,row:4,type:'square',color:'#ff4d6d'},{col:2,row:4,type:'circle',color:'#00bfff'},{col:3,row:4,type:'rect',color:'#f5c842'},{col:1,row:3,type:'circle',color:'#00bfff'},{col:2,row:3,type:'square',color:'#ff4d6d'},{col:3,row:3,type:'rect',color:'#f5c842'},{col:1,row:2,type:'rect',color:'#f5c842'},{col:2,row:2,type:'circle',color:'#b66dff'},{col:3,row:2,type:'square',color:'#ff4d6d'},{col:1,row:1,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'rect',color:'#f5c842'},{col:3,row:1,type:'circle',color:'#00bfff'},{col:4,row:4,type:'square',color:'#b66dff'},{col:4,row:3,type:'circle',color:'#00bfff'},{col:4,row:2,type:'rect',color:'#f5c842'},{col:4,row:1,type:'square',color:'#ff4d6d'}] },
+  // H8 — C1→C5. A coluna C toda bloqueada. Desvio pela col A.
+  // C1(O→vira N? dir L inicial)→ dir inicial Sul. C1(S)→bloqueado. 
+  // C1(N) dir: C1→C2(bloqueado). Usar dir L: C1(L)→... 
+  // Rota: C1(N)→ bloq. C1(dir L, precisa girar): GE→N? não.
+  // Rota válida: C1(dir 0=N)→bloq. GD(L)→D1→E1(2F), GE(N)→E5(4F), GE(O)→D5→C5(2F)
+  { name:"DETOUR TOTAL", desc:"A coluna C está bloqueada! Desvie pela coluna E.",
+    start:{col:2,row:4}, startDir:0, end:{col:2,row:0},
+    hint:"GD, F×2, GE, F×4, GE, F×2",
+    obstacles:[{col:2,row:3,type:'square',color:'#ff4d6d'},{col:2,row:2,type:'circle',color:'#00bfff'},{col:2,row:1,type:'rect',color:'#f5c842'},{col:0,row:3,type:'circle',color:'#00bfff'},{col:0,row:2,type:'square',color:'#ff4d6d'},{col:0,row:1,type:'rect',color:'#f5c842'},{col:1,row:3,type:'rect',color:'#f5c842'},{col:1,row:2,type:'circle',color:'#b66dff'},{col:1,row:1,type:'square',color:'#ff4d6d'},{col:3,row:3,type:'circle',color:'#00bfff'},{col:3,row:2,type:'square',color:'#ff4d6d'},{col:3,row:1,type:'rect',color:'#f5c842'}] },
+  // H9 — A1→E5 via espiral máxima inversa (sentido anti-horário)
+  // A1(L)→E1(4F), GE(N)→E4(3F), GE(O)→B4(3F), GE(S)→B2(2F), GD(L)→D2(2F), GE(N)→D5? GE→O→C5? 
+  // Mais limpo: A1(L)→E1(4F), GE(N)→E3(2F), GE(O)→C3(2F), GE(S)→C1(2F)? meta E5.
+  // Rota alternativa: A1(L)→D1(3F), GE(N)→D5(4F), GD(L)→E5(1F)
+  { name:"ESPIRAL ANTI-HORÁRIA", desc:"Percorra o caminho em espiral no sentido anti-horário!",
+    start:{col:0,row:4}, startDir:1, end:{col:4,row:0},
+    hint:"F×3, GE, F×4, GD, F",
+    obstacles:[{col:0,row:3,type:'square',color:'#ff4d6d'},{col:0,row:2,type:'circle',color:'#00bfff'},{col:0,row:1,type:'rect',color:'#f5c842'},{col:0,row:0,type:'square',color:'#b66dff'},{col:1,row:3,type:'square',color:'#ff4d6d'},{col:2,row:3,type:'circle',color:'#00bfff'},{col:1,row:2,type:'circle',color:'#b66dff'},{col:2,row:2,type:'square',color:'#ff4d6d'},{col:1,row:1,type:'square',color:'#ff4d6d'},{col:2,row:1,type:'rect',color:'#f5c842'}] },
+  // H10 — CHEFE FINAL. A1→E5. Rota só existe pela borda esquerda+topo (como F1) mas com densidade máxima.
+  // Exige SE→ENTÃO para detectar obstáculos na linha 5 e girar.
+  // Rota: A1(N)→A5(4F), GD(L)→ SE Círculo→GD(S)→contorna→sobe col E.
+  // Rota manual garantida: A1(N)→A5(4F), GD→B5(1F), GD(S)→B4(1F), GE(L)→E4(3F), GE(N)→E5(1F)
+  { name:"CHEFE FINAL: NÚCLEO", desc:"A fase mais densa! Toda saída foi bloqueada. Encontre o único caminho.",
+    start:{col:0,row:4}, startDir:0, end:{col:4,row:0},
+    hint:"F×4, GD, F, GD, F, GE, F×3, GE, F",
+    obstacles:[{col:1,row:4,type:'square',color:'#ff4d6d'},{col:2,row:4,type:'circle',color:'#00bfff'},{col:3,row:4,type:'rect',color:'#f5c842'},{col:4,row:4,type:'square',color:'#b66dff'},{col:4,row:3,type:'circle',color:'#00bfff'},{col:4,row:2,type:'square',color:'#ff4d6d'},{col:2,row:0,type:'circle',color:'#00bfff'},{col:3,row:0,type:'square',color:'#ff4d6d'},{col:1,row:3,type:'circle',color:'#b66dff'},{col:2,row:3,type:'square',color:'#ff4d6d'},{col:3,row:3,type:'rect',color:'#f5c842'},{col:1,row:2,type:'square',color:'#ff4d6d'},{col:2,row:2,type:'circle',color:'#00bfff'},{col:3,row:2,type:'square',color:'#b66dff'}] },
+];
 
-function getPhase() { return phases[currentPhase % phases.length]; }
+const ALL_PHASES = { easy: phasesEasy, medium: phasesMedium, hard: phasesHard };
+
+function getPhaseList() { return ALL_PHASES[difficulty]; }
+function getPhase()     { const list = getPhaseList(); return list[currentPhase % list.length]; }
+
+// ── LEVEL SELECT ─────────────────────────────
+function showLevelSelect() {
+  if (isExecuting) return;
+  document.getElementById('level-select').classList.remove('hidden');
+}
+function startLevel(diff) {
+  difficulty   = diff;
+  currentPhase = 0;
+  score        = 0;
+  document.getElementById('score-disp').textContent = '0';
+  document.getElementById('level-select').classList.add('hidden');
+  document.getElementById('levelcomplete-overlay').classList.add('hidden');
+  // update badge
+  const badge = document.getElementById('diff-badge');
+  badge.className = 'diff-badge ' + diff;  // handled by class; use id attr
+  badge.setAttribute('class', diff);
+  badge.id = 'diff-badge';
+  badge.textContent = DIFF_LABEL[diff];
+  badge.style.color = DIFF_COLOR[diff];
+  badge.style.borderColor = DIFF_COLOR[diff];
+  badge.style.background  = DIFF_COLOR[diff] + '15';
+  loadPhase();
+}
+function goNextLevel() {
+  document.getElementById('levelcomplete-overlay').classList.add('hidden');
+  const order = ['easy','medium','hard'];
+  const next  = order[order.indexOf(difficulty) + 1];
+  if (next) startLevel(next);
+  else      showLevelSelect();
+}
 
 // ── AUDIO SYSTEM (Web Audio API) ─────────────
 let audioCtx = null;
-
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return audioCtx;
 }
-
 function playTone(type, opts = {}) {
   try {
-    const ctx = getAudioCtx();
-    const { freq = 440, freq2, duration = 0.18, volume = 0.28, wave = 'sine', delay = 0 } = opts;
-
-    const startAt = ctx.currentTime + delay;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const dist = ctx.createWaveShaper();
-
-    // Gentle distortion for robot character
+    const ac = getAudioCtx();
+    const { freq=440, freq2, duration=0.18, volume=0.28, wave='sine', delay=0 } = opts;
+    const t0  = ac.currentTime + delay;
+    const osc = ac.createOscillator();
+    const gain= ac.createGain();
+    const dist= ac.createWaveShaper();
     const curve = new Float32Array(256);
-    for (let i = 0; i < 256; i++) {
-      const x = (i * 2) / 256 - 1;
-      curve[i] = (Math.PI + (opts.distortion || 0)) * x / (Math.PI + (opts.distortion || 0) * Math.abs(x));
-    }
+    for (let i=0;i<256;i++){const x=(i*2)/256-1;curve[i]=(Math.PI+(opts.distortion||0))*x/(Math.PI+(opts.distortion||0)*Math.abs(x));}
     dist.curve = curve;
-
-    osc.connect(dist);
-    dist.connect(gain);
-    gain.connect(ctx.destination);
-
+    osc.connect(dist); dist.connect(gain); gain.connect(ac.destination);
     osc.type = wave;
-    osc.frequency.setValueAtTime(freq, startAt);
-    if (freq2) osc.frequency.linearRampToValueAtTime(freq2, startAt + duration);
-
-    gain.gain.setValueAtTime(0, startAt);
-    gain.gain.linearRampToValueAtTime(volume, startAt + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
-
-    osc.start(startAt);
-    osc.stop(startAt + duration + 0.05);
-  } catch(e) {}
+    osc.frequency.setValueAtTime(freq, t0);
+    if (freq2) osc.frequency.linearRampToValueAtTime(freq2, t0+duration);
+    gain.gain.setValueAtTime(0,t0);
+    gain.gain.linearRampToValueAtTime(volume, t0+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+duration);
+    osc.start(t0); osc.stop(t0+duration+0.05);
+  } catch(e){}
 }
-
-function playNoise(duration = 0.08, volume = 0.15, delay = 0) {
+function playNoise(duration=0.08, volume=0.15, delay=0) {
   try {
-    const ctx = getAudioCtx();
-    const startAt = ctx.currentTime + delay;
-    const bufSize = ctx.sampleRate * duration;
-    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 800;
-    filter.Q.value = 0.5;
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(volume, startAt);
-    gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
-    src.start(startAt);
-    src.stop(startAt + duration + 0.02);
-  } catch(e) {}
+    const ac=getAudioCtx(); const t0=ac.currentTime+delay;
+    const buf=ac.createBuffer(1,ac.sampleRate*duration,ac.sampleRate);
+    const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    const src=ac.createBufferSource(); src.buffer=buf;
+    const gain=ac.createGain(); const filt=ac.createBiquadFilter();
+    filt.type='bandpass'; filt.frequency.value=800; filt.Q.value=0.5;
+    src.connect(filt); filt.connect(gain); gain.connect(ac.destination);
+    gain.gain.setValueAtTime(volume,t0); gain.gain.exponentialRampToValueAtTime(0.001,t0+duration);
+    src.start(t0); src.stop(t0+duration+0.02);
+  } catch(e){}
 }
-
-// Som: movimento do robô (passo eletrônico)
-function soundMove() {
-  playTone('move', { freq: 330, freq2: 440, duration: 0.12, volume: 0.22, wave: 'square', distortion: 20 });
-  playNoise(0.04, 0.08, 0.08);
-}
-
-// Som: girar (clique mecânico + sweep)
-function soundTurn() {
-  playTone('turn', { freq: 520, freq2: 380, duration: 0.15, volume: 0.2, wave: 'sawtooth', distortion: 30 });
-  playNoise(0.03, 0.1, 0);
-}
-
-// Som: colisão / erro
-function soundError() {
-  playTone('err1', { freq: 180, freq2: 120, duration: 0.25, volume: 0.35, wave: 'sawtooth', distortion: 80 });
-  playTone('err2', { freq: 140, freq2: 80,  duration: 0.3,  volume: 0.3,  wave: 'square',   distortion: 80, delay: 0.1 });
-  playNoise(0.12, 0.2, 0.05);
-}
-
-// Som: bateria ligada/desligada
-function soundBattery(on) {
-  if (on) {
-    playTone('bat', { freq: 440, freq2: 880, duration: 0.2, volume: 0.25, wave: 'sine' });
-  } else {
-    playTone('bat', { freq: 440, freq2: 220, duration: 0.25, volume: 0.25, wave: 'sine' });
-  }
-}
-
-// Som: vitória (fanfarra eletrônica em cascata)
+function soundMove()  { playTone('m',{freq:330,freq2:440,duration:0.12,volume:0.22,wave:'square',distortion:20}); playNoise(0.04,0.08,0.08); }
+function soundTurn()  { playTone('t',{freq:520,freq2:380,duration:0.15,volume:0.2,wave:'sawtooth',distortion:30}); playNoise(0.03,0.1,0); }
+function soundError() { playTone('e1',{freq:180,freq2:120,duration:0.25,volume:0.35,wave:'sawtooth',distortion:80}); playTone('e2',{freq:140,freq2:80,duration:0.3,volume:0.3,wave:'square',distortion:80,delay:0.1}); playNoise(0.12,0.2,0.05); }
+function soundBattery(on) { playTone('b',{freq:440,freq2:on?880:220,duration:0.2,volume:0.25,wave:'sine'}); }
 function soundWin() {
-  const notes = [523, 659, 784, 1047];
-  notes.forEach((freq, i) => {
-    playTone('win', { freq, freq2: freq * 1.02, duration: 0.22, volume: 0.3, wave: 'square', distortion: 15, delay: i * 0.13 });
-  });
-  // Acorde final
-  [523, 659, 784].forEach((f, i) => {
-    playTone('winChord', { freq: f, duration: 0.6, volume: 0.2, wave: 'sine', delay: 0.55 + i * 0.01 });
-  });
-  // Ruído de celebração
-  [0.52, 0.65, 0.78].forEach(d => playNoise(0.06, 0.12, d));
+  [523,659,784,1047].forEach((f,i)=>playTone('w',{freq:f,freq2:f*1.02,duration:0.22,volume:0.3,wave:'square',distortion:15,delay:i*0.13}));
+  [523,659,784].forEach((f,i)=>playTone('wc',{freq:f,duration:0.6,volume:0.2,wave:'sine',delay:0.55+i*0.01}));
+  [0.52,0.65,0.78].forEach(d=>playNoise(0.06,0.12,d));
+}
+function soundLevelComplete() {
+  // Fanfarra maior — 8 notas ascendentes
+  const seq=[392,440,523,587,659,784,880,1047];
+  seq.forEach((f,i)=>playTone('lc',{freq:f,freq2:f*1.01,duration:0.18,volume:0.32,wave:'square',distortion:10,delay:i*0.1}));
+  [523,659,784,1047].forEach((f,i)=>playTone('lca',{freq:f,duration:0.8,volume:0.22,wave:'sine',delay:0.85+i*0.01}));
+  [0.8,0.95,1.1,1.25].forEach(d=>playNoise(0.08,0.15,d));
 }
 
 // ── CANVAS SIZING ────────────────────────────
-function resizeCanvas() {
-  const wrap = document.getElementById('canvas-wrap');
-  const w = wrap.clientWidth - 24;
-  canvas.style.width = w + 'px';
-}
+function resizeCanvas() { const w=document.getElementById('canvas-wrap').clientWidth-24; canvas.style.width=w+'px'; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-
 function getCellSize() {
-  const W = canvas.width, H = canvas.height;
-  const gridW = W * 0.75, gridH = H * 0.75;
-  return { w: gridW / COLS, h: gridH / ROWS, ox: W * 0.13, oy: H * 0.12 };
+  const W=canvas.width,H=canvas.height,gW=W*0.75,gH=H*0.75;
+  return {w:gW/COLS, h:gH/ROWS, ox:W*0.13, oy:H*0.12};
 }
 
-// ── DRAW FUNCTIONS ───────────────────────────
+// ── DRAW ─────────────────────────────────────
 function drawGrid() {
-  const {w, h, ox, oy} = getCellSize();
-  const totalW = w * COLS, totalH = h * ROWS;
+  const {w,h,ox,oy}=getCellSize();
+  const tW=w*COLS, tH=h*ROWS;
+  ctx.fillStyle='#070c14';
+  ctx.beginPath(); ctx.roundRect(ox-4,oy-4,tW+8,tH+8,8); ctx.fill();
 
-  // Grid background
-  ctx.fillStyle = '#070c14';
-  ctx.beginPath();
-  ctx.roundRect(ox - 4, oy - 4, totalW + 8, totalH + 8, 8);
-  ctx.fill();
-
-  // Circuit traces in background
-  circuitAnim = (circuitAnim + 0.5) % 100;
-  ctx.save();
-  ctx.globalAlpha = 0.12;
-  for (let i = 0; i < COLS; i++) {
-    for (let j = 0; j < ROWS; j++) {
-      const cx = ox + i * w + w / 2, cy = oy + j * h + h / 2;
-      const t = (circuitAnim + i * 20 + j * 15) % 100;
-      ctx.strokeStyle = t < 50 ? '#00f5ff' : '#7cff6b';
-      ctx.lineWidth = 1;
-      if (i < COLS - 1) {
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + w * 0.3, cy);
-        ctx.stroke();
-      }
-    }
+  circuitAnim=(circuitAnim+0.5)%100;
+  ctx.save(); ctx.globalAlpha=0.12;
+  for(let i=0;i<COLS;i++) for(let j=0;j<ROWS;j++){
+    const cx=ox+i*w+w/2,cy=oy+j*h+h/2,t=(circuitAnim+i*20+j*15)%100;
+    ctx.strokeStyle=t<50?'#00f5ff':'#7cff6b'; ctx.lineWidth=1;
+    if(i<COLS-1){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+w*0.3,cy);ctx.stroke();}
   }
   ctx.restore();
 
-  // Cells
-  const phase = getPhase();
-  for (let c = 0; c < COLS; c++) {
-    for (let r = 0; r < ROWS; r++) {
-      const x = ox + c * w, y = oy + r * h;
-      const isStart = phase.start.col === c && phase.start.row === r;
-      const isEnd   = phase.end.col   === c && phase.end.row   === r;
-
-      // Cell fill
-      ctx.fillStyle = isEnd ? 'rgba(0,245,255,0.08)' : isStart ? 'rgba(124,255,107,0.06)' : '#0d1b2e';
-      ctx.beginPath();
-      ctx.roundRect(x + 2, y + 2, w - 4, h - 4, 6);
-      ctx.fill();
-
-      // Cell border
-      ctx.strokeStyle = isEnd ? '#00f5ff' : isStart ? '#7cff6b' : '#1e3a5f';
-      ctx.lineWidth = isEnd || isStart ? 2 : 1;
-      ctx.stroke();
-
-      // Start marker
-      if (isStart) {
-        ctx.fillStyle = '#7cff6b';
-        ctx.globalAlpha = 0.3;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = '#7cff6b';
-        ctx.font = `bold ${w * 0.22}px Orbitron`;
-        ctx.textAlign = 'center';
-        ctx.fillText('START', x + w/2, y + h - 8);
-      }
-
-      // End marker (pulsing)
-      if (isEnd) {
-        const pulse = Math.sin(Date.now() / 300) * 0.3 + 0.7;
-        ctx.fillStyle = `rgba(0,245,255,${pulse * 0.25})`;
-        ctx.beginPath();
-        ctx.roundRect(x + 2, y + 2, w - 4, h - 4, 6);
-        ctx.fill();
-        ctx.fillStyle = '#00f5ff';
-        ctx.font = `bold ${w * 0.22}px Orbitron`;
-        ctx.textAlign = 'center';
-        ctx.fillText('🎯', x + w/2, y + h/2 + 5);
-        ctx.font = `${w * 0.16}px Orbitron`;
-        ctx.fillText('META', x + w/2, y + h - 8);
-      }
+  const phase=getPhase();
+  const diffC=DIFF_COLOR[difficulty];
+  for(let c=0;c<COLS;c++) for(let r=0;r<ROWS;r++){
+    const x=ox+c*w,y=oy+r*h;
+    const isStart=phase.start.col===c&&phase.start.row===r;
+    const isEnd=phase.end.col===c&&phase.end.row===r;
+    ctx.fillStyle=isEnd?'rgba(0,245,255,0.08)':isStart?'rgba(124,255,107,0.06)':'#0d1b2e';
+    ctx.beginPath(); ctx.roundRect(x+2,y+2,w-4,h-4,6); ctx.fill();
+    ctx.strokeStyle=isEnd?'#00f5ff':isStart?'#7cff6b':'#1e3a5f';
+    ctx.lineWidth=isEnd||isStart?2:1; ctx.stroke();
+    if(isStart){
+      ctx.fillStyle='#7cff6b'; ctx.globalAlpha=0.3; ctx.fill(); ctx.globalAlpha=1;
+      ctx.fillStyle='#7cff6b'; ctx.font=`bold ${w*0.2}px Orbitron`; ctx.textAlign='center';
+      ctx.fillText('START',x+w/2,y+h-8);
+    }
+    if(isEnd){
+      const pulse=Math.sin(Date.now()/300)*0.3+0.7;
+      ctx.fillStyle=`rgba(0,245,255,${pulse*0.25})`;
+      ctx.beginPath(); ctx.roundRect(x+2,y+2,w-4,h-4,6); ctx.fill();
+      ctx.fillStyle='#00f5ff'; ctx.font=`bold ${w*0.22}px Orbitron`; ctx.textAlign='center';
+      ctx.fillText('🎯',x+w/2,y+h/2+5);
+      ctx.font=`${w*0.16}px Orbitron`; ctx.fillText('META',x+w/2,y+h-8);
     }
   }
-
-  // Column labels (A-E) — top and bottom
-  ctx.fillStyle = '#00f5ff';
-  ctx.font = `bold ${w * 0.22}px Orbitron`;
-  ctx.textAlign = 'center';
-  for (let c = 0; c < COLS; c++) {
-    const x = ox + c * w + w / 2;
-    ctx.fillText(COLS_LABELS[c], x, oy - 8);
-    ctx.fillText(COLS_LABELS[c], x, oy + totalH + 20);
-  }
-
-  // Row labels (1-5) — left and right
-  ctx.textAlign = 'right';
-  for (let r = 0; r < ROWS; r++) {
-    const y = oy + r * h + h / 2 + 6;
-    ctx.fillText(ROWS - r, ox - 8, y);
-    ctx.textAlign = 'left';
-    ctx.fillText(ROWS - r, ox + totalW + 8, y);
-    ctx.textAlign = 'right';
-  }
+  ctx.fillStyle='#00f5ff'; ctx.font=`bold ${w*0.22}px Orbitron`; ctx.textAlign='center';
+  for(let c=0;c<COLS;c++){const x=ox+c*w+w/2;ctx.fillText(COLS_LABELS[c],x,oy-8);ctx.fillText(COLS_LABELS[c],x,oy+tH+20);}
+  ctx.textAlign='right';
+  for(let r=0;r<ROWS;r++){const y=oy+r*h+h/2+6;ctx.fillText(ROWS-r,ox-8,y);ctx.textAlign='left';ctx.fillText(ROWS-r,ox+tW+8,y);ctx.textAlign='right';}
 }
 
 function drawObstacles() {
-  const {w, h, ox, oy} = getCellSize();
-  const phase = getPhase();
-  phase.obstacles.forEach(ob => {
-    const x = ox + ob.col * w + w / 2;
-    const y = oy + ob.row * h + h / 2;
-    ctx.save();
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = ob.color;
-    ctx.fillStyle = ob.color;
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 1.5;
-
-    if (ob.type === 'circle') {
-      ctx.beginPath();
-      ctx.arc(x, y, w * 0.28, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    } else if (ob.type === 'square') {
-      const s = w * 0.42;
-      ctx.beginPath();
-      ctx.roundRect(x - s/2, y - s/2, s, s, 4);
-      ctx.fill();
-      ctx.stroke();
-    } else { // rect
-      ctx.beginPath();
-      ctx.roundRect(x - w*0.32, y - h*0.2, w*0.64, h*0.4, 4);
-      ctx.fill();
-      ctx.stroke();
-    }
+  const {w,h,ox,oy}=getCellSize();
+  getPhase().obstacles.forEach(ob=>{
+    const x=ox+ob.col*w+w/2, y=oy+ob.row*h+h/2;
+    ctx.save(); ctx.shadowBlur=12; ctx.shadowColor=ob.color; ctx.fillStyle=ob.color;
+    ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1.5;
+    if(ob.type==='circle'){ctx.beginPath();ctx.arc(x,y,w*0.28,0,Math.PI*2);ctx.fill();ctx.stroke();}
+    else if(ob.type==='square'){const s=w*0.42;ctx.beginPath();ctx.roundRect(x-s/2,y-s/2,s,s,4);ctx.fill();ctx.stroke();}
+    else{ctx.beginPath();ctx.roundRect(x-w*0.32,y-h*0.2,w*0.64,h*0.4,4);ctx.fill();ctx.stroke();}
     ctx.restore();
   });
 }
 
 function drawRobot() {
-  const {w, h, ox, oy} = getCellSize();
-  const rx = ox + robotPos.col * w + w / 2;
-  const ry = oy + robotPos.row * h + h / 2;
-
-  ctx.save();
-  ctx.translate(rx, ry);
-  ctx.rotate((robotDir * 90) * Math.PI / 180);
-
-  const s = Math.min(w, h) * 0.38;
-
-  // Glow
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = '#00f5ff';
-
+  const {w,h,ox,oy}=getCellSize();
+  const rx=ox+robotPos.col*w+w/2, ry=oy+robotPos.row*h+h/2;
+  ctx.save(); ctx.translate(rx,ry); ctx.rotate(robotDir*Math.PI/2);
+  const s=Math.min(w,h)*0.38;
+  ctx.shadowBlur=20; ctx.shadowColor='#00f5ff';
   // Body
-  ctx.fillStyle = '#1a3a5c';
-  ctx.strokeStyle = '#00f5ff';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.55, -s * 0.35, s * 1.1, s * 0.9, 6);
-  ctx.fill();
-  ctx.stroke();
-
-  // Circuit lines on body
-  ctx.strokeStyle = 'rgba(0,245,255,0.5)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(-s*0.3, -s*0.1);
-  ctx.lineTo(s*0.1, -s*0.1);
-  ctx.lineTo(s*0.1, s*0.15);
-  ctx.lineTo(s*0.3, s*0.15);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(-s*0.3, s*0.1);
-  ctx.lineTo(-s*0.05, s*0.1);
-  ctx.stroke();
-  ctx.fillStyle = '#00f5ff';
-  ctx.beginPath();
-  ctx.arc(s*0.3, s*0.15, 3, 0, Math.PI*2);
-  ctx.arc(-s*0.05, s*0.1, 3, 0, Math.PI*2);
-  ctx.fill();
-
+  ctx.fillStyle='#1a3a5c'; ctx.strokeStyle='#00f5ff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-s*0.55,-s*0.35,s*1.1,s*0.9,6); ctx.fill(); ctx.stroke();
+  // Circuit lines
+  ctx.strokeStyle='rgba(0,245,255,0.5)'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(-s*0.3,-s*0.1);ctx.lineTo(s*0.1,-s*0.1);ctx.lineTo(s*0.1,s*0.15);ctx.lineTo(s*0.3,s*0.15);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-s*0.3,s*0.1);ctx.lineTo(-s*0.05,s*0.1);ctx.stroke();
+  ctx.fillStyle='#00f5ff';ctx.beginPath();ctx.arc(s*0.3,s*0.15,3,0,Math.PI*2);ctx.arc(-s*0.05,s*0.1,3,0,Math.PI*2);ctx.fill();
   // Head
-  ctx.fillStyle = '#0d2a44';
-  ctx.strokeStyle = '#00f5ff';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.38, -s * 0.85, s * 0.76, s * 0.5, 6);
-  ctx.fill();
-  ctx.stroke();
-
-  // Eyes (glowing)
-  const eyePulse = Math.sin(Date.now() / 400) * 0.3 + 0.7;
-  ctx.shadowBlur = 12;
-  ctx.shadowColor = '#00f5ff';
-  ctx.fillStyle = `rgba(0,245,255,${eyePulse})`;
-  ctx.beginPath();
-  ctx.arc(-s * 0.15, -s * 0.63, s * 0.1, 0, Math.PI * 2);
-  ctx.arc( s * 0.15, -s * 0.63, s * 0.1, 0, Math.PI * 2);
-  ctx.fill();
-
+  ctx.fillStyle='#0d2a44'; ctx.strokeStyle='#00f5ff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-s*0.38,-s*0.85,s*0.76,s*0.5,6); ctx.fill(); ctx.stroke();
+  // Eyes
+  const ep=Math.sin(Date.now()/400)*0.3+0.7;
+  ctx.shadowBlur=12; ctx.shadowColor='#00f5ff'; ctx.fillStyle=`rgba(0,245,255,${ep})`;
+  ctx.beginPath();ctx.arc(-s*0.15,-s*0.63,s*0.1,0,Math.PI*2);ctx.arc(s*0.15,-s*0.63,s*0.1,0,Math.PI*2);ctx.fill();
   // Smile
-  ctx.strokeStyle = '#7cff6b';
-  ctx.lineWidth = 1.5;
-  ctx.shadowColor = '#7cff6b';
-  ctx.beginPath();
-  ctx.arc(0, -s * 0.48, s * 0.15, 0, Math.PI);
-  ctx.stroke();
-
+  ctx.strokeStyle='#7cff6b'; ctx.lineWidth=1.5; ctx.shadowColor='#7cff6b';
+  ctx.beginPath();ctx.arc(0,-s*0.48,s*0.15,0,Math.PI);ctx.stroke();
   // Arms
-  ctx.fillStyle = '#1a3a5c';
-  ctx.strokeStyle = '#00f5ff';
-  ctx.lineWidth = 1.5;
-  ctx.shadowBlur = 8;
-  // Left arm
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.8, -s * 0.25, s * 0.22, s * 0.6, 4);
-  ctx.fill();
-  ctx.stroke();
-  // Right arm
-  ctx.beginPath();
-  ctx.roundRect(s * 0.58, -s * 0.25, s * 0.22, s * 0.6, 4);
-  ctx.fill();
-  ctx.stroke();
-
+  ctx.fillStyle='#1a3a5c'; ctx.strokeStyle='#00f5ff'; ctx.lineWidth=1.5; ctx.shadowBlur=8;
+  ctx.beginPath();ctx.roundRect(-s*0.8,-s*0.25,s*0.22,s*0.6,4);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.roundRect(s*0.58,-s*0.25,s*0.22,s*0.6,4);ctx.fill();ctx.stroke();
   // Legs
-  ctx.beginPath();
-  ctx.roundRect(-s * 0.38, s * 0.55, s * 0.3, s * 0.45, 4);
-  ctx.fill();
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.roundRect(s * 0.08, s * 0.55, s * 0.3, s * 0.45, 4);
-  ctx.fill();
-  ctx.stroke();
-
+  ctx.beginPath();ctx.roundRect(-s*0.38,s*0.55,s*0.3,s*0.45,4);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.roundRect(s*0.08,s*0.55,s*0.3,s*0.45,4);ctx.fill();ctx.stroke();
   // Antenna
-  ctx.strokeStyle = '#7cff6b';
-  ctx.lineWidth = 2;
-  ctx.shadowColor = '#7cff6b';
-  ctx.shadowBlur = 10;
-  ctx.beginPath();
-  ctx.moveTo(0, -s * 0.85);
-  ctx.lineTo(0, -s * 1.15);
-  ctx.stroke();
-  ctx.fillStyle = '#7cff6b';
-  ctx.beginPath();
-  ctx.arc(0, -s * 1.18, 4, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Direction arrow
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = 'rgba(0,245,255,0.6)';
-  ctx.beginPath();
-  ctx.moveTo(0, -s * 0.85);
-  ctx.lineTo(-6, -s * 0.72);
-  ctx.lineTo(6, -s * 0.72);
-  ctx.closePath();
-  ctx.fill();
-
+  ctx.strokeStyle='#7cff6b'; ctx.lineWidth=2; ctx.shadowColor='#7cff6b'; ctx.shadowBlur=10;
+  ctx.beginPath();ctx.moveTo(0,-s*0.85);ctx.lineTo(0,-s*1.15);ctx.stroke();
+  ctx.fillStyle='#7cff6b';ctx.beginPath();ctx.arc(0,-s*1.18,4,0,Math.PI*2);ctx.fill();
+  // Dir arrow
+  ctx.shadowBlur=0; ctx.fillStyle='rgba(0,245,255,0.6)';
+  ctx.beginPath();ctx.moveTo(0,-s*0.85);ctx.lineTo(-6,-s*0.72);ctx.lineTo(6,-s*0.72);ctx.closePath();ctx.fill();
   ctx.restore();
 }
 
 function drawParticles() {
-  particles = particles.filter(p => p.life > 0);
-  particles.forEach(p => {
-    ctx.save();
-    ctx.globalAlpha = p.life / p.maxLife;
-    ctx.fillStyle = p.color;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life--;
+  particles=particles.filter(p=>p.life>0);
+  particles.forEach(p=>{
+    ctx.save();ctx.globalAlpha=p.life/p.maxLife;ctx.fillStyle=p.color;ctx.shadowBlur=10;ctx.shadowColor=p.color;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore();
+    p.x+=p.vx;p.y+=p.vy;p.life--;
   });
 }
-
-function spawnParticles(x, y, color, count) {
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 1 + Math.random() * 3;
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      r: 2 + Math.random() * 4,
-      color,
-      life: 30 + Math.random() * 20,
-      maxLife: 50
-    });
+function spawnParticles(x,y,color,count) {
+  for(let i=0;i<count;i++){
+    const a=Math.random()*Math.PI*2,sp=1+Math.random()*3;
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:2+Math.random()*4,color,life:30+Math.random()*20,maxLife:50});
   }
 }
 
 function renderFrame() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // Dark gradient bg
-  const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
-  grad.addColorStop(0, '#0f1929');
-  grad.addColorStop(1, '#070c14');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  drawGrid();
-  drawObstacles();
-  drawRobot();
-  drawParticles();
-
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const g=ctx.createRadialGradient(canvas.width/2,canvas.height/2,0,canvas.width/2,canvas.height/2,canvas.width/2);
+  g.addColorStop(0,'#0f1929');g.addColorStop(1,'#070c14');
+  ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);
+  drawGrid();drawObstacles();drawRobot();drawParticles();
   requestAnimationFrame(renderFrame);
 }
 
-// ── COORDINATE HELPERS ───────────────────────
-function coordLabel(pos) {
-  return COLS_LABELS[pos.col] + (ROWS - pos.row);
-}
-function updateCoordDisplay() {
-  document.getElementById('coord-cur').textContent = coordLabel(robotPos);
-}
+// ── COORD HELPERS ────────────────────────────
+function coordLabel(pos){return COLS_LABELS[pos.col]+(ROWS-pos.row);}
+function updateCoordDisplay(){document.getElementById('coord-cur').textContent=coordLabel(robotPos);}
 
 // ── BATTERY ──────────────────────────────────
-function toggleBattery() {
-  batteryOn = !batteryOn;
-  document.getElementById('battery-btn').className = 'battery-btn' + (batteryOn ? ' on' : '');
+function toggleBattery(){
+  batteryOn=!batteryOn;
+  document.getElementById('battery-btn').className='battery-btn'+(batteryOn?' on':'');
   soundBattery(batteryOn);
-  showMsg(batteryOn ? '⚡ Energia ativada! Circuitos conectados.' : '🔴 Energia desligada. Georrobô offline.', batteryOn ? '#7cff6b' : '#ff4d6d');
+  showMsg(batteryOn?'⚡ Energia ativada! Circuitos conectados.':'🔴 Energia desligada. Georrobô offline.',batteryOn?'#7cff6b':'#ff4d6d');
 }
 
-// ── QUEUE ─────────────────────────────────────
-function addCmd(type) {
-  const labels = { forward:'⬆ Frente', right:'↪ Gir. D', left:'↩ Gir. E' };
-  commandQueue.push({type, label: labels[type]});
-  renderQueue();
+// ── QUEUE ────────────────────────────────────
+function addCmd(type){
+  const labels={forward:'⬆ Frente',right:'↪ Gir. D',left:'↩ Gir. E'};
+  commandQueue.push({type,label:labels[type]});renderQueue();
 }
-function addLogicCmd() {
-  const cond = document.getElementById('logic-if').value;
-  const action = document.getElementById('logic-then').value;
-  const condLabels = { circle:'Círculo', square:'Quadrado', rect:'Retângulo' };
-  const actLabels = { jump:'Gir. 90°D', back:'Gir. 90°E', stop:'Parar' };
-  commandQueue.push({type:'logic', cond, action, label:`SE ${condLabels[cond]}→${actLabels[action]}`});
-  renderQueue();
+function addLogicCmd(){
+  const cond=document.getElementById('logic-if').value;
+  const action=document.getElementById('logic-then').value;
+  const cL={circle:'Círculo',square:'Quadrado',rect:'Retângulo'};
+  const aL={jump:'Gir.D',back:'Gir.E',stop:'Parar'};
+  commandQueue.push({type:'logic',cond,action,label:`SE ${cL[cond]}→${aL[action]}`});renderQueue();
 }
-function clearQueue() {
-  commandQueue = [];
-  renderQueue();
-}
-function renderQueue() {
-  const d = document.getElementById('queue-display');
-  if (commandQueue.length === 0) {
-    d.innerHTML = '<span style="color:#334;font-size:0.75rem;font-family:\'Orbitron\',monospace;padding:4px">Adicione comandos acima...</span>';
-    return;
-  }
-  d.innerHTML = commandQueue.map((cmd, i) =>
+function clearQueue(){commandQueue=[];renderQueue();}
+function renderQueue(){
+  const d=document.getElementById('queue-display');
+  if(!commandQueue.length){d.innerHTML='<span style="color:#334;font-size:0.75rem;font-family:\'Orbitron\',monospace;padding:4px">Adicione comandos acima...</span>';return;}
+  d.innerHTML=commandQueue.map((cmd,i)=>
     `<div class="queue-item" id="qi-${i}">
       <span style="color:#334;font-size:0.65rem;font-family:Orbitron,monospace">${i+1}</span>
       <span style="font-size:0.7rem;font-family:Orbitron,monospace;color:${cmd.type==='logic'?'#b66dff':cmd.type==='forward'?'#00f5ff':cmd.type==='right'?'#ff6b35':'#7cff6b'}">${cmd.label}</span>
       <span style="margin-left:auto;cursor:pointer;color:#446;font-size:0.7rem" onclick="removeCmd(${i})">✕</span>
-    </div>`
-  ).join('');
+    </div>`).join('');
 }
-function removeCmd(i) {
-  commandQueue.splice(i, 1);
-  renderQueue();
-}
+function removeCmd(i){commandQueue.splice(i,1);renderQueue();}
 
-// ── SHOW MESSAGE ─────────────────────────────
-let msgTimer = null;
-function showMsg(text, color='#ff6b35') {
-  const el = document.getElementById('msg-overlay');
-  el.textContent = text;
-  el.style.borderColor = color;
-  el.style.color = color;
-  el.style.boxShadow = `0 0 20px ${color}44`;
-  el.style.display = 'block';
-  if (msgTimer) clearTimeout(msgTimer);
-  msgTimer = setTimeout(() => { el.style.display = 'none'; }, 3000);
+// ── MESSAGE ──────────────────────────────────
+function showMsg(text,color='#ff6b35'){
+  const el=document.getElementById('msg-overlay');
+  el.textContent=text;el.style.borderColor=color;el.style.color=color;
+  el.style.boxShadow=`0 0 20px ${color}44`;el.style.display='block';
+  if(msgTimer)clearTimeout(msgTimer);
+  msgTimer=setTimeout(()=>{el.style.display='none';},3200);
 }
 
 // ── OBSTACLE CHECK ───────────────────────────
-function getObstacleAt(col, row) {
-  const phase = getPhase();
-  return phase.obstacles.find(ob => ob.col === col && ob.row === row) || null;
-}
+function getObstacleAt(col,row){return getPhase().obstacles.find(o=>o.col===col&&o.row===row)||null;}
 
 // ── EXECUTE ──────────────────────────────────
-function executeAlgorithm() {
-  if (isExecuting) return;
-  if (!batteryOn) {
-    soundError();
-    showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
-    return;
-  }
-  if (commandQueue.length === 0) {
-    soundError();
-    showMsg('⚠️ Nenhum comando na fila! Adicione blocos.', '#f5c842');
-    return;
-  }
-  isExecuting = true;
-  document.getElementById('exec-btn').disabled = true;
-  runQueue(0);
+function executeAlgorithm(){
+  if(isExecuting)return;
+  if(!batteryOn){soundError();showMsg('⚡ Erro de Eletrônica: Sem energia para mover!','#ff4d6d');return;}
+  if(!commandQueue.length){soundError();showMsg('⚠️ Nenhum comando na fila! Adicione blocos.','#f5c842');return;}
+  isExecuting=true;document.getElementById('exec-btn').disabled=true;runQueue(0);
 }
 
-function runQueue(index) {
-  if (index >= commandQueue.length) {
-    isExecuting = false;
-    document.getElementById('exec-btn').disabled = false;
-    checkWin();
-    return;
-  }
+function runQueue(index){
+  if(index>=commandQueue.length){isExecuting=false;document.getElementById('exec-btn').disabled=false;checkWin();return;}
+  const items=document.querySelectorAll('.queue-item');
+  items.forEach((el,i)=>{el.classList.remove('active');if(i<index)el.classList.add('done');});
+  if(items[index])items[index].classList.add('active');
 
-  // Highlight current
-  const items = document.querySelectorAll('.queue-item');
-  items.forEach((el, i) => {
-    el.classList.remove('active');
-    if (i < index) el.classList.add('done');
-  });
-  if (items[index]) items[index].classList.add('active');
+  const cmd=commandQueue[index];
+  const {w,h,ox,oy}=getCellSize();
 
-  const cmd = commandQueue[index];
-  const {w, h, ox, oy} = getCellSize();
-
-  if (cmd.type === 'forward') {
-    if (!batteryOn) {
-      soundError();
-      showMsg('⚡ Erro de Eletrônica: Sem energia para mover!', '#ff4d6d');
-      isExecuting = false;
-      document.getElementById('exec-btn').disabled = false;
-      return;
+  if(cmd.type==='forward'){
+    if(!batteryOn){soundError();showMsg('⚡ Erro de Eletrônica: Sem energia para mover!','#ff4d6d');isExecuting=false;document.getElementById('exec-btn').disabled=false;return;}
+    let nc=robotPos.col,nr=robotPos.row;
+    if(robotDir===0)nr--;else if(robotDir===1)nc++;else if(robotDir===2)nr++;else nc--;
+    if(nc<0||nc>=COLS||nr<0||nr>=ROWS){soundError();showMsg('🚧 Erro: Georrobô tentou sair da matriz!','#ff4d6d');}
+    else{
+      const ob=getObstacleAt(nc,nr);
+      if(ob){spawnParticles(ox+ob.col*w+w/2,oy+ob.row*h+h/2,ob.color,20);soundError();showMsg(`⚠️ Colisão com ${ob.type==='circle'?'Círculo':ob.type==='square'?'Quadrado':'Retângulo'}! Bloqueado.`,'#f5c842');}
+      else{robotPos={col:nc,row:nr};spawnParticles(ox+nc*w+w/2,oy+nr*h+h/2,'#00f5ff',8);soundMove();updateCoordDisplay();}
     }
-    let nc = robotPos.col, nr = robotPos.row;
-    if (robotDir === 0) nr--;
-    else if (robotDir === 1) nc++;
-    else if (robotDir === 2) nr++;
-    else nc--;
-
-    if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) {
-      soundError();
-      showMsg('🚧 Erro: Georrobô tentou sair da matriz!', '#ff4d6d');
-    } else {
-      const ob = getObstacleAt(nc, nr);
-      if (ob) {
-        const px = ox + ob.col * w + w / 2;
-        const py = oy + ob.row * h + h / 2;
-        spawnParticles(px, py, ob.color, 20);
-        soundError();
-        showMsg(`⚠️ Colisão com ${ob.type === 'circle' ? 'Círculo' : ob.type === 'square' ? 'Quadrado' : 'Retângulo'}! Bloqueado.`, '#f5c842');
-      } else {
-        robotPos = {col: nc, row: nr};
-        const px = ox + nc * w + w / 2;
-        const py = oy + nr * h + h / 2;
-        spawnParticles(px, py, '#00f5ff', 8);
-        soundMove();
-        updateCoordDisplay();
-      }
-    }
-  } else if (cmd.type === 'right') {
-    soundTurn();
-    robotDir = (robotDir + 1) % 4;
-  } else if (cmd.type === 'left') {
-    soundTurn();
-    robotDir = (robotDir + 3) % 4;
-  } else if (cmd.type === 'logic') {
-    let nc = robotPos.col, nr = robotPos.row;
-    if (robotDir === 0) nr--;
-    else if (robotDir === 1) nc++;
-    else if (robotDir === 2) nr++;
-    else nc--;
-    const ahead = (nc >= 0 && nc < COLS && nr >= 0 && nr < ROWS) ? getObstacleAt(nc, nr) : null;
-    if (ahead && ahead.type === cmd.cond) {
+  } else if(cmd.type==='right'){soundTurn();robotDir=(robotDir+1)%4;}
+  else if(cmd.type==='left'){soundTurn();robotDir=(robotDir+3)%4;}
+  else if(cmd.type==='logic'){
+    let nc=robotPos.col,nr=robotPos.row;
+    if(robotDir===0)nr--;else if(robotDir===1)nc++;else if(robotDir===2)nr++;else nc--;
+    const ahead=(nc>=0&&nc<COLS&&nr>=0&&nr<ROWS)?getObstacleAt(nc,nr):null;
+    if(ahead&&ahead.type===cmd.cond){
       soundTurn();
-      if (cmd.action === 'jump') { robotDir = (robotDir + 1) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou direita!`, '#b66dff'); }
-      else if (cmd.action === 'back') { robotDir = (robotDir + 3) % 4; showMsg(`🔀 SE ${cmd.cond} ENTÃO girou esquerda!`, '#b66dff'); }
-      else { soundError(); showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`, '#b66dff'); isExecuting = false; document.getElementById('exec-btn').disabled = false; return; }
+      if(cmd.action==='jump'){robotDir=(robotDir+1)%4;showMsg(`🔀 SE ${cmd.cond} ENTÃO girou direita!`,'#b66dff');}
+      else if(cmd.action==='back'){robotDir=(robotDir+3)%4;showMsg(`🔀 SE ${cmd.cond} ENTÃO girou esquerda!`,'#b66dff');}
+      else{soundError();showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`,'#b66dff');isExecuting=false;document.getElementById('exec-btn').disabled=false;return;}
     }
   }
-
-  setTimeout(() => runQueue(index + 1), 550);
+  setTimeout(()=>runQueue(index+1),550);
 }
 
-function checkWin() {
-  const phase = getPhase();
-  if (robotPos.col === phase.end.col && robotPos.row === phase.end.row) {
-    const pts = 100 + commandQueue.length * 10;
-    score += pts;
-    document.getElementById('score-disp').textContent = score;
-    const {w, h, ox, oy} = getCellSize();
-    const px = ox + robotPos.col * w + w / 2;
-    const py = oy + robotPos.row * h + h / 2;
-    for (let i = 0; i < 5; i++) setTimeout(() => spawnParticles(px, py, ['#00f5ff','#f5c842','#7cff6b','#ff6b35'][i%4], 20), i*150);
+function checkWin(){
+  const phase=getPhase();
+  if(robotPos.col===phase.end.col&&robotPos.row===phase.end.row){
+    const mult={easy:1,medium:2,hard:3}[difficulty];
+    const pts=(100+commandQueue.length*10)*mult;
+    score+=pts;
+    document.getElementById('score-disp').textContent=score;
+    const {w,h,ox,oy}=getCellSize();
+    const px=ox+robotPos.col*w+w/2,py=oy+robotPos.row*h+h/2;
+    for(let i=0;i<5;i++)setTimeout(()=>spawnParticles(px,py,['#00f5ff','#f5c842','#7cff6b','#ff6b35'][i%4],20),i*150);
     soundWin();
-    document.getElementById('win-score').textContent = `+${pts} pontos! Total: ${score}`;
+    document.getElementById('win-score').textContent=`+${pts} pontos! (×${mult} bônus ${difficulty==='easy'?'fácil':difficulty==='medium'?'médio':'difícil'}) Total: ${score}`;
     document.getElementById('win-overlay').classList.remove('hidden');
   }
 }
 
-// ── RESET / NEXT PHASE ───────────────────────
-function resetPosition() {
-  const phase = getPhase();
-  robotPos = {...phase.start};
-  robotDir = phase.startDir || 0;
-  updateCoordDisplay();
-  commandQueue = [];
-  renderQueue();
-  document.getElementById('exec-btn').disabled = false;
-  isExecuting = false;
+// ── RESET / NEXT ─────────────────────────────
+function resetPosition(){
+  const p=getPhase();
+  robotPos={...p.start};robotDir=p.startDir||0;
+  updateCoordDisplay();commandQueue=[];renderQueue();
+  document.getElementById('exec-btn').disabled=false;isExecuting=false;
 }
-function resetPhase() {
+function resetPhase(){document.getElementById('win-overlay').classList.add('hidden');resetPosition();}
+function nextPhase(){
   document.getElementById('win-overlay').classList.add('hidden');
+  const list=getPhaseList();
+  if(currentPhase+1>=list.length){
+    // Level complete!
+    soundLevelComplete();
+    const lc=document.getElementById('levelcomplete-overlay');
+    const t=document.getElementById('lc-title');
+    t.textContent=`NÍVEL ${difficulty==='easy'?'FÁCIL':difficulty==='medium'?'MÉDIO':'DIFÍCIL'} COMPLETO!`;
+    t.className='lc-title '+difficulty;
+    document.getElementById('lc-sub').textContent='Parabéns! Você concluiu todas as '+(list.length)+' fases!';
+    document.getElementById('lc-score').textContent=`Pontuação total: ${score} pontos`;
+    const nextBtn=document.getElementById('lc-next-btn');
+    if(difficulty==='hard'){nextBtn.textContent='🏆 RECOMEÇAR';nextBtn.onclick=()=>startLevel('easy');}
+    else{nextBtn.textContent='PRÓXIMO NÍVEL ▶';nextBtn.onclick=goNextLevel;}
+    lc.classList.remove('hidden');
+  } else {
+    currentPhase++;loadPhase();
+  }
+}
+function closeWin(){nextPhase();}
+
+// ── LOAD PHASE ───────────────────────────────
+function loadPhase(){
+  const p=getPhase();
+  const idx=currentPhase;
+  const dirNames=['⬆ Norte','→ Leste','↓ Sul','← Oeste'];
+  document.getElementById('phase-title').textContent=`FASE ${idx+1} — ${p.name}`;
+  document.getElementById('phase-desc').textContent=p.desc;
+  document.getElementById('phase-disp').textContent=idx+1;
+  document.getElementById('coord-start').textContent=coordLabel(p.start)+' '+dirNames[p.startDir||0];
+  document.getElementById('coord-end').textContent=coordLabel(p.end);
   resetPosition();
-}
-function nextPhase() {
-  currentPhase++;
-  loadPhase();
-}
-function closeWin() {
-  document.getElementById('win-overlay').classList.add('hidden');
-  nextPhase();
+  showPhasePopup(p, idx);
 }
 
-function loadPhase() {
-  const p = getPhase();
-  const idx = currentPhase % phases.length;
-  const dirNames = ['⬆ Norte', '→ Leste', '↓ Sul', '← Oeste'];
-  document.getElementById('phase-title').textContent = `FASE ${idx+1} — ${p.name}`;
-  document.getElementById('phase-desc').textContent = p.desc;
-  document.getElementById('phase-disp').textContent = idx + 1;
-  document.getElementById('coord-start').textContent = coordLabel(p.start) + ' ' + dirNames[p.startDir || 0];
-  document.getElementById('coord-end').textContent = coordLabel(p.end);
-  resetPosition();
-  showPhasePopup(idx);
-}
-
-// ── POPUP ─────────────────────────────────────
-function showPhasePopup(idx) {
-  const titles = [
-    'INICIALIZAÇÃO', 'LABIRINTO DE CIRCUITOS', 'O ZIGUE-ZAGUE',
-    'CAMINHO INVERSO', 'ROTA DO CENTRO', 'TRAVESSIA DO MEIO',
-    'DESCIDA TOTAL', 'A DIAGONAL ANTI-HORÁRIA', 'ROTA INTERIOR', 'MAESTRO: A ESPIRAL'
-  ];
-  const icons = ['🤖', '⚡', '🌀', '🔄', '🎯', '➡️', '⬇️', '↙️', '🔲', '🌀'];
-  const hints = [
-    'Dir. Norte. Suba pela coluna A até A5, gire à Direita e avance até E5. Fila: F×4, GD, F×4.',
-    'Dir. Leste! Avance pela linha 1 até E1, gire à Esquerda (Norte) e suba até E5. Fila: F×4, GE, F×4.',
-    'Dir. Norte. Zigue-zague: suba col A, desvie em B5, desça p/ B4, cruze linha 4 até E4, suba p/ E5.',
-    'Dir. Norte — começa em E1! Suba pela col E até E5, gire à Esquerda (Oeste) e cruze até A5. F×4, GE, F×4.',
-    'Dir. Leste — começa em C1! Avance p/ D1, gire Norte, suba col D até D5, gire Oeste, chegue em C5. F, GE, F×4, GE, F.',
-    'Dir. Leste — começa em A3! Linha 3 está livre. Avance direto 4 casas até E3. Fila: F×4.',
-    'Dir. Sul — começa em E5! Desça pela col E até E1, gire à Direita (Oeste) e cruze até A1. F×4, GD, F×4.',
-    'Dir. Leste — começa em A5! Cruze o topo até E5, gire à Direita (Sul) e desça até E1. F×4, GD, F×4.',
-    'Dir. Norte — começa em B2! Suba col B até B5, gire Direita p/ D5 (2F), gire Direita (Sul), desça 1 casa p/ D4. F×3, GD, F×2, GD, F.',
-    'Dir. Norte — ESPIRAL! A1→A4(3F), GD→C4(2F), GD→C2(2F), GE→E2(2F), GE→E5(3F). Máxima atenção às direções!'
-  ];
-  const dirLabels = ['⬆ Norte','→ Leste','⬆ Norte','⬆ Norte','→ Leste','→ Leste','↓ Sul','→ Leste','⬆ Norte','⬆ Norte'];
-  const n = idx % 10;
-  document.getElementById('popup-icon').textContent = icons[n];
-  document.getElementById('popup-title').textContent = `FASE ${idx+1} — ${titles[n]}`;
-  document.getElementById('popup-pillar').textContent = `Direção inicial: ${dirLabels[n]}`;
-  document.getElementById('popup-lines').innerHTML = `
+// ── POPUP ────────────────────────────────────
+function showPhasePopup(p, idx){
+  const diffTxt={easy:'⭐ FÁCIL',medium:'⭐⭐ MÉDIO',hard:'⭐⭐⭐ DIFÍCIL'}[difficulty];
+  const dirNames=['⬆ Norte','→ Leste','↓ Sul','← Oeste'];
+  document.getElementById('popup-icon').textContent='🤖';
+  document.getElementById('popup-title').textContent=`FASE ${idx+1} — ${p.name}`;
+  document.getElementById('popup-pillar').textContent=`${diffTxt}  ·  Dir. inicial: ${dirNames[p.startDir||0]}`;
+  document.getElementById('popup-lines').innerHTML=`
     <div class="popup-line mec">⚙️ <strong>Mecânica:</strong> Verificando estrutura e articulações...</div>
     <div class="popup-line ele">⚡ <strong>Eletrônica:</strong> Circuitos conectados e bateria carregada!</div>
-    <div class="popup-line prog">💻 <strong>Programação:</strong> ${hints[n]}</div>
+    <div class="popup-line prog">💻 <strong>Programação:</strong> ${p.hint||'Monte o algoritmo e execute!'}</div>
   `;
   document.getElementById('popup').classList.remove('hidden');
 }
-function closePopup() {
-  document.getElementById('popup').classList.add('hidden');
-}
+function closePopup(){document.getElementById('popup').classList.add('hidden');}
 
 // ── INIT ─────────────────────────────────────
-loadPhase();
 renderFrame();
 </script>
 </body>
