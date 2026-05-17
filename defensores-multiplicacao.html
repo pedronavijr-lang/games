@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Defensores da Multiplicação</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap');
@@ -18,24 +18,29 @@
     --bg-mid: #080020;
     --purple-dark: #1a0040;
     --hud-bg: rgba(0,5,30,0.85);
+    --hud-h: 50px;
+    --bottom-h: 80px;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
     background: var(--bg-deep);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    min-height: -webkit-fill-available;
     font-family: 'Press Start 2P', monospace;
     overflow: hidden;
+    touch-action: none;
   }
 
   #gameWrapper {
     position: relative;
-    width: 800px;
-    height: 600px;
+    width: min(800px, 100vw);
+    height: min(600px, 100svh);
     border: 3px solid var(--neon-cyan);
     box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px rgba(0,245,255,0.3), inset 0 0 30px rgba(0,245,255,0.05);
     overflow: hidden;
@@ -58,19 +63,19 @@
   #hud {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 60px;
+    height: var(--hud-h);
     background: var(--hud-bg);
     border-bottom: 2px solid var(--neon-cyan);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 15px;
+    padding: 0 10px;
     z-index: 10;
     box-shadow: 0 2px 20px rgba(0,245,255,0.3);
   }
 
-  .hud-left { display: flex; flex-direction: column; gap: 4px; }
-  .hud-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .hud-left { display: flex; flex-direction: column; gap: 2px; }
+  .hud-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
   .hud-center {
     display: flex;
     flex-direction: column;
@@ -80,24 +85,25 @@
 
   .hud-label {
     color: var(--neon-cyan);
-    font-size: 9px;
+    font-size: clamp(6px, 1.8vw, 9px);
     text-shadow: 0 0 10px var(--neon-cyan);
     letter-spacing: 1px;
   }
 
   .hud-value {
     color: var(--neon-yellow);
-    font-size: 11px;
+    font-size: clamp(8px, 2.2vw, 11px);
     text-shadow: 0 0 15px var(--neon-yellow);
   }
 
   #gameTitle {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 18px;
+    font-size: clamp(10px, 3vw, 18px);
     color: var(--neon-magenta);
     text-shadow: 0 0 20px var(--neon-magenta), 0 0 40px rgba(255,0,255,0.5);
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    text-align: center;
   }
 
   #gameTitle span {
@@ -106,31 +112,32 @@
   }
 
   .lives { display: flex; gap: 4px; }
-  .heart { color: #ff3366; font-size: 14px; text-shadow: 0 0 8px #ff3366; }
+  .heart { color: #ff3366; font-size: clamp(10px, 2.5vw, 14px); text-shadow: 0 0 8px #ff3366; }
 
   /* BOTTOM HUD */
   #bottomHud {
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    height: 70px;
+    height: var(--bottom-h);
     background: var(--hud-bg);
     border-top: 2px solid var(--neon-cyan);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 0 15px;
+    gap: 5px;
+    padding: 0 6px;
     z-index: 10;
     box-shadow: 0 -2px 20px rgba(0,245,255,0.3);
+    flex-wrap: nowrap;
   }
 
   .answer-btn {
-    width: 52px;
-    height: 52px;
+    width: clamp(44px, 12vw, 56px);
+    height: clamp(44px, 12vw, 56px);
     border-radius: 50%;
     border: 2px solid;
     font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-size: clamp(9px, 2.5vw, 12px);
     cursor: pointer;
     transition: all 0.15s;
     display: flex;
@@ -138,6 +145,8 @@
     justify-content: center;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
+    touch-action: manipulation;
   }
 
   .answer-btn::before {
@@ -165,17 +174,19 @@
     border: 2px solid var(--neon-orange);
     color: #fff;
     border-radius: 8px;
-    padding: 8px 14px;
+    padding: 8px 10px;
     font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
+    font-size: clamp(7px, 2vw, 9px);
     cursor: pointer;
     box-shadow: 0 0 15px var(--neon-orange);
     transition: all 0.15s;
     letter-spacing: 1px;
-    margin-left: 6px;
+    flex-shrink: 0;
+    touch-action: manipulation;
+    white-space: nowrap;
   }
 
-  #fireBtn:hover { transform: scale(1.08); box-shadow: 0 0 25px var(--neon-orange); }
+  #fireBtn:hover, #fireBtn:active { transform: scale(1.08); box-shadow: 0 0 25px var(--neon-orange); }
 
   #inputDisplay {
     background: rgba(0,0,0,0.6);
@@ -183,14 +194,15 @@
     border-radius: 6px;
     color: var(--neon-cyan);
     font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
-    width: 60px;
-    height: 52px;
+    font-size: clamp(11px, 3vw, 14px);
+    width: clamp(46px, 12vw, 60px);
+    height: clamp(44px, 12vw, 56px);
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 10px rgba(0,245,255,0.4);
     letter-spacing: 2px;
+    flex-shrink: 0;
   }
 
   /* OVERLAYS */
@@ -203,12 +215,13 @@
     justify-content: center;
     background: rgba(4,0,15,0.92);
     z-index: 100;
-    gap: 20px;
+    gap: clamp(12px, 3vw, 20px);
+    padding: 20px;
   }
 
   .overlay-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 28px;
+    font-size: clamp(16px, 5vw, 28px);
     font-weight: 900;
     color: var(--neon-magenta);
     text-shadow: 0 0 30px var(--neon-magenta);
@@ -223,7 +236,7 @@
 
   .overlay-sub {
     color: var(--neon-cyan);
-    font-size: 9px;
+    font-size: clamp(6px, 1.8vw, 9px);
     text-shadow: 0 0 10px var(--neon-cyan);
     text-align: center;
     line-height: 2;
@@ -234,16 +247,17 @@
     border: 2px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
-    padding: 14px 28px;
+    font-size: clamp(9px, 2.5vw, 11px);
+    padding: 14px 24px;
     cursor: pointer;
     box-shadow: 0 0 20px var(--neon-cyan);
     letter-spacing: 2px;
     transition: all 0.2s;
     border-radius: 4px;
+    touch-action: manipulation;
   }
 
-  .overlay-btn:hover {
+  .overlay-btn:hover, .overlay-btn:active {
     transform: scale(1.05);
     box-shadow: 0 0 35px var(--neon-cyan);
     background: linear-gradient(135deg, #004455, #0088aa);
@@ -251,26 +265,27 @@
 
   .overlay-score {
     color: var(--neon-yellow);
-    font-size: 13px;
+    font-size: clamp(10px, 3vw, 13px);
     text-shadow: 0 0 15px var(--neon-yellow);
   }
 
   #comboAlert {
     position: absolute;
-    top: 70px;
+    top: calc(var(--hud-h) + 8px);
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255,102,0,0.9);
     border: 2px solid var(--neon-yellow);
     color: var(--neon-yellow);
-    font-size: 9px;
-    padding: 6px 14px;
+    font-size: clamp(7px, 2vw, 9px);
+    padding: 5px 12px;
     border-radius: 4px;
     box-shadow: 0 0 20px var(--neon-orange);
     z-index: 20;
     display: none;
     text-shadow: 0 0 8px #000;
     letter-spacing: 1px;
+    white-space: nowrap;
     animation: comboAnim 0.3s ease-out;
   }
 
@@ -285,7 +300,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     color: var(--neon-cyan);
-    font-size: 20px;
+    font-size: clamp(14px, 4vw, 20px);
     text-shadow: 0 0 30px var(--neon-cyan);
     z-index: 50;
     display: none;
@@ -313,19 +328,19 @@
     background: rgba(0,245,255,0.1);
     border: 1px solid var(--neon-cyan);
     border-radius: 4px;
-    padding: 2px 8px;
+    padding: 1px 6px;
   }
 
   .wave-info {
     color: var(--neon-magenta);
-    font-size: 8px;
+    font-size: clamp(6px, 1.6vw, 8px);
     text-shadow: 0 0 8px var(--neon-magenta);
     text-align: right;
   }
 
   #highScoreDisplay {
     color: #aa44ff;
-    font-size: 10px;
+    font-size: clamp(7px, 1.8vw, 10px);
     text-shadow: 0 0 10px #aa44ff;
   }
 
@@ -335,8 +350,8 @@
     border-radius: 6px;
     color: var(--neon-cyan);
     font-size: 16px;
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -345,8 +360,9 @@
     transition: all 0.2s;
     padding: 0;
     line-height: 1;
+    touch-action: manipulation;
   }
-  #muteBtn:hover {
+  #muteBtn:hover, #muteBtn:active {
     box-shadow: 0 0 16px var(--neon-cyan);
     transform: scale(1.1);
   }
@@ -362,24 +378,23 @@
     gap: 5px;
   }
 
-  /* Responsive small buttons for numpad row */
   #answerButtons {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: clamp(3px, 1vw, 6px);
   }
 
   #questionDisplay {
     position: absolute;
-    bottom: 78px;
+    bottom: calc(var(--bottom-h) + 4px);
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0,0,20,0.8);
     border: 2px solid var(--neon-magenta);
     border-radius: 6px;
-    padding: 4px 16px;
+    padding: 4px 14px;
     color: var(--neon-magenta);
-    font-size: 11px;
+    font-size: clamp(9px, 2.5vw, 11px);
     text-shadow: 0 0 12px var(--neon-magenta);
     z-index: 15;
     box-shadow: 0 0 15px rgba(255,0,255,0.3);
@@ -387,61 +402,44 @@
     white-space: nowrap;
   }
 
-.btn-back {
-  /* Mudança: de absolute para fixed para ele não sumir ao rolar */
-  position: fixed; 
-  
-  /* Mudança: de top para bottom para descer para o rodapé */
-  bottom: 25px; 
-  left: 25px;
-  
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  text-decoration: none;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: #ffffff;
-  
-  /* Um fundo um pouco mais escuro para garantir leitura sobre o conteúdo */
-  padding: 10px 20px;
-  background: rgba(4, 9, 31, 0.8); 
-  border: 1px solid rgba(180, 200, 255, 0.3);
-  border-radius: 8px;
-  backdrop-filter: blur(4px); /* Efeito de vidro para ficar profissional */
-  transition: all 0.3s ease;
-}
-
-.btn-back:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.25);
-  border-color: #ffffff;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-  transform: scale(1.05);
-}
-
-/* Ajuste para telas pequenas */
-@media (max-width: 600px) {
+  /* Botão voltar — dentro do gameWrapper, não sobrepõe o jogo */
   .btn-back {
-    bottom: 15px;
-    left: 15px;
-    padding: 8px 12px;
+    position: absolute;
+    top: calc(var(--hud-h) + 6px);
+    left: 8px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(6px, 1.5vw, 9px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.6);
+    padding: 4px 8px;
+    background: rgba(4, 9, 31, 0.6);
+    border: 1px solid rgba(180, 200, 255, 0.2);
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+    touch-action: manipulation;
   }
-}
+  .btn-back:hover, .btn-back:active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255,255,255,0.5);
+  }
 
 </style>
 </head>
 <body>
 
-<a href="index.html" class="btn-back">
-  <span class="icon">❮</span> Página inicial
-</a>
-
 <div id="gameWrapper">
+  <!-- Botão voltar -->
+  <a href="index.html" class="btn-back">
+    <span class="icon">❮</span> Início
+  </a>
   <!-- Background starfield canvas -->
   <canvas id="bgCanvas" width="800" height="600"></canvas>
   <!-- Game canvas -->
@@ -471,8 +469,8 @@
     </div>
   </div>
 
-  <!-- Canvas sits below HUD (top:60px) -->
-  <div style="position:absolute;top:60px;left:0;right:0;bottom:70px;overflow:hidden;" id="gameArea"></div>
+  <!-- Canvas sits below HUD (top:50px) -->
+  <div style="position:absolute;top:50px;left:0;right:0;bottom:80px;overflow:hidden;" id="gameArea"></div>
 
   <!-- Bottom HUD -->
   <div id="bottomHud">
@@ -481,9 +479,6 @@
       <button class="answer-btn btn-1" data-idx="0" onclick="selectAnswer(0)">?</button>
       <button class="answer-btn btn-2" data-idx="1" onclick="selectAnswer(1)">?</button>
       <button class="answer-btn btn-3" data-idx="2" onclick="selectAnswer(2)">?</button>
-      <button class="answer-btn btn-4" data-idx="3" onclick="selectAnswer(3)">?</button>
-      <button class="answer-btn btn-5" data-idx="4" onclick="selectAnswer(4)">?</button>
-      <button class="answer-btn btn-6" data-idx="5" onclick="selectAnswer(5)">?</button>
     </div>
     <button id="fireBtn" onclick="fireAnswer()">FOGO 🔥</button>
   </div>
@@ -645,19 +640,48 @@ const bgCtx = bgCanvas.getContext('2d');
 const gc = document.getElementById('gameCanvas');
 const ctx = gc.getContext('2d');
 
+// Logical game dimensions (fixed internal resolution)
+const GAME_W = 800, GAME_H = 600;
+const PLAY_TOP = 50;  // logical HUD height
+const PLAY_BOT = 80;  // logical bottom HUD height
+const PLAY_H = GAME_H - PLAY_TOP - PLAY_BOT; // 470
+
 // Move canvas inside gameArea div
 const gameArea = document.getElementById('gameArea');
 gameArea.appendChild(gc);
 gc.style.position = 'absolute';
 gc.style.top = '0'; gc.style.left = '0';
-gc.width = 800; gc.height = 470;
+gc.width = GAME_W; gc.height = PLAY_H;
+
+bgCanvas.width = GAME_W; bgCanvas.height = GAME_H;
+
+// Responsive: scale gameWrapper to fit screen
+function resizeGame() {
+  const wrapper = document.getElementById('gameWrapper');
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const scaleX = vw / GAME_W;
+  const scaleY = vh / GAME_H;
+  const scale = Math.min(scaleX, scaleY, 1); // never upscale beyond 1x on desktop
+  wrapper.style.width = GAME_W + 'px';
+  wrapper.style.height = GAME_H + 'px';
+  wrapper.style.transform = `scale(${scale})`;
+  wrapper.style.transformOrigin = 'top center';
+  // Center vertically
+  const scaledH = GAME_H * scale;
+  const marginTop = Math.max(0, (vh - scaledH) / 2);
+  wrapper.style.marginTop = marginTop + 'px';
+}
+resizeGame();
+window.addEventListener('resize', resizeGame);
+window.addEventListener('orientationchange', () => setTimeout(resizeGame, 200));
 
 // ===================== STARFIELD =====================
 const stars = [];
 for(let i=0;i<200;i++){
   stars.push({
-    x: Math.random()*800,
-    y: Math.random()*600,
+    x: Math.random()*GAME_W,
+    y: Math.random()*GAME_H,
     r: Math.random()*1.8+0.2,
     speed: Math.random()*0.4+0.1,
     brightness: Math.random(),
@@ -673,14 +697,14 @@ const nebulae = [
 ];
 
 function drawBackground() {
-  bgCtx.clearRect(0,0,800,600);
+  bgCtx.clearRect(0,0,GAME_W,GAME_H);
   // Deep space
-  const grad = bgCtx.createRadialGradient(400,300,0,400,300,500);
+  const grad = bgCtx.createRadialGradient(GAME_W/2,GAME_H/2,0,GAME_W/2,GAME_H/2,500);
   grad.addColorStop(0,'#0a0030');
   grad.addColorStop(0.5,'#050018');
   grad.addColorStop(1,'#02000a');
   bgCtx.fillStyle = grad;
-  bgCtx.fillRect(0,0,800,600);
+  bgCtx.fillRect(0,0,GAME_W,GAME_H);
   // Nebulae
   nebulae.forEach(n=>{
     const g = bgCtx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.rx);
@@ -711,7 +735,7 @@ function drawBackground() {
   bgCtx.globalAlpha = 1;
 
   // Scroll stars
-  stars.forEach(s=>{ s.y+=s.speed; if(s.y>600){s.y=0;s.x=Math.random()*800;} });
+  stars.forEach(s=>{ s.y+=s.speed; if(s.y>GAME_H){s.y=0;s.x=Math.random()*GAME_W;} });
 }
 
 // ===================== GAME STATE =====================
@@ -933,7 +957,7 @@ function generateQuestion(tables) {
 
 function generateAnswerOptions(correct, tables) {
   const opts = new Set([correct]);
-  while(opts.size < 6){
+  while(opts.size < 3){
     const t2=tables[Math.floor(Math.random()*tables.length)];
     const n2=Math.floor(Math.random()*9)+1;
     opts.add(t2*n2);
@@ -1102,7 +1126,7 @@ function update(dt){
 
   // Player movement
   if(keys['ArrowLeft']||keys['a']){gs.player.x=Math.max(0,gs.player.x-5*dt);}
-  if(keys['ArrowRight']||keys['d']){gs.player.x=Math.min(748,gs.player.x+5*dt);}
+  if(keys['ArrowRight']||keys['d']){gs.player.x=Math.min(GAME_W-52,gs.player.x+5*dt);}
 
   // Enemy movement
   gs.enemyMoveTimer+=dt;
@@ -1217,7 +1241,7 @@ function nextWave(){
 }
 
 function render(){
-  ctx.clearRect(0,0,800,470);
+  ctx.clearRect(0,0,GAME_W,PLAY_H);
 
   const gs=gameState;
 
@@ -1304,7 +1328,7 @@ function render(){
   ctx.strokeStyle='rgba(0,245,255,0.25)';
   ctx.lineWidth=1;
   ctx.setLineDash([6,4]);
-  ctx.beginPath();ctx.moveTo(0,440);ctx.lineTo(800,440);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,440);ctx.lineTo(GAME_W,440);ctx.stroke();
   ctx.setLineDash([]);
   ctx.restore();
 
@@ -1313,11 +1337,11 @@ function render(){
     const pct=gs.comboTimer/300;
     ctx.save();
     ctx.fillStyle='rgba(255,100,0,0.2)';
-    ctx.fillRect(0,0,800,4);
-    const bg=ctx.createLinearGradient(0,0,800,0);
+    ctx.fillRect(0,0,GAME_W,4);
+    const bg=ctx.createLinearGradient(0,0,GAME_W,0);
     bg.addColorStop(0,'#ff6600');bg.addColorStop(0.5,'#ffdd00');bg.addColorStop(1,'#ff6600');
     ctx.fillStyle=bg;
-    ctx.fillRect(0,0,800*pct,4);
+    ctx.fillRect(0,0,GAME_W*pct,4);
     ctx.restore();
   }
 }
@@ -1330,10 +1354,15 @@ document.addEventListener('keydown',e=>{
   if(!gameState.running)return;
   // Number keys 1-6 select answer
   const n=parseInt(e.key);
-  if(n>=1&&n<=6){selectAnswer(n-1);}
+  if(n>=1&&n<=3){selectAnswer(n-1);}
   if(e.key==='Enter'||e.key===' '){e.preventDefault();fireAnswer();}
 });
 document.addEventListener('keyup',e=>keys[e.key]=false);
+
+// Touch: prevent double-tap zoom on buttons
+document.querySelectorAll('.answer-btn, #fireBtn, .overlay-btn, #muteBtn').forEach(el=>{
+  el.addEventListener('touchstart', e=>{ e.preventDefault(); el.click(); }, {passive:false});
+});
 
 // ===================== GAME CONTROL =====================
 function startGame(){
@@ -1349,7 +1378,7 @@ function startGame(){
     enemies:[], bullets:[], particles:[],
     gameOver:false, victory:false,
     enemyDir:1, enemyMoveTimer:0, enemyMoveInterval:60,
-    player:{x:370,y:390,w:52,h:60,vx:0,firing:false,fireTimer:0},
+    player:{x:374,y:390,w:52,h:60,vx:0,firing:false,fireTimer:0},
   });
 
   document.getElementById('scoreDisplay').textContent='0';
@@ -1409,3 +1438,4 @@ bgLoop();
 </script>
 </body>
 </html>
+
