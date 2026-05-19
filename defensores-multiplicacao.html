@@ -1162,7 +1162,7 @@ function update(dt){
 
     // Check if enemies reached bottom
     const maxY=Math.max(...alive.map(e=>e.y+e.h));
-    if(maxY>=(ph*0.78)){
+    if(maxY>=(ph*0.62)){
       gs.lives--;
       updateLivesUI();
       shake(10,20);
@@ -1342,7 +1342,7 @@ function render(){
   ctx.strokeStyle='rgba(0,245,255,0.25)';
   ctx.lineWidth=1;
   ctx.setLineDash([6,4]);
-  const baseLineY = ph * 0.79;
+  const baseLineY = ph * 0.89;
   ctx.beginPath();ctx.moveTo(0,baseLineY);ctx.lineTo(pw,baseLineY);ctx.stroke();
   ctx.setLineDash([]);
   ctx.restore();
@@ -1375,7 +1375,7 @@ function startGame(){
     enemies:[], bullets:[], particles:[],
     gameOver:false, victory:false,
     enemyDir:1, enemyMoveTimer:0, enemyMoveInterval:60,
-    player:{x: Math.max(0,(PLAY_W||BASE_W)/2 - 26), y: Math.round((PLAY_H||BASE_H)*0.78) - 60, w:52,h:60,vx:0,firing:false,fireTimer:0},
+    player:{x: Math.max(0,(PLAY_W||BASE_W)/2 - 26), y: Math.round((PLAY_H||BASE_H)*0.88) - 60, w:52,h:60,vx:0,firing:false,fireTimer:0},
   });
 
   document.getElementById('scoreDisplay').textContent='0';
