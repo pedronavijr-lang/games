@@ -8,148 +8,132 @@
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap');
 
   :root {
-    --neon-cyan: #00f5ff;
+    --neon-cyan:    #00f5ff;
     --neon-magenta: #ff00ff;
-    --neon-yellow: #ccff00;
-    --neon-orange: #ff6600;
-    --neon-green: #39ff14;
-    --neon-pink: #ff1493;
-    --bg-deep: #04000f;
-    --bg-mid: #080020;
-    --purple-dark: #1a0040;
-    --hud-bg: rgba(0,5,30,0.92);
-    /* Layout landscape: HUD top, painel de controle na direita */
-    --hud-h: 44px;
-    --panel-w: 110px;
+    --neon-yellow:  #ccff00;
+    --neon-orange:  #ff6600;
+    --neon-green:   #39ff14;
+    --bg-deep:      #04000f;
+    --hud-bg:       rgba(0,5,30,0.95);
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-  html, body {
-    width: 100%; height: 100%;
-    overflow: hidden;
+  html {
+    /* Esconde barra de endereço em Safari iOS ao entrar em landscape */
+    height: -webkit-fill-available;
   }
 
   body {
     background: var(--bg-deep);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Press Start 2P', monospace;
-    touch-action: none;
-  }
-
-  /* ── WRAPPER: proporção fixa 800×600, escala via transform ── */
-  #gameWrapper {
-    position: relative;
-    width: 800px;
-    height: 600px;
-    border: 3px solid var(--neon-cyan);
-    box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px rgba(0,245,255,0.3);
+    width: 100vw;
+    height: 100vh;
+    height: -webkit-fill-available;
     overflow: hidden;
-    border-radius: 4px;
-    transform-origin: top left;
+    touch-action: none;
+    font-family: 'Press Start 2P', monospace;
+    display: block;
   }
 
+  /* ══════════════════════════════════════
+     CANVAS: ocupa TODA a tela
+  ══════════════════════════════════════ */
   #bgCanvas, #gameCanvas {
-    position: absolute;
+    position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
+    display: block;
   }
+  #gameCanvas { z-index: 1; }
 
-  /* ── HUD TOPO: largura total menos painel direito ── */
+  /* ══════════════════════════════════════
+     HUD TOPO (esquerda da área de jogo)
+  ══════════════════════════════════════ */
   #hud {
-    position: absolute;
+    position: fixed;
     top: 0; left: 0;
-    right: var(--panel-w);
-    height: var(--hud-h);
+    /* largura = tela - painel direito; calculada em JS via CSS var */
+    right: var(--panel-w, 130px);
+    height: var(--hud-h, 44px);
     background: var(--hud-bg);
     border-bottom: 2px solid var(--neon-cyan);
-    border-right: 2px solid rgba(0,245,255,0.3);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 10px;
+    padding: 0 12px;
     z-index: 10;
-    box-shadow: 0 2px 20px rgba(0,245,255,0.3);
+    box-shadow: 0 2px 18px rgba(0,245,255,0.3);
   }
 
-  .hud-left  { display: flex; flex-direction: column; gap: 2px; }
-  .hud-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .hud-center { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .hud-left  { display:flex; flex-direction:column; gap:2px; }
+  .hud-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+  .hud-center{ display:flex; flex-direction:column; align-items:center; gap:1px; }
 
-  .hud-label { color: var(--neon-cyan);   font-size: 7px;  text-shadow: 0 0 8px var(--neon-cyan);   letter-spacing: 1px; }
-  .hud-value { color: var(--neon-yellow); font-size: 10px; text-shadow: 0 0 12px var(--neon-yellow); }
+  .hud-label { color:var(--neon-cyan);   font-size:clamp(5px,1.5vw,8px);  text-shadow:0 0 8px var(--neon-cyan);   letter-spacing:1px; }
+  .hud-value { color:var(--neon-yellow); font-size:clamp(7px,2vw,11px);   text-shadow:0 0 10px var(--neon-yellow); }
 
   #gameTitle {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 13px;
+    font-size: clamp(9px, 2.2vw, 15px);
     color: var(--neon-magenta);
-    text-shadow: 0 0 16px var(--neon-magenta);
-    letter-spacing: 1px;
+    text-shadow: 0 0 14px var(--neon-magenta);
     text-align: center;
     line-height: 1.3;
   }
-  #gameTitle span { color: var(--neon-cyan); text-shadow: 0 0 16px var(--neon-cyan); }
+  #gameTitle span { color:var(--neon-cyan); text-shadow:0 0 14px var(--neon-cyan); }
 
-  .lives { display: flex; gap: 3px; }
-  .heart { color: #ff3366; font-size: 11px; text-shadow: 0 0 6px #ff3366; }
+  .lives { display:flex; gap:3px; }
+  .heart { color:#ff3366; font-size:clamp(9px,2vw,13px); text-shadow:0 0 6px #ff3366; }
 
-  #levelBadge {
-    background: rgba(0,245,255,0.1);
-    border: 1px solid var(--neon-cyan);
-    border-radius: 3px;
-    padding: 1px 5px;
-  }
-  .wave-info   { color: var(--neon-magenta); font-size: 7px; text-shadow: 0 0 6px var(--neon-magenta); text-align: right; }
-  #highScoreDisplay { color: #aa44ff; font-size: 7px; text-shadow: 0 0 8px #aa44ff; }
+  #levelBadge { background:rgba(0,245,255,0.1); border:1px solid var(--neon-cyan); border-radius:3px; padding:1px 5px; }
+  .wave-info  { color:var(--neon-magenta); font-size:clamp(5px,1.3vw,7px); text-align:right; }
+  #highScoreDisplay { color:#aa44ff; font-size:clamp(5px,1.3vw,7px); }
 
   #muteBtn {
-    background: rgba(0,0,0,0.5);
-    border: 2px solid var(--neon-cyan);
-    border-radius: 5px;
-    color: var(--neon-cyan);
-    font-size: 13px;
-    width: 26px; height: 26px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 6px rgba(0,245,255,0.4);
-    transition: all 0.2s;
-    padding: 0; line-height: 1;
-    touch-action: manipulation;
+    background:rgba(0,0,0,0.5);
+    border:2px solid var(--neon-cyan);
+    border-radius:5px;
+    color:var(--neon-cyan);
+    font-size:14px;
+    width:30px; height:30px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    touch-action:manipulation;
+    transition:all 0.2s;
   }
-  #muteBtn:hover, #muteBtn:active { box-shadow: 0 0 14px var(--neon-cyan); transform: scale(1.1); }
-  #muteBtn.muted { border-color: #555; color: #555; box-shadow: none; }
+  #muteBtn:active { transform:scale(0.9); }
+  #muteBtn.muted  { border-color:#555; color:#555; box-shadow:none; }
 
-  /* ── PAINEL DIREITO: controles de resposta ── */
+  /* ══════════════════════════════════════
+     PAINEL LATERAL DIREITO
+  ══════════════════════════════════════ */
   #sidePanel {
-    position: absolute;
+    position: fixed;
     top: 0; right: 0;
-    width: var(--panel-w);
+    width: var(--panel-w, 130px);
     height: 100%;
     background: var(--hud-bg);
     border-left: 2px solid var(--neon-cyan);
-    box-shadow: -2px 0 20px rgba(0,245,255,0.2);
+    box-shadow: -2px 0 20px rgba(0,245,255,0.25);
     z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 8px 6px;
+    padding: 10px 8px;
   }
 
-  /* Pergunta atual — dentro do painel */
+  /* Pergunta */
   #questionDisplay {
-    background: rgba(0,0,20,0.85);
+    background: rgba(0,0,20,0.9);
     border: 2px solid var(--neon-magenta);
     border-radius: 6px;
-    padding: 5px 4px;
+    padding: 6px 4px;
     color: var(--neon-magenta);
-    font-size: 10px;
-    text-shadow: 0 0 10px var(--neon-magenta);
-    box-shadow: 0 0 12px rgba(255,0,255,0.3);
+    font-size: clamp(8px, 1.8vw, 11px);
+    text-shadow: 0 0 8px var(--neon-magenta);
     display: none;
     white-space: nowrap;
     text-align: center;
@@ -159,103 +143,134 @@
 
   /* Display do valor selecionado */
   #inputDisplay {
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.7);
     border: 2px solid var(--neon-cyan);
     border-radius: 6px;
     color: var(--neon-cyan);
-    font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
-    width: 62px; height: 38px;
+    font-size: clamp(12px, 2.8vw, 16px);
+    width: 100%; height: clamp(36px, 7vh, 48px);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 10px rgba(0,245,255,0.4);
+    box-shadow: 0 0 10px rgba(0,245,255,0.3);
     letter-spacing: 2px;
-    flex-shrink: 0;
   }
 
-  /* Botões de resposta — empilhados verticalmente */
+  /* Botões de resposta empilhados */
   #answerButtons {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
+    gap: clamp(5px, 1.2vh, 9px);
     width: 100%;
   }
 
   .answer-btn {
-    width: 86px;
-    height: 46px;
+    width: 100%;
+    height: clamp(40px, 9vh, 58px);
     border-radius: 8px;
     border: 2px solid;
     font-family: 'Press Start 2P', monospace;
-    font-size: 13px;
+    font-size: clamp(11px, 2.5vw, 15px);
     cursor: pointer;
-    transition: all 0.12s;
     display: flex; align-items: center; justify-content: center;
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
     touch-action: manipulation;
-    flex-shrink: 0;
-    width: 100%;
+    transition: filter 0.1s, transform 0.1s;
   }
   .answer-btn::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent);
-    border-radius: 8px;
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent);
+    border-radius:8px;
   }
-  .answer-btn:active { transform: scale(0.94); filter: brightness(1.4); }
+  .answer-btn:active { transform:scale(0.93); filter:brightness(1.5); }
 
-  .btn-1 { background: #1a0020; border-color: var(--neon-magenta); color: var(--neon-magenta); box-shadow: 0 0 10px var(--neon-magenta); }
-  .btn-2 { background: #001a20; border-color: var(--neon-cyan);    color: var(--neon-cyan);    box-shadow: 0 0 10px var(--neon-cyan); }
-  .btn-3 { background: #1a1a00; border-color: var(--neon-yellow);  color: var(--neon-yellow);  box-shadow: 0 0 10px var(--neon-yellow); }
+  .btn-1 { background:#1a0020; border-color:var(--neon-magenta); color:var(--neon-magenta); box-shadow:0 0 10px var(--neon-magenta); }
+  .btn-2 { background:#001a20; border-color:var(--neon-cyan);    color:var(--neon-cyan);    box-shadow:0 0 10px var(--neon-cyan); }
+  .btn-3 { background:#1a1a00; border-color:var(--neon-yellow);  color:var(--neon-yellow);  box-shadow:0 0 10px var(--neon-yellow); }
 
   /* Botão FOGO */
   #fireBtn {
-    background: linear-gradient(135deg, #cc2200, #ff4400);
+    background: linear-gradient(135deg,#cc2200,#ff4400);
     border: 2px solid var(--neon-orange);
     color: #fff;
     border-radius: 8px;
-    padding: 0;
     width: 100%;
-    height: 44px;
+    height: clamp(38px, 8vh, 52px);
     font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
+    font-size: clamp(8px, 1.8vw, 10px);
     cursor: pointer;
     box-shadow: 0 0 14px var(--neon-orange);
-    transition: all 0.12s;
-    letter-spacing: 1px;
     touch-action: manipulation;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    transition: filter 0.1s, transform 0.1s;
+    letter-spacing: 1px;
+  }
+  #fireBtn:active { transform:scale(0.93); filter:brightness(1.4); }
+
+  /* ══════════════════════════════════════
+     BOTÃO FULLSCREEN
+  ══════════════════════════════════════ */
+  #fsBtn {
+    position: fixed;
+    bottom: 10px;
+    right: calc(var(--panel-w, 130px) + 8px);
+    z-index: 20;
+    background: rgba(0,0,0,0.55);
+    border: 2px solid rgba(0,245,255,0.5);
+    border-radius: 6px;
+    color: rgba(0,245,255,0.7);
+    font-size: 18px;
+    width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
-    gap: 4px;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
   }
-  #fireBtn:active { transform: scale(0.94); box-shadow: 0 0 24px var(--neon-orange); }
+  #fsBtn:active { transform:scale(0.9); color:#fff; border-color:#fff; }
 
-  /* ── ÁREA DE JOGO: ocupa o espaço restante ── */
-  #gameArea {
-    position: absolute;
-    top: var(--hud-h);
-    left: 0;
-    right: var(--panel-w);
-    bottom: 0;
-    overflow: hidden;
+  /* ══════════════════════════════════════
+     BOTÃO VOLTAR
+  ══════════════════════════════════════ */
+  .btn-back {
+    position: fixed;
+    bottom: 10px;
+    left: 8px;
+    z-index: 20;
+    display: flex; align-items: center; gap: 4px;
+    text-decoration: none;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(6px, 1.3vw, 8px);
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    padding: 4px 8px;
+    background: rgba(4,9,31,0.6);
+    border: 1px solid rgba(180,200,255,0.2);
+    border-radius: 5px;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+    touch-action: manipulation;
   }
+  .btn-back:active { color:#fff; }
 
-  /* ── OVERLAYS ── */
+  /* ══════════════════════════════════════
+     OVERLAYS (tela cheia)
+  ══════════════════════════════════════ */
   .overlay {
-    position: absolute;
+    position: fixed;
     inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(4,0,15,0.93);
+    background: rgba(4,0,15,0.94);
     z-index: 100;
-    gap: 14px;
+    gap: clamp(10px,2.5vh,18px);
     padding: 20px;
   }
   .overlay-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(14px, 3.5vw, 24px);
+    font-size: clamp(14px, 4vw, 26px);
     font-weight: 900;
     color: var(--neon-magenta);
     text-shadow: 0 0 28px var(--neon-magenta);
@@ -263,67 +278,64 @@
     animation: titlePulse 1.5s ease-in-out infinite;
   }
   @keyframes titlePulse {
-    0%,100% { text-shadow: 0 0 20px var(--neon-magenta), 0 0 40px rgba(255,0,255,0.5); }
-    50%     { text-shadow: 0 0 40px var(--neon-magenta), 0 0 80px rgba(255,0,255,0.8); }
+    0%,100%{ text-shadow:0 0 20px var(--neon-magenta),0 0 40px rgba(255,0,255,0.5); }
+    50%    { text-shadow:0 0 40px var(--neon-magenta),0 0 80px rgba(255,0,255,0.8); }
   }
   .overlay-sub {
     color: var(--neon-cyan);
-    font-size: clamp(6px, 1.4vw, 8px);
+    font-size: clamp(6px, 1.5vw, 9px);
     text-shadow: 0 0 8px var(--neon-cyan);
     text-align: center;
     line-height: 2.2;
   }
   .overlay-btn {
-    background: linear-gradient(135deg, #003344, #006688);
+    background: linear-gradient(135deg,#003344,#006688);
     border: 2px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'Press Start 2P', monospace;
-    font-size: clamp(9px, 2vw, 11px);
-    padding: 13px 22px;
+    font-size: clamp(9px, 2.2vw, 12px);
+    padding: clamp(10px,2vh,16px) clamp(18px,3vw,28px);
     cursor: pointer;
     box-shadow: 0 0 18px var(--neon-cyan);
     letter-spacing: 2px;
-    transition: all 0.2s;
     border-radius: 4px;
     touch-action: manipulation;
+    transition: all 0.15s;
   }
-  .overlay-btn:active { transform: scale(1.05); box-shadow: 0 0 32px var(--neon-cyan); }
-  .overlay-score {
-    color: var(--neon-yellow);
-    font-size: clamp(9px, 2vw, 12px);
-    text-shadow: 0 0 12px var(--neon-yellow);
-  }
+  .overlay-btn:active { transform:scale(1.05); box-shadow:0 0 30px var(--neon-cyan); }
+  .overlay-score { color:var(--neon-yellow); font-size:clamp(9px,2.2vw,13px); text-shadow:0 0 10px var(--neon-yellow); }
 
-  /* ── ALERTAS ── */
+  /* ══════════════════════════════════════
+     ALERTAS IN-GAME
+  ══════════════════════════════════════ */
   #comboAlert {
-    position: absolute;
-    top: calc(var(--hud-h) + 6px);
+    position: fixed;
+    top: calc(var(--hud-h, 44px) + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255,102,0,0.9);
+    background: rgba(255,102,0,0.92);
     border: 2px solid var(--neon-yellow);
     color: var(--neon-yellow);
-    font-size: 8px;
-    padding: 4px 10px;
+    font-size: clamp(7px,1.6vw,9px);
+    padding: 4px 12px;
     border-radius: 4px;
-    box-shadow: 0 0 18px var(--neon-orange);
+    box-shadow: 0 0 16px var(--neon-orange);
     z-index: 20;
     display: none;
-    letter-spacing: 1px;
     white-space: nowrap;
     animation: comboAnim 0.3s ease-out;
   }
   @keyframes comboAnim {
-    0%   { transform: translateX(-50%) scale(0.5); opacity: 0; }
-    100% { transform: translateX(-50%) scale(1);   opacity: 1; }
+    0%  { transform:translateX(-50%) scale(0.5); opacity:0; }
+    100%{ transform:translateX(-50%) scale(1);   opacity:1; }
   }
 
   #waveAlert {
-    position: absolute;
+    position: fixed;
     top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%,-50%);
     color: var(--neon-cyan);
-    font-size: clamp(12px, 3vw, 18px);
+    font-size: clamp(12px,3.5vw,20px);
     text-shadow: 0 0 28px var(--neon-cyan);
     z-index: 50;
     display: none;
@@ -331,8 +343,8 @@
     line-height: 2;
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    background: rgba(0,0,20,0.75);
-    padding: 16px 24px;
+    background: rgba(0,0,20,0.8);
+    padding: 18px 28px;
     border: 2px solid var(--neon-cyan);
     border-radius: 8px;
     box-shadow: 0 0 36px rgba(0,245,255,0.4);
@@ -340,126 +352,126 @@
 
   .shake { animation: shake 0.4s ease-in-out; }
   @keyframes shake {
-    0%,100%{transform:translate(0,0)}
+    0%,100%{transform:none}
     20%{transform:translate(-6px,2px)}
     40%{transform:translate(6px,-2px)}
     60%{transform:translate(-4px,3px)}
     80%{transform:translate(4px,-1px)}
   }
 
-  /* ── BOTÃO VOLTAR ── */
-  .btn-back {
-    position: absolute;
-    top: calc(var(--hud-h) + 6px);
-    left: 8px;
-    z-index: 20;
-    display: flex; align-items: center; gap: 4px;
-    text-decoration: none;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 7px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.55);
-    padding: 3px 7px;
-    background: rgba(4,9,31,0.6);
-    border: 1px solid rgba(180,200,255,0.2);
-    border-radius: 5px;
-    backdrop-filter: blur(4px);
-    transition: all 0.3s;
-    touch-action: manipulation;
+  /* Aviso de rotação (portrait) */
+  #rotateMsg {
+    display: none;
+    position: fixed; inset: 0; z-index: 999;
+    background: var(--bg-deep);
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px;
+    color: var(--neon-cyan);
+    font-size: clamp(10px,3vw,16px);
+    text-align: center;
+    padding: 30px;
+    text-shadow: 0 0 10px var(--neon-cyan);
   }
-  .btn-back:active { color: #fff; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); }
-
-  /* ── área de jogo sem bottom-hud ── */
-  #numpadArea { display: none; }
+  #rotateMsg .icon { font-size: clamp(40px,12vw,70px); animation: rotateAnim 1.5s ease-in-out infinite; }
+  @keyframes rotateAnim {
+    0%,100%{ transform:rotate(0deg); }
+    50%    { transform:rotate(90deg); }
+  }
+  @media (orientation: portrait) {
+    #rotateMsg { display: flex; }
+  }
 
 </style>
 </head>
 <body>
 
-<div id="gameWrapper">
-  <!-- Botão voltar -->
-  <a href="index.html" class="btn-back">
-    <span class="icon">❮</span> Início
-  </a>
-  <!-- Background starfield canvas -->
-  <canvas id="bgCanvas" width="800" height="600"></canvas>
-  <!-- Game canvas -->
-  <canvas id="gameCanvas" width="800" height="530"></canvas>
+<!-- Aviso para girar o celular -->
+<div id="rotateMsg">
+  <div class="icon">📱</div>
+  <div>VIRE O CELULAR<br>PARA JOGAR!</div>
+</div>
 
-  <!-- HUD Top -->
-  <div id="hud">
-    <div class="hud-left">
-      <div class="hud-label">PONTUAÇÃO</div>
-      <div class="hud-value" id="scoreDisplay">0</div>
-      <div class="lives" id="livesDisplay">
-        <span class="heart">♥</span>
-        <span class="heart">♥</span>
-        <span class="heart">♥</span>
-      </div>
-    </div>
-    <div class="hud-center">
-      <div id="gameTitle">MULT<span>IPLICATION</span><br>DEFENDER</div>
-    </div>
-    <div class="hud-right">
-      <div id="levelBadge">
-        <span class="hud-label">NÍVEL: <span id="levelDisplay">1</span></span>
-      </div>
-      <div class="wave-info" id="waveInfo">TABUADAS DO 1 AO 3</div>
-      <div id="highScoreDisplay">HI: <span id="hiScoreVal">0</span></div>
-      <button id="muteBtn" onclick="toggleMute()" title="Mutar/Desmutar (M)">🔊</button>
+<!-- Background starfield canvas (full screen) -->
+<canvas id="bgCanvas"></canvas>
+<!-- Game canvas (full screen) -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- HUD Topo -->
+<div id="hud">
+  <div class="hud-left">
+    <div class="hud-label">PONTUAÇÃO</div>
+    <div class="hud-value" id="scoreDisplay">0</div>
+    <div class="lives" id="livesDisplay">
+      <span class="heart">♥</span>
+      <span class="heart">♥</span>
+      <span class="heart">♥</span>
     </div>
   </div>
-
-  <!-- Canvas sits below HUD, to the left of the side panel -->
-  <div id="gameArea"></div>
-
-  <!-- Side Panel: controles à direita -->
-  <div id="sidePanel">
-    <div id="questionDisplay"></div>
-    <div id="inputDisplay">?</div>
-    <div id="answerButtons">
-      <button class="answer-btn btn-1" data-idx="0" onclick="selectAnswer(0)">?</button>
-      <button class="answer-btn btn-2" data-idx="1" onclick="selectAnswer(1)">?</button>
-      <button class="answer-btn btn-3" data-idx="2" onclick="selectAnswer(2)">?</button>
+  <div class="hud-center">
+    <div id="gameTitle">MULT<span>IPLICATION</span><br>DEFENDER</div>
+  </div>
+  <div class="hud-right">
+    <div id="levelBadge">
+      <span class="hud-label">NÍVEL: <span id="levelDisplay">1</span></span>
     </div>
-    <button id="fireBtn" onclick="fireAnswer()">FOGO 🔥</button>
+    <div class="wave-info" id="waveInfo">TABUADAS DO 1 AO 3</div>
+    <div id="highScoreDisplay">HI: <span id="hiScoreVal">0</span></div>
+    <button id="muteBtn" onclick="toggleMute()" title="Mutar (M)">🔊</button>
   </div>
+</div>
 
-  <!-- Combo Alert -->
-  <div id="comboAlert">⚡ FOGO RÁPIDO! COMBO x2 ⚡</div>
-
-  <!-- Wave Alert -->
-  <div id="waveAlert"></div>
-
-  <!-- Start Screen -->
-  <div class="overlay" id="startScreen">
-    <div class="overlay-title">DEFENSORES DA<br>MULTIPLICAÇÃO</div>
-    <div class="overlay-sub">
-      DERROTE OS INVASORES RESPONDENDO<br>
-      AS OPERAÇÕES DE MULTIPLICAÇÃO!<br><br>
-      USE OS BOTÕES OU TECLADO NUMÉRICO<br>
-      PARA SELECIONAR A RESPOSTA<br><br>
-      3 ACERTOS SEGUIDOS = FOGO RÁPIDO!
-    </div>
-    <button class="overlay-btn" onclick="startGame()">▶ INICIAR JOGO</button>
+<!-- Painel lateral direito: controles -->
+<div id="sidePanel">
+  <div id="questionDisplay"></div>
+  <div id="inputDisplay">?</div>
+  <div id="answerButtons">
+    <button class="answer-btn btn-1" data-idx="0" onclick="selectAnswer(0)">?</button>
+    <button class="answer-btn btn-2" data-idx="1" onclick="selectAnswer(1)">?</button>
+    <button class="answer-btn btn-3" data-idx="2" onclick="selectAnswer(2)">?</button>
   </div>
+  <button id="fireBtn" onclick="fireAnswer()">FOGO 🔥</button>
+</div>
 
-  <!-- Game Over Screen -->
-  <div class="overlay" id="gameOverScreen" style="display:none;">
-    <div class="overlay-title" style="color:#ff3366;text-shadow:0 0 30px #ff3366;">GAME OVER</div>
-    <div class="overlay-score">PONTUAÇÃO: <span id="finalScore">0</span></div>
-    <div class="overlay-score" style="color:#aa44ff;font-size:10px;">RECORDE: <span id="finalHiScore">0</span></div>
-    <button class="overlay-btn" onclick="startGame()">↺ JOGAR NOVAMENTE</button>
-  </div>
+<!-- Botão Fullscreen -->
+<button id="fsBtn" onclick="toggleFullscreen()" title="Tela cheia">⛶</button>
 
-  <!-- Victory Screen -->
-  <div class="overlay" id="victoryScreen" style="display:none;">
-    <div class="overlay-title" style="color:var(--neon-yellow);text-shadow:0 0 30px var(--neon-yellow);">VITÓRIA!</div>
-    <div class="overlay-sub">VOCÊ DERROTOU TODOS OS INVASORES!<br>A MATEMÁTICA ESTÁ SALVA! 🚀</div>
-    <div class="overlay-score">PONTUAÇÃO: <span id="victoryScore">0</span></div>
-    <button class="overlay-btn" onclick="startGame()">▶ JOGAR NOVAMENTE</button>
+<!-- Botão voltar -->
+<a href="index.html" class="btn-back">❮ Início</a>
+
+<!-- Combo Alert -->
+<div id="comboAlert">⚡ FOGO RÁPIDO! COMBO x2 ⚡</div>
+
+<!-- Wave Alert -->
+<div id="waveAlert"></div>
+
+<!-- Start Screen -->
+<div class="overlay" id="startScreen">
+  <div class="overlay-title">DEFENSORES DA<br>MULTIPLICAÇÃO</div>
+  <div class="overlay-sub">
+    DERROTE OS INVASORES RESPONDENDO<br>
+    AS OPERAÇÕES DE MULTIPLICAÇÃO!<br><br>
+    TOQUE NOS BOTÕES À DIREITA<br>
+    PARA SELECIONAR A RESPOSTA<br><br>
+    3 ACERTOS SEGUIDOS = FOGO RÁPIDO! 🔥
   </div>
+  <button class="overlay-btn" onclick="startGame()">▶ INICIAR JOGO</button>
+</div>
+
+<!-- Game Over Screen -->
+<div class="overlay" id="gameOverScreen" style="display:none;">
+  <div class="overlay-title" style="color:#ff3366;text-shadow:0 0 30px #ff3366;">GAME OVER</div>
+  <div class="overlay-score">PONTUAÇÃO: <span id="finalScore">0</span></div>
+  <div class="overlay-score" style="color:#aa44ff;font-size:10px;">RECORDE: <span id="finalHiScore">0</span></div>
+  <button class="overlay-btn" onclick="startGame()">↺ JOGAR NOVAMENTE</button>
+</div>
+
+<!-- Victory Screen -->
+<div class="overlay" id="victoryScreen" style="display:none;">
+  <div class="overlay-title" style="color:var(--neon-yellow);text-shadow:0 0 30px var(--neon-yellow);">VITÓRIA! 🚀</div>
+  <div class="overlay-sub">VOCÊ DERROTOU TODOS OS INVASORES!<br>A MATEMÁTICA ESTÁ SALVA!</div>
+  <div class="overlay-score">PONTUAÇÃO: <span id="victoryScore">0</span></div>
+  <button class="overlay-btn" onclick="startGame()">▶ JOGAR NOVAMENTE</button>
 </div>
 
 <script>
@@ -574,109 +586,131 @@ function startChiptune() {
 }
 function stopChiptune() { chiptuneStopped = true; chiptunePlaying = false; }
 
-// ===================== CANVAS SETUP =====================
+// ===================== CANVAS SETUP & RESPONSIVE =====================
 const bgCanvas = document.getElementById('bgCanvas');
-const bgCtx = bgCanvas.getContext('2d');
-const gc = document.getElementById('gameCanvas');
-const ctx = gc.getContext('2d');
+const bgCtx    = bgCanvas.getContext('2d');
+const gc       = document.getElementById('gameCanvas');
+const ctx      = gc.getContext('2d');
 
-// Logical game dimensions (fixed internal resolution)
-const GAME_W = 800, GAME_H = 600;
-const PLAY_TOP = 44;   // HUD height
-const PANEL_W = 110;   // side panel width
-const PLAY_W  = GAME_W - PANEL_W;  // 690
-const PLAY_H  = GAME_H - PLAY_TOP; // 556
+// ── Dimensões dinâmicas (recalculadas no resize) ──
+let VW, VH, HUD_H, PANEL_W, PLAY_W, PLAY_H, RATIO;
 
-// Move canvas inside gameArea div
-const gameArea = document.getElementById('gameArea');
-gameArea.appendChild(gc);
-gc.style.position = 'absolute';
-gc.style.top = '0'; gc.style.left = '0';
-gc.width = PLAY_W; gc.height = PLAY_H;
+// Referência lógica fixa (base para escalar sprites e posições)
+const BASE_W = 690, BASE_H = 556; // área de jogo lógica base
 
-bgCanvas.width = GAME_W; bgCanvas.height = GAME_H;
-
-// Responsive: scale gameWrapper to fit the screen (landscape)
 function resizeGame() {
-  const wrapper = document.getElementById('gameWrapper');
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const scaleX = vw / GAME_W;
-  const scaleY = vh / GAME_H;
-  const scale  = Math.min(scaleX, scaleY, 1);
-  wrapper.style.transform       = `scale(${scale})`;
-  wrapper.style.transformOrigin = 'top left';
-  // Center both axes
-  const scaledW = GAME_W * scale;
-  const scaledH = GAME_H * scale;
-  wrapper.style.left    = Math.max(0, (vw - scaledW) / 2) + 'px';
-  wrapper.style.top     = Math.max(0, (vh - scaledH) / 2) + 'px';
-  wrapper.style.position = 'absolute';
+  VW = window.innerWidth;
+  VH = window.innerHeight;
+
+  HUD_H   = Math.round(VH * 0.092);
+  PANEL_W = Math.max(110, Math.round(VW * 0.16));
+  PLAY_W  = VW - PANEL_W;
+  PLAY_H  = VH - HUD_H;
+  RATIO   = Math.min(PLAY_W / BASE_W, PLAY_H / BASE_H);
+
+  const dpr = window.devicePixelRatio || 1;
+
+  bgCanvas.width  = Math.round(VW  * dpr);
+  bgCanvas.height = Math.round(VH  * dpr);
+  bgCanvas.style.width  = VW  + 'px';
+  bgCanvas.style.height = VH  + 'px';
+  bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  gc.width  = Math.round(PLAY_W * dpr);
+  gc.height = Math.round(PLAY_H * dpr);
+  gc.style.width  = PLAY_W + 'px';
+  gc.style.height = PLAY_H + 'px';
+  gc.style.left   = '0px';
+  gc.style.top    = HUD_H  + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  document.documentElement.style.setProperty('--hud-h',   HUD_H   + 'px');
+  document.documentElement.style.setProperty('--panel-w', PANEL_W + 'px');
+
+  if (stars.length) stars.forEach(s => { s.x = Math.random()*VW; s.y = Math.random()*VH; });
 }
-resizeGame();
-window.addEventListener('resize', resizeGame);
-window.addEventListener('orientationchange', () => setTimeout(resizeGame, 200));
+
+// Fullscreen API
+function toggleFullscreen() {
+  const btn = document.getElementById('fsBtn');
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    const el = document.documentElement;
+    if (el.requestFullscreen)       el.requestFullscreen({navigationUI:'hide'});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    btn.textContent = '✕';
+    // Solicita orientação landscape se disponível
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(()=>{});
+    }
+  } else {
+    if (document.exitFullscreen)       document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    btn.textContent = '⛶';
+  }
+}
+document.addEventListener('fullscreenchange', ()=>{
+  const btn = document.getElementById('fsBtn');
+  btn.textContent = document.fullscreenElement ? '✕' : '⛶';
+  setTimeout(resizeGame, 100);
+});
+document.addEventListener('webkitfullscreenchange', ()=>setTimeout(resizeGame, 100));
 
 // ===================== STARFIELD =====================
 const stars = [];
 for(let i=0;i<200;i++){
   stars.push({
-    x: Math.random()*GAME_W,
-    y: Math.random()*GAME_H,
+    x: Math.random()*1000,
+    y: Math.random()*600,
     r: Math.random()*1.8+0.2,
-    speed: Math.random()*0.4+0.1,
+    speed: Math.random()*0.5+0.1,
     brightness: Math.random(),
     color: Math.random() < 0.1 ? `hsl(${Math.random()*60+180},100%,80%)` : '#fff'
   });
 }
 
-// Nebula clouds
+// Chama resizeGame agora que stars existe, e registra listeners
+resizeGame();
+window.addEventListener('resize', resizeGame);
+window.addEventListener('orientationchange', () => setTimeout(resizeGame, 250));
+
+// Nebula clouds (% based, redrawn each frame)
 const nebulae = [
-  {x:200,y:200,rx:250,ry:150,color:'rgba(80,0,120,0.18)'},
-  {x:600,y:350,rx:200,ry:120,color:'rgba(0,60,120,0.15)'},
-  {x:400,y:100,rx:300,ry:100,color:'rgba(120,0,80,0.12)'},
+  {px:0.25,py:0.35,rx:0.3,ry:0.25,color:'rgba(80,0,120,0.18)'},
+  {px:0.75,py:0.60,rx:0.25,ry:0.22,color:'rgba(0,60,120,0.15)'},
+  {px:0.50,py:0.18,rx:0.38,ry:0.18,color:'rgba(120,0,80,0.12)'},
 ];
 
 function drawBackground() {
-  bgCtx.clearRect(0,0,GAME_W,GAME_H);
-  // Deep space
-  const grad = bgCtx.createRadialGradient(GAME_W/2,GAME_H/2,0,GAME_W/2,GAME_H/2,500);
+  const W = VW || 800, H = VH || 600;
+  bgCtx.clearRect(0,0,W,H);
+  const grad = bgCtx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.7);
   grad.addColorStop(0,'#0a0030');
   grad.addColorStop(0.5,'#050018');
   grad.addColorStop(1,'#02000a');
   bgCtx.fillStyle = grad;
-  bgCtx.fillRect(0,0,GAME_W,GAME_H);
-  // Nebulae
+  bgCtx.fillRect(0,0,W,H);
   nebulae.forEach(n=>{
-    const g = bgCtx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.rx);
-    g.addColorStop(0,n.color);
-    g.addColorStop(1,'transparent');
+    const nx=n.px*W, ny=n.py*H, nrx=n.rx*W;
+    const g = bgCtx.createRadialGradient(nx,ny,0,nx,ny,nrx);
+    g.addColorStop(0,n.color); g.addColorStop(1,'transparent');
     bgCtx.fillStyle=g;
     bgCtx.beginPath();
-    bgCtx.ellipse(n.x,n.y,n.rx,n.ry,0,0,Math.PI*2);
+    bgCtx.ellipse(nx,ny,nrx,n.ry*H,0,0,Math.PI*2);
     bgCtx.fill();
   });
-  // Stars
   stars.forEach(s=>{
-    const twinkle = 0.5 + 0.5*Math.sin(Date.now()*0.003*s.speed+s.x);
-    bgCtx.globalAlpha = 0.3 + twinkle*0.7;
+    const twinkle = 0.5+0.5*Math.sin(Date.now()*0.003*s.speed+s.x);
+    bgCtx.globalAlpha = 0.3+twinkle*0.7;
     bgCtx.fillStyle = s.color;
-    bgCtx.beginPath();
-    bgCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    bgCtx.fill();
-    // Glowing stars
-    if(s.r > 1.5){
-      bgCtx.globalAlpha = 0.1*twinkle;
-      bgCtx.fillStyle = '#fff';
-      bgCtx.beginPath();
-      bgCtx.arc(s.x,s.y,s.r*3,0,Math.PI*2);
-      bgCtx.fill();
+    bgCtx.beginPath(); bgCtx.arc(s.x,s.y,s.r,0,Math.PI*2); bgCtx.fill();
+    if(s.r>1.5){
+      bgCtx.globalAlpha=0.1*twinkle;
+      bgCtx.fillStyle='#fff';
+      bgCtx.beginPath(); bgCtx.arc(s.x,s.y,s.r*3,0,Math.PI*2); bgCtx.fill();
     }
   });
-  bgCtx.globalAlpha = 1;
-
-  // Scroll stars
-  stars.forEach(s=>{ s.y+=s.speed; if(s.y>GAME_H){s.y=0;s.x=Math.random()*GAME_W;} });
+  bgCtx.globalAlpha=1;
+  stars.forEach(s=>{ s.y+=s.speed; if(s.y>(VH||600)){s.y=0;s.x=Math.random()*(VW||800);} });
 }
 
 // ===================== GAME STATE =====================
@@ -699,7 +733,7 @@ let gameState = {
   answers: [],
   selectedAnswer: null,
   enemies: [],
-  player: { x: 370, y: 420, w: 52, h: 60, vx: 0, firing: false, fireTimer: 0 },
+  player: { x: 300, y: 400, w: 52, h: 60, vx: 0, firing: false, fireTimer: 0 },
   bullets: [],
   particles: [],
   explosions: [],
@@ -910,9 +944,14 @@ function generateAnswerOptions(correct, tables) {
 function spawnWave(waveNum) {
   const conf = WAVE_CONFIG[waveNum-1];
   gameState.enemies = [];
+  const pw = PLAY_W || BASE_W;
   const rows = 4, cols = 5;
-  const startX = 50, startY = 10;
-  const spacingX = 120, spacingY = 68;
+  const eW = Math.round(52 * RATIO), eH = Math.round(50 * RATIO);
+  const totalW = cols * eW + (cols-1)*Math.round(20*RATIO);
+  const startX = Math.round((pw - totalW) / 2);
+  const startY = Math.round(10 * RATIO);
+  const spacingX = Math.round(eW + 20*RATIO);
+  const spacingY = Math.round(eH + 18*RATIO);
 
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
@@ -921,7 +960,7 @@ function spawnWave(waveNum) {
       gameState.enemies.push({
         x: startX + c*spacingX,
         y: startY + r*spacingY,
-        w: 52, h: 50,
+        w: eW, h: eH,
         typeIdx,
         question: q,
         hitTimer: 0,
@@ -941,7 +980,7 @@ function pickTargetEnemy() {
   const alive = gameState.enemies.filter(e=>e.alive);
   if(alive.length===0) return null;
   // Target lowest enemy in middle columns
-  alive.sort((a,b)=>b.y-a.y||(Math.abs(a.x-400)-Math.abs(b.x-400)));
+  alive.sort((a,b)=>b.y-a.y||(Math.abs(a.x-(PLAY_W||BASE_W)/2)-Math.abs(b.x-(PLAY_W||BASE_W)/2)));
   return alive[0];
 }
 
@@ -1019,9 +1058,39 @@ function spawnParticles(cx,cy,correct){
 let shakeTimer=0, shakeIntensity=0;
 function shake(intensity=6, duration=15){
   shakeTimer=duration; shakeIntensity=intensity;
-  document.getElementById('gameWrapper').classList.add('shake');
-  setTimeout(()=>document.getElementById('gameWrapper').classList.remove('shake'),400);
+  document.getElementById('gameCanvas').classList.add('shake');
+  setTimeout(()=>document.getElementById('gameCanvas').classList.remove('shake'),400);
 }
+
+// ===================== INPUT =====================
+const keys={};
+document.addEventListener('keydown',e=>{
+  keys[e.key]=true;
+  if(e.key==='m'||e.key==='M'){ toggleMute(); return; }
+  if(!gameState.running)return;
+  const n=parseInt(e.key);
+  if(n>=1&&n<=3){selectAnswer(n-1);}
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();fireAnswer();}
+});
+document.addEventListener('keyup',e=>keys[e.key]=false);
+
+// Touch: prevent double-tap zoom on interactive buttons
+document.querySelectorAll('.answer-btn, #fireBtn, .overlay-btn, #muteBtn, #fsBtn').forEach(el=>{
+  el.addEventListener('touchstart', e=>{ e.preventDefault(); el.click(); }, {passive:false});
+});
+
+// Touch drag on game canvas to move player left/right
+let touchStartX = null;
+gc.addEventListener('touchstart', e=>{ touchStartX = e.touches[0].clientX; }, {passive:true});
+gc.addEventListener('touchmove', e=>{
+  if(touchStartX===null || !gameState.running) return;
+  const dx = e.touches[0].clientX - touchStartX;
+  const gs = gameState;
+  const pw = PLAY_W || BASE_W;
+  gs.player.x = Math.max(0, Math.min(pw - gs.player.w, gs.player.x + dx * 0.8));
+  touchStartX = e.touches[0].clientX;
+}, {passive:true});
+gc.addEventListener('touchend', ()=>{ touchStartX=null; }, {passive:true});
 
 // ===================== COMBO SYSTEM =====================
 function addCombo(){
@@ -1067,8 +1136,9 @@ function update(dt){
   }
 
   // Player movement
-  if(keys['ArrowLeft']||keys['a']){gs.player.x=Math.max(0,gs.player.x-5*dt);}
-  if(keys['ArrowRight']||keys['d']){gs.player.x=Math.min(PLAY_W-52,gs.player.x+5*dt);}
+  const pw = PLAY_W || BASE_W, ph = PLAY_H || BASE_H;
+  if(keys['ArrowLeft']||keys['a']){gs.player.x=Math.max(0,gs.player.x-5*dt*(pw/BASE_W));}
+  if(keys['ArrowRight']||keys['d']){gs.player.x=Math.min(pw-gs.player.w,gs.player.x+5*dt*(pw/BASE_W));}
 
   // Enemy movement
   gs.enemyMoveTimer+=dt;
@@ -1081,18 +1151,18 @@ function update(dt){
     const leftX=Math.min(...alive.map(e=>e.x));
     const rightX=Math.max(...alive.map(e=>e.x+e.w));
     let descend=false;
-    if(rightX>=(PLAY_W-20)&&gs.enemyDir===1){gs.enemyDir=-1;descend=true;}
-    if(leftX<=10&&gs.enemyDir===-1){gs.enemyDir=1;descend=true;}
+    if(rightX>=(pw-12)&&gs.enemyDir===1){gs.enemyDir=-1;descend=true;}
+    if(leftX<=8&&gs.enemyDir===-1){gs.enemyDir=1;descend=true;}
 
-    const step = descend ? 0 : 18*gs.enemyDir;
-    const downStep = descend ? 20 : 0;
+    const step = descend ? 0 : Math.round(18*(pw/BASE_W))*gs.enemyDir;
+    const downStep = descend ? Math.round(20*(ph/BASE_H)) : 0;
     gs.enemies.forEach(e=>{
       if(e.alive){e.x+=step;e.y+=downStep;}
     });
 
     // Check if enemies reached bottom
     const maxY=Math.max(...alive.map(e=>e.y+e.h));
-    if(maxY>=420){
+    if(maxY>=(ph*0.78)){
       gs.lives--;
       updateLivesUI();
       shake(10,20);
@@ -1183,7 +1253,8 @@ function nextWave(){
 }
 
 function render(){
-  ctx.clearRect(0,0,PLAY_W,PLAY_H);
+  const pw = PLAY_W || BASE_W, ph = PLAY_H || BASE_H;
+  ctx.clearRect(0,0,pw,ph);
 
   const gs=gameState;
 
@@ -1196,17 +1267,19 @@ function render(){
 
     // Question label on enemy
     ctx.save();
-    ctx.font="bold 9px 'Press Start 2P', monospace";
+    const labelFontSize = Math.max(6, Math.round(9 * RATIO));
+    const labelH = Math.round(16 * RATIO);
+    ctx.font=`bold ${labelFontSize}px 'Press Start 2P', monospace`;
     ctx.textAlign='center';
     ctx.fillStyle='#000';
-    ctx.fillRect(e.x,e.y+e.h+1,e.w,16);
+    ctx.fillRect(e.x,e.y+e.h+1,e.w,labelH);
     ctx.strokeStyle=hit?'#ff3300':'#00f5ff';
     ctx.lineWidth=1;
-    ctx.strokeRect(e.x,e.y+e.h+1,e.w,16);
+    ctx.strokeRect(e.x,e.y+e.h+1,e.w,labelH);
     ctx.fillStyle=hit?'#ff6600':'#00f5ff';
     ctx.shadowColor=hit?'#ff3300':'#00f5ff';
     ctx.shadowBlur=6;
-    ctx.fillText(e.question.text, e.x+e.w/2, e.y+e.h+13);
+    ctx.fillText(e.question.text, e.x+e.w/2, e.y+e.h+labelH-2);
     ctx.shadowBlur=0;
     ctx.restore();
 
@@ -1237,7 +1310,7 @@ function render(){
     ctx.shadowBlur=12;
     ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-(b.targetX-b.x)*0.3,b.y-(b.targetY-b.y)*0.3);ctx.stroke();
     // Answer label on bullet
-    ctx.font="9px 'Press Start 2P'";
+    ctx.font=`${Math.max(7,Math.round(9*RATIO))}px 'Press Start 2P'`;
     ctx.textAlign='center';
     ctx.fillStyle='#fff';
     ctx.shadowColor=c;
@@ -1265,12 +1338,12 @@ function render(){
   // Draw player
   drawPlayer(ctx, gs.player.x, gs.player.y, false, gs.comboActive);
 
-  // Grid line (base)
   ctx.save();
   ctx.strokeStyle='rgba(0,245,255,0.25)';
   ctx.lineWidth=1;
   ctx.setLineDash([6,4]);
-  ctx.beginPath();ctx.moveTo(0,440);ctx.lineTo(PLAY_W,440);ctx.stroke();
+  const baseLineY = ph * 0.79;
+  ctx.beginPath();ctx.moveTo(0,baseLineY);ctx.lineTo(pw,baseLineY);ctx.stroke();
   ctx.setLineDash([]);
   ctx.restore();
 
@@ -1279,32 +1352,14 @@ function render(){
     const pct=gs.comboTimer/300;
     ctx.save();
     ctx.fillStyle='rgba(255,100,0,0.2)';
-    ctx.fillRect(0,0,PLAY_W,4);
-    const bg=ctx.createLinearGradient(0,0,PLAY_W,0);
+    ctx.fillRect(0,0,pw,4);
+    const bg=ctx.createLinearGradient(0,0,pw,0);
     bg.addColorStop(0,'#ff6600');bg.addColorStop(0.5,'#ffdd00');bg.addColorStop(1,'#ff6600');
     ctx.fillStyle=bg;
-    ctx.fillRect(0,0,PLAY_W*pct,4);
+    ctx.fillRect(0,0,pw*pct,4);
     ctx.restore();
   }
 }
-
-// ===================== INPUT =====================
-const keys={};
-document.addEventListener('keydown',e=>{
-  keys[e.key]=true;
-  if(e.key==='m'||e.key==='M'){ toggleMute(); return; }
-  if(!gameState.running)return;
-  // Number keys 1-6 select answer
-  const n=parseInt(e.key);
-  if(n>=1&&n<=3){selectAnswer(n-1);}
-  if(e.key==='Enter'||e.key===' '){e.preventDefault();fireAnswer();}
-});
-document.addEventListener('keyup',e=>keys[e.key]=false);
-
-// Touch: prevent double-tap zoom on buttons
-document.querySelectorAll('.answer-btn, #fireBtn, .overlay-btn, #muteBtn').forEach(el=>{
-  el.addEventListener('touchstart', e=>{ e.preventDefault(); el.click(); }, {passive:false});
-});
 
 // ===================== GAME CONTROL =====================
 function startGame(){
@@ -1320,7 +1375,7 @@ function startGame(){
     enemies:[], bullets:[], particles:[],
     gameOver:false, victory:false,
     enemyDir:1, enemyMoveTimer:0, enemyMoveInterval:60,
-    player:{x:319,y:390,w:52,h:60,vx:0,firing:false,fireTimer:0},
+    player:{x: Math.max(0,(PLAY_W||BASE_W)/2 - 26), y: Math.round((PLAY_H||BASE_H)*0.78) - 60, w:52,h:60,vx:0,firing:false,fireTimer:0},
   });
 
   document.getElementById('scoreDisplay').textContent='0';
@@ -1380,5 +1435,4 @@ bgLoop();
 </script>
 </body>
 </html>
-
 
