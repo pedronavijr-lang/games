@@ -100,7 +100,7 @@ body{background:var(--bg);font-family:'Cinzel',serif;overflow:hidden;width:100vw
 #energy-bar{height:12px;background:#1a0a30;border-radius:6px;border:1px solid var(--purple-light);overflow:hidden;}
 #energy-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--electric-blue),var(--neon-pink));border-radius:6px;transition:width .4s,background .4s;box-shadow:0 0 8px var(--electric-blue);}
 #sequence-wrap{display:flex;gap:.28rem;align-items:center;}
-.seq-dot{width:12px;height:12px;border-radius:50%;background:#2a1a50;border:1px solid var(--purple-light);transition:all .3s;}
+.seq-dot{width:10px;height:10px;border-radius:50%;background:#2a1a50;border:1px solid var(--purple-light);transition:all .3s;}
 .seq-dot.done{background:var(--gold);box-shadow:0 0 8px var(--gold);border-color:var(--gold-light);}
 .back-btn{padding:.3rem .75rem;border-radius:8px;background:transparent;border:1px solid var(--purple-light);color:var(--purple-light);cursor:pointer;font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.07em;transition:all .2s;}
 .back-btn:hover{border-color:var(--gold);color:var(--gold);}
@@ -207,7 +207,7 @@ body{background:var(--bg);font-family:'Cinzel',serif;overflow:hidden;width:100vw
 <div class="screen" id="menu-screen">
   <div id="menu-mascot">🧙</div>
   <div class="lab-title">The Alchemist's Lab</div>
-  <div class="lab-subtitle">✦ Laboratório de Tabuadas ✦</div>
+  <div class="lab-subtitle">✦ Laboratório de Tabuadas Místicas ✦</div>
   <div class="difficulty-grid">
     <button class="diff-btn btn-easy" onclick="startGame('easy')">
       <span class="btn-title">⚗️ Aprendiz de Alquimista</span>
@@ -455,7 +455,7 @@ let reviewQuestions=[],reviewIdx=0,reviewCorrect=0,reviewActive=false;
 const CONFIGS={
   easy:{tables:[1,2,3,4,5],label:'⚗️ Aprendiz',liquidColors:['#3aff7a','#00ff9f']},
   medium:{tables:[1,2,3,4,5,6,7,8,9],label:'🫧 Alquimista',liquidColors:['#00aaff','#0055ff']},
-  hard:{tables:[6,7,8,9],seqLen:5,timePerQ:12,label:'⚡ Mestre',liquidColors:['#ffd700','#ff9900']}
+  hard:{tables:[6,7,8,9],seqLen:10,timePerQ:20,label:'⚡ Mestre',liquidColors:['#ffd700','#ff9900']}
 };
 
 // ══════════ TROPHIES ══════════
@@ -522,7 +522,8 @@ function updateHUD(){
 }
 function updateSequenceDots(){
   const w=document.getElementById('sequence-wrap');w.innerHTML='';
-  for(let i=0;i<5;i++){const d=document.createElement('div');d.className='seq-dot'+(i<hardSequence?' done':'');w.appendChild(d);}
+  const total=(CONFIGS[currentDiff]&&CONFIGS[currentDiff].seqLen)||10;
+  for(let i=0;i<total;i++){const d=document.createElement('div');d.className='seq-dot'+(i<hardSequence?' done':'');w.appendChild(d);}
 }
 
 // ══════════ FORMULA ══════════
@@ -606,9 +607,36 @@ function buildMediumUI(){
   bubbleInterval=setInterval(()=>{if(!gameActive||reviewActive)return;if(activeBubbles.length<6)spawnOneBubble();},1900);
 }
 const BCOLORS=[{border:'#3aff7a',bg:'rgba(0,200,120,.22)',text:'#afffcf'},{border:'#00aaff',bg:'rgba(0,150,255,.22)',text:'#aaddff'},{border:'#ff3dff',bg:'rgba(200,0,200,.22)',text:'#ffaaff'},{border:'#ffd700',bg:'rgba(200,160,0,.22)',text:'#ffe566'},{border:'#ff6644',bg:'rgba(200,80,50,.22)',text:'#ffccbb'}];
+// Retorna posição X livre para uma bolha de tamanho sz,
+// evitando sobreposição com bolhas já ativas.
+function freeBubbleX(field, sz){
+  const W = field.offsetWidth;
+  const margin = 6;
+  // Divide o campo em slots de largura sz+margin e escolhe aleatoriamente
+  const slotW = sz + margin;
+  const slots = Math.max(1, Math.floor((W - margin) / slotW));
+  // Embaralha slots e pega o primeiro que não colide
+  const order = Array.from({length:slots},(_,i)=>i);
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  for(const s of order){
+    const x = margin + s * slotW;
+    // Verifica colisão com bolhas ativas (considera apenas posição X)
+    const clash = activeBubbles.some(b=>{
+      const bx = parseFloat(b.style.left);
+      const bsz = parseFloat(b.style.width);
+      return Math.abs(x - bx) < (sz + bsz) / 2 + margin;
+    });
+    if(!clash) return Math.min(x, W - sz - margin);
+  }
+  // Fallback: posição aleatória simples
+  return Math.max(margin, Math.random() * (W - sz - margin * 2));
+}
+
 function spawnBubbleWave(){
   const correct=correctAnswer(),nums=generateOptions(correct,4);
-  nums.forEach((n,i)=>setTimeout(()=>{if(gameActive)spawnBubble(n,n===correct);},i*520));
+  // Limpa bolhas antigas antes de lançar onda nova
+  clearBubbles();
+  nums.forEach((n,i)=>setTimeout(()=>{if(gameActive)spawnBubble(n,n===correct);},i*650));
 }
 function spawnOneBubble(){
   const correct=correctAnswer(),isCorrect=Math.random()<.35;
@@ -621,8 +649,13 @@ function spawnBubble(num,isAnswer){
   const field=document.getElementById('bubble-field');
   if(!field)return;
   const el=document.createElement('div');el.className='bubble';
-  const sz=60+Math.random()*24,col=BCOLORS[Math.floor(Math.random()*BCOLORS.length)],dur=5+Math.random()*4,left=Math.random()*(field.offsetWidth-sz-10)+5;
-  el.style.cssText=`width:${sz}px;height:${sz}px;left:${left}px;border-color:${col.border};background:${col.bg};color:${col.text};font-size:${sz*.37}px;animation-duration:${dur}s;box-shadow:0 0 12px ${col.border}55;`;
+  // Tamanho fixo por legibilidade (sem variação excessiva)
+  const sz=64,col=BCOLORS[Math.floor(Math.random()*BCOLORS.length)];
+  // Duração variada para que as bolhas não cheguem ao topo juntas
+  const dur=6+Math.random()*4;
+  // Posição X sem sobreposição
+  const left=freeBubbleX(field,sz);
+  el.style.cssText=`width:${sz}px;height:${sz}px;left:${left}px;border-color:${col.border};background:${col.bg};color:${col.text};font-size:${sz*.38}px;animation-duration:${dur}s;box-shadow:0 0 14px ${col.border}66;`;
   el.textContent=num;
   el.onclick=()=>handleBubbleClick(el,num,isAnswer);
   field.appendChild(el);activeBubbles.push(el);
@@ -664,7 +697,7 @@ function renderFlasksHard(){
 function handleHardClick(val,correct,btn){
   if(!gameActive||reviewActive)return;
   stopHardTimer();
-  if(val===correct){onCorrect(btn.getBoundingClientRect());hardSequence++;updateSequenceDots();if(hardSequence>=5){setTimeout(()=>showResult('win'),800);}else setTimeout(nextHardQuestion,720);}
+  if(val===correct){onCorrect(btn.getBoundingClientRect());hardSequence++;updateSequenceDots();if(hardSequence>=10){setTimeout(()=>showResult('win'),800);}else setTimeout(nextHardQuestion,720);}
   else{onWrong(val,correct);hardSequence=0;updateSequenceDots();setTimeout(nextHardQuestion,1000);}
 }
 function startHardTimer(){
@@ -686,7 +719,7 @@ function onTimerExpire(){
   const correct=correctAnswer();
   onWrong(null,correct);
   hardSequence=0;updateSequenceDots();
-  energy=Math.max(0,energy-15);updateHUD();
+  energy=Math.max(0,energy-8);updateHUD();
   if(energy<=0){showResult('lose');return;}
   setTimeout(nextHardQuestion,1000);
 }
@@ -694,7 +727,7 @@ function onTimerExpire(){
 // ══════════ CORRECT / WRONG ══════════
 function onCorrect(rect){
   playSuccess();flashFormula('success');
-  score+=(currentDiff==='hard'?30:currentDiff==='medium'?20:10)+streak*2;
+  score+=(currentDiff==='hard'?50:currentDiff==='medium'?20:10)+streak*3;
   streak++;answeredCorrectly++;answeredTotal++;
   recordStat(currentA,true);
   // easy: energy only positive; others +5
@@ -709,14 +742,14 @@ function onCorrect(rect){
   if(window.speechSynthesis) window.speechSynthesis.cancel();
   speak(`${correctAnswer()}! Muito bem!`);
   checkTrophies();
-  if(answeredCorrectly>0&&answeredCorrectly%3===0&&!reviewActive)setTimeout(scheduleReview,1200);
+  if(answeredCorrectly>0&&answeredCorrectly%8===0&&!reviewActive)setTimeout(scheduleReview,1200);
   if(answeredCorrectly>0&&answeredCorrectly%10===0)playLevelUp();
 }
 function onWrong(val,correct){
   playError();flashFormula('error');
   streak=0;answeredTotal++;
   recordStat(currentA,false);
-  if(currentDiff!=='easy')energy=Math.max(0,energy-10);
+  if(currentDiff!=='easy')energy=Math.max(0,energy-(currentDiff==='hard'?6:10));
   updateHUD();
   pulseCaludron('error');
   mascotError();
