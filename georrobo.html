@@ -696,10 +696,317 @@
   .lc-btn.menu { background: linear-gradient(135deg,#0a1f30,#050e1a); border-color: var(--accent); color: var(--accent); }
   .lc-btn.menu:hover { box-shadow: 0 0 30px rgba(0,245,255,0.4); transform: translateY(-3px); }
 
+  /* ── EFFICIENCY COUNTER ── */
+  #efficiency-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--panel2);
+    border: 1px solid var(--grid-border);
+    border-radius: 8px;
+    margin-top: 8px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.68rem;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #efficiency-bar .eff-mine {
+    color: var(--accent4);
+    font-weight: 700;
+  }
+  #efficiency-bar .eff-sep { color: #334; }
+  #efficiency-bar .eff-opt { color: var(--accent3); }
+  #efficiency-bar .eff-bonus {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    border: 1px solid;
+    transition: all 0.3s;
+  }
+  #efficiency-bar .eff-bonus.great { border-color: #7cff6b; color: #7cff6b; background: rgba(124,255,107,0.1); }
+  #efficiency-bar .eff-bonus.good  { border-color: #f5c842; color: #f5c842; background: rgba(245,200,66,0.1); }
+  #efficiency-bar .eff-bonus.ok    { border-color: #556; color: #778; background: transparent; }
+
+  /* ── ATTEMPT HISTORY ── */
+  #attempt-log {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 130px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  #attempt-log:empty::before {
+    content: 'Nenhuma tentativa ainda...';
+    color: #334;
+    font-size: 0.72rem;
+    font-family: 'Orbitron', monospace;
+    padding: 4px;
+    display: block;
+  }
+  .attempt-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    background: var(--panel2);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 0.68rem;
+    font-family: 'Orbitron', monospace;
+    border-left: 3px solid;
+    animation: popIn 0.25s ease;
+  }
+  .attempt-entry.fail    { border-color: var(--red); }
+  .attempt-entry.oob     { border-color: var(--accent2); }
+  .attempt-entry.success { border-color: var(--accent3); }
+  .attempt-entry .att-num { color: #446; flex-shrink: 0; }
+  .attempt-entry .att-msg { color: #aac; line-height: 1.4; flex: 1; }
+  .attempt-entry.fail    .att-msg { color: #ff9aaa; }
+  .attempt-entry.oob     .att-msg { color: #ffb897; }
+  .attempt-entry.success .att-msg { color: #a0ffb0; }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--grid-border); border-radius: 3px; }
+
+  /* ── CUSTOM LEVEL CARD ── */
+  .ls-card.custom { border-color: #6b35ff; }
+  .ls-card.custom::before { background: radial-gradient(ellipse at 50% 0%, rgba(107,53,255,0.14), transparent 70%); }
+  .ls-card.custom:hover { border-color: #b66dff; box-shadow: 0 0 30px rgba(182,109,255,0.35); transform: translateY(-4px); }
+  .ls-card.custom:hover::before { opacity: 1; }
+  .ls-card.custom .ls-card-name { color: #b66dff; }
+  .ls-cards-wrap { display: flex; flex-direction: column; gap: 16px; }
+  .ls-cards-row2 { display: flex; justify-content: center; }
+  .ls-card.custom-wide { max-width: 320px; width: 100%; }
+
+  /* ── EDITOR OVERLAY ── */
+  #editor-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,7,14,0.97);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 350;
+    backdrop-filter: blur(10px);
+  }
+  #editor-overlay.hidden { display: none; }
+  .editor-box {
+    background: var(--panel);
+    border: 2px solid var(--purple);
+    border-radius: 20px;
+    padding: 28px 32px;
+    max-width: 860px;
+    width: 96%;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 0 60px rgba(182,109,255,0.2), inset 0 0 40px rgba(182,109,255,0.03);
+    animation: popupIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  .editor-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--purple);
+    text-shadow: 0 0 16px rgba(182,109,255,0.6);
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+  .editor-sub {
+    font-size: 0.82rem;
+    color: #667;
+    margin-bottom: 20px;
+  }
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 24px;
+    align-items: start;
+  }
+  /* Editor grid */
+  .ed-grid-wrap {
+    position: relative;
+    background: #070c14;
+    border: 1px solid #1e3a5f;
+    border-radius: 12px;
+    padding: 10px;
+    user-select: none;
+  }
+  #ed-canvas {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    cursor: crosshair;
+  }
+  /* Tool palette */
+  .ed-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ed-section-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .ed-tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background: var(--panel2);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    width: 100%;
+    text-align: left;
+  }
+  .ed-tool-btn:hover { border-color: var(--purple); }
+  .ed-tool-btn.active { border-color: var(--purple); background: rgba(182,109,255,0.12); box-shadow: 0 0 10px rgba(182,109,255,0.25); }
+  .ed-tool-icon { font-size: 1.3rem; }
+  .ed-tool-name { font-size: 0.78rem; }
+  .ed-tool-desc { font-size: 0.62rem; color: #556; }
+
+  /* Obstacle type selector */
+  .ed-obs-types {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .ed-obs-type {
+    flex: 1;
+    min-width: 60px;
+    padding: 7px 6px;
+    border-radius: 8px;
+    border: 2px solid var(--grid-border);
+    background: var(--panel2);
+    color: #aaa;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+  }
+  .ed-obs-type.active { border-color: var(--accent2); color: var(--accent2); background: rgba(255,107,53,0.1); }
+
+  /* Direction selector */
+  .ed-dir-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    max-width: 110px;
+  }
+  .ed-dir-btn {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--grid-border);
+    background: var(--panel2);
+    color: #667;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .ed-dir-btn.active { border-color: var(--accent3); color: var(--accent3); background: rgba(124,255,107,0.12); }
+
+  /* Phase config */
+  .ed-phase-inputs { display: flex; flex-direction: column; gap: 8px; }
+  .ed-input-row { display: flex; flex-direction: column; gap: 3px; }
+  .ed-input-label { font-family:'Orbitron',monospace; font-size:0.6rem; color:var(--accent); letter-spacing:1px; }
+  .ed-input {
+    background: #0d1b2e;
+    border: 1px solid var(--purple);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    padding: 6px 10px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .ed-input:focus { border-color: var(--accent); }
+
+  /* Editor action buttons */
+  .ed-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .ed-save-btn {
+    padding: 13px;
+    background: linear-gradient(135deg, #2a0070, #1a0045);
+    border: 2px solid var(--purple);
+    border-radius: 12px;
+    color: var(--purple);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.25s;
+    width: 100%;
+  }
+  .ed-save-btn:hover { background: linear-gradient(135deg,#3d00a0,#280060); box-shadow: 0 0 25px rgba(182,109,255,0.5); transform: translateY(-2px); }
+  .ed-clear-btn {
+    padding: 9px;
+    background: var(--panel2);
+    border: 1px solid #334;
+    border-radius: 10px;
+    color: #667;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.18s;
+    width: 100%;
+  }
+  .ed-clear-btn:hover { border-color: var(--red); color: var(--red); }
+  .ed-back-btn {
+    padding: 9px;
+    background: var(--panel2);
+    border: 1px solid #334;
+    border-radius: 10px;
+    color: #667;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.18s;
+    width: 100%;
+  }
+  .ed-back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Ed obstacle count badge */
+  .ed-obs-count {
+    font-family:'Orbitron',monospace;
+    font-size:0.62rem;
+    color:#446;
+    letter-spacing:1px;
+    margin-top:4px;
+  }
+  /* Editor hint */
+  .ed-hint {
+    font-size: 0.72rem;
+    color: #445;
+    text-align: center;
+    margin-top: 6px;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+  }
+
+  @media(max-width:700px){
+    .editor-layout { grid-template-columns: 1fr; }
+    .editor-box { padding: 18px 14px; }
+  }
 
   /* Circuit background decoration */
   .circuit-deco {
@@ -850,6 +1157,18 @@
     <div class="panel-card">
       <h2>📋 Fila de Algoritmo</h2>
       <div id="queue-display"><span style="color:#334;font-size:0.75rem;font-family:'Orbitron',monospace;padding:4px">Adicione comandos acima...</span></div>
+      <div id="efficiency-bar">
+        <span class="eff-mine">Seu algoritmo: <span id="eff-mine-val">0</span> cmd</span>
+        <span class="eff-sep">|</span>
+        <span class="eff-opt">Ótimo: <span id="eff-opt-val">—</span> cmd</span>
+        <span class="eff-bonus ok" id="eff-badge">—</span>
+      </div>
+    </div>
+
+    <!-- Attempt History -->
+    <div class="panel-card">
+      <h2>📜 Histórico de Tentativas</h2>
+      <div id="attempt-log"></div>
     </div>
 
     <!-- Execute -->
@@ -915,27 +1234,118 @@
   <div class="ls-box">
     <div class="ls-title">⬡ GEORROBÔ</div>
     <div class="ls-sub">Missão Matriz — Selecione o nível de dificuldade</div>
-    <div class="ls-cards">
-      <div class="ls-card easy" onclick="startLevel('easy')">
-        <div class="ls-card-icon">🟢</div>
-        <div class="ls-stars">⭐☆☆</div>
-        <div class="ls-card-name">FÁCIL</div>
-        <div class="ls-card-desc">Rotas simples pelas bordas da matriz. Perfeito para aprender os comandos básicos.</div>
-        <div class="ls-card-info">10 FASES · 1–2 GIROS · ≤3 OBSTÁCULOS</div>
+    <div class="ls-cards-wrap">
+      <div class="ls-cards">
+        <div class="ls-card easy" onclick="startLevel('easy')">
+          <div class="ls-card-icon">🟢</div>
+          <div class="ls-stars">⭐☆☆</div>
+          <div class="ls-card-name">FÁCIL</div>
+          <div class="ls-card-desc">Rotas simples pelas bordas da matriz. Perfeito para aprender os comandos básicos.</div>
+          <div class="ls-card-info">10 FASES · 1–2 GIROS · ≤3 OBSTÁCULOS</div>
+        </div>
+        <div class="ls-card medium" onclick="startLevel('medium')">
+          <div class="ls-card-icon">🟡</div>
+          <div class="ls-stars">⭐⭐☆</div>
+          <div class="ls-card-name">MÉDIO</div>
+          <div class="ls-card-desc">Zigue-zagues, mudanças de direção múltiplas e uso do bloco SE→ENTÃO.</div>
+          <div class="ls-card-info">10 FASES · 3–5 GIROS · 5–8 OBSTÁCULOS</div>
+        </div>
+        <div class="ls-card hard" onclick="startLevel('hard')">
+          <div class="ls-card-icon">🔴</div>
+          <div class="ls-stars">⭐⭐⭐</div>
+          <div class="ls-card-name">DIFÍCIL</div>
+          <div class="ls-card-desc">Espirais, labirintos e lógica condicional obrigatória. Somente para mestres!</div>
+          <div class="ls-card-info">10 FASES · 6+ GIROS · 8–12 OBSTÁCULOS</div>
+        </div>
       </div>
-      <div class="ls-card medium" onclick="startLevel('medium')">
-        <div class="ls-card-icon">🟡</div>
-        <div class="ls-stars">⭐⭐☆</div>
-        <div class="ls-card-name">MÉDIO</div>
-        <div class="ls-card-desc">Zigue-zagues, mudanças de direção múltiplas e uso do bloco SE→ENTÃO.</div>
-        <div class="ls-card-info">10 FASES · 3–5 GIROS · 5–8 OBSTÁCULOS</div>
+      <div class="ls-cards-row2">
+        <div class="ls-card custom custom-wide" onclick="openEditor()">
+          <div class="ls-card-icon">🛠️</div>
+          <div class="ls-stars" style="color:#b66dff;letter-spacing:4px">✦ ✦ ✦</div>
+          <div class="ls-card-name">NÍVEL PERSONALIZADO</div>
+          <div class="ls-card-desc">Crie sua própria fase! Posicione o robô, o alvo e os obstáculos livremente na grade e salve como uma fase jogável.</div>
+          <div class="ls-card-info" style="color:#b66dff88">EDITOR VISUAL · GRADE 5×5 · LIVRE CRIAÇÃO</div>
+        </div>
       </div>
-      <div class="ls-card hard" onclick="startLevel('hard')">
-        <div class="ls-card-icon">🔴</div>
-        <div class="ls-stars">⭐⭐⭐</div>
-        <div class="ls-card-name">DIFÍCIL</div>
-        <div class="ls-card-desc">Espirais, labirintos e lógica condicional obrigatória. Somente para mestres!</div>
-        <div class="ls-card-info">10 FASES · 6+ GIROS · 8–12 OBSTÁCULOS</div>
+    </div>
+  </div>
+</div>
+
+<!-- EDITOR OVERLAY -->
+<div id="editor-overlay" class="hidden">
+  <div class="editor-box">
+    <div class="editor-title">🛠 EDITOR DE FASE</div>
+    <div class="editor-sub">Clique ou arraste na grade para posicionar elementos. Configure o robô e o alvo, depois salve.</div>
+    <div class="editor-layout">
+      <!-- Grid canvas -->
+      <div>
+        <div class="ed-grid-wrap">
+          <canvas id="ed-canvas" width="460" height="460"></canvas>
+          <div class="ed-hint" id="ed-hint">Selecione uma ferramenta e clique na grade</div>
+        </div>
+      </div>
+      <!-- Tools panel -->
+      <div class="ed-tools">
+        <div class="ed-section-label">🔧 Ferramenta ativa</div>
+        <button class="ed-tool-btn active" id="ed-tool-robot" onclick="setEdTool('robot')">
+          <span class="ed-tool-icon">🤖</span>
+          <div><div class="ed-tool-name">ROBÔ</div><div class="ed-tool-desc">Posição inicial do Georrobô</div></div>
+        </button>
+        <button class="ed-tool-btn" id="ed-tool-target" onclick="setEdTool('target')">
+          <span class="ed-tool-icon">🎯</span>
+          <div><div class="ed-tool-name">DESTINO</div><div class="ed-tool-desc">Célula alvo da missão</div></div>
+        </button>
+        <button class="ed-tool-btn" id="ed-tool-obstacle" onclick="setEdTool('obstacle')">
+          <span class="ed-tool-icon">🧱</span>
+          <div><div class="ed-tool-name">OBSTÁCULO</div><div class="ed-tool-desc">Clique p/ add / remover</div></div>
+        </button>
+        <button class="ed-tool-btn" id="ed-tool-erase" onclick="setEdTool('erase')">
+          <span class="ed-tool-icon">🗑</span>
+          <div><div class="ed-tool-name">APAGAR</div><div class="ed-tool-desc">Remove qualquer elemento</div></div>
+        </button>
+
+        <div class="ed-section-label" style="margin-top:8px">🟥 Tipo de obstáculo</div>
+        <div class="ed-obs-types">
+          <div class="ed-obs-type active" id="edobs-circle" onclick="setEdObsType('circle')">⬤<br>Círc.</div>
+          <div class="ed-obs-type" id="edobs-square" onclick="setEdObsType('square')">■<br>Quad.</div>
+          <div class="ed-obs-type" id="edobs-rect" onclick="setEdObsType('rect')">▬<br>Ret.</div>
+        </div>
+        <div class="ed-obs-count" id="ed-obs-count">Obstáculos: 0</div>
+
+        <div class="ed-section-label" style="margin-top:8px">🧭 Direção do robô</div>
+        <div class="ed-dir-grid">
+          <div></div>
+          <div class="ed-dir-btn active" id="eddir-0" onclick="setEdDir(0)">⬆</div>
+          <div></div>
+          <div class="ed-dir-btn" id="eddir-3" onclick="setEdDir(3)">⬅</div>
+          <div style="display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#334">🤖</div>
+          <div class="ed-dir-btn" id="eddir-1" onclick="setEdDir(1)">➡</div>
+          <div></div>
+          <div class="ed-dir-btn" id="eddir-2" onclick="setEdDir(2)">⬇</div>
+          <div></div>
+        </div>
+
+        <div class="ed-section-label" style="margin-top:8px">📝 Configuração</div>
+        <div class="ed-phase-inputs">
+          <div class="ed-input-row">
+            <div class="ed-input-label">NOME DA FASE</div>
+            <input class="ed-input" id="ed-phase-name" type="text" maxlength="30" placeholder="Minha Fase" value="Fase Personalizada">
+          </div>
+          <div class="ed-input-row">
+            <div class="ed-input-label">DESCRIÇÃO</div>
+            <input class="ed-input" id="ed-phase-desc" type="text" maxlength="60" placeholder="Descrição da missão" value="Leve o Georrobô ao destino!">
+          </div>
+          <div class="ed-input-row">
+            <div class="ed-input-label">DICA (opcional)</div>
+            <input class="ed-input" id="ed-phase-hint" type="text" maxlength="60" placeholder="Ex: F×2, GD, F×2">
+          </div>
+        </div>
+
+        <div class="ed-actions">
+          <button class="ed-save-btn" onclick="saveCustomLevel()">💾 SALVAR E JOGAR</button>
+          <button class="ed-clear-btn" onclick="clearEditorGrid()">🗑 LIMPAR GRADE</button>
+          <button class="ed-back-btn" onclick="closeEditor()">← VOLTAR AO MENU</button>
+        </div>
       </div>
     </div>
   </div>
@@ -967,6 +1377,19 @@ let robotPos     = {col:0, row:4};
 let particles    = [];
 let circuitAnim  = 0;
 let msgTimer     = null;
+
+// ── ROBOT TWEEN (smooth movement) ────────────────────────────────────────
+let robotPixel   = {x:0, y:0};   // current rendered pixel pos
+let robotTarget  = {x:0, y:0};   // target pixel pos
+let tweenFrom    = {x:0, y:0};   // start pixel pos
+let robotTweening = false;
+let tweenCallback = null;
+let tweenStart   = 0;
+const TWEEN_MS   = 300;
+
+// ── ATTEMPT HISTORY ────────────────────────────────────────
+let attemptHistory = [];
+let attemptCount   = 0;
 
 // ── PHASE BANK ───────────────────────────────
 // col: 0=A…4=E | row: 0=topo(linha5)…4=base(linha1) | dir: 0=N 1=L 2=S 3=O
@@ -1164,8 +1587,15 @@ const phasesHard = [
 
 const ALL_PHASES = { easy: phasesEasy, medium: phasesMedium, hard: phasesHard };
 
-function getPhaseList() { return ALL_PHASES[difficulty]; }
-function getPhase()     { const list = getPhaseList(); return list[currentPhase % list.length]; }
+function getPhaseList() {
+  if (difficulty === 'custom') return customPhase ? [customPhase] : phasesEasy;
+  return ALL_PHASES[difficulty];
+}
+function getPhase() {
+  if (difficulty === 'custom' && customPhase) return customPhase;
+  const list = getPhaseList();
+  return list[currentPhase % list.length];
+}
 
 // ── LEVEL SELECT ─────────────────────────────
 function showLevelSelect() {
@@ -1196,6 +1626,331 @@ function goNextLevel() {
   const next  = order[order.indexOf(difficulty) + 1];
   if (next) startLevel(next);
   else      showLevelSelect();
+}
+
+// ── CUSTOM LEVEL SYSTEM ──────────────────────
+let customPhase = null;
+
+// ── EDITOR STATE ─────────────────────────────
+let edTool      = 'robot';    // 'robot' | 'target' | 'obstacle' | 'erase'
+let edObsType   = 'circle';
+let edDir       = 0;          // 0=N 1=E 2=S 3=O
+let edObstacles = [];
+let edRobot     = null;       // {col, row}
+let edTarget    = null;       // {col, row}
+let edDragging  = false;
+const ED_COLS = 5, ED_ROWS = 5;
+const ED_OBS_COLORS = ['#00bfff','#ff4d6d','#f5c842','#b66dff','#7cff6b'];
+let edColorIdx = 0;
+
+function openEditor() {
+  document.getElementById('level-select').classList.add('hidden');
+  document.getElementById('editor-overlay').classList.remove('hidden');
+  edRobot     = {col:0, row:4};
+  edTarget    = {col:4, row:0};
+  edObstacles = [];
+  edDir       = 0;
+  edTool      = 'robot';
+  edColorIdx  = 0;
+  syncEdToolUI();
+  syncEdDirUI();
+  syncEdObsTypeUI();
+  updateEdObsCount();
+  setupEditorCanvas();
+  renderEditorGrid();
+}
+
+function closeEditor() {
+  document.getElementById('editor-overlay').classList.add('hidden');
+  document.getElementById('level-select').classList.remove('hidden');
+}
+
+function setEdTool(t) {
+  edTool = t;
+  syncEdToolUI();
+  const hints = {
+    robot:    '🤖 Clique para mover o robô',
+    target:   '🎯 Clique para mover o destino',
+    obstacle: '🧱 Clique para adicionar / remover obstáculo',
+    erase:    '🗑 Clique para apagar qualquer elemento',
+  };
+  document.getElementById('ed-hint').textContent = hints[t] || '';
+}
+
+function syncEdToolUI() {
+  ['robot','target','obstacle','erase'].forEach(t => {
+    document.getElementById('ed-tool-'+t).classList.toggle('active', t === edTool);
+  });
+}
+
+function setEdObsType(t) {
+  edObsType = t;
+  syncEdObsTypeUI();
+}
+
+function syncEdObsTypeUI() {
+  ['circle','square','rect'].forEach(t => {
+    document.getElementById('edobs-'+t).classList.toggle('active', t === edObsType);
+  });
+}
+
+function setEdDir(d) {
+  edDir = d;
+  syncEdDirUI();
+  renderEditorGrid();
+}
+
+function syncEdDirUI() {
+  [0,1,2,3].forEach(d => {
+    document.getElementById('eddir-'+d).classList.toggle('active', d === edDir);
+  });
+}
+
+function updateEdObsCount() {
+  document.getElementById('ed-obs-count').textContent = `Obstáculos: ${edObstacles.length}`;
+}
+
+function clearEditorGrid() {
+  edObstacles = [];
+  edRobot     = {col:0, row:4};
+  edTarget    = {col:4, row:0};
+  edColorIdx  = 0;
+  updateEdObsCount();
+  renderEditorGrid();
+}
+
+// ── EDITOR CANVAS ────────────────────────────
+let edCanvas, edCtx;
+function setupEditorCanvas() {
+  edCanvas = document.getElementById('ed-canvas');
+  edCtx    = edCanvas.getContext('2d');
+
+  edCanvas.onmousedown  = (e) => { edDragging = true; handleEdClick(e); };
+  edCanvas.onmousemove  = (e) => { if (edDragging) handleEdClick(e); };
+  edCanvas.onmouseup    = ()  => { edDragging = false; };
+  edCanvas.onmouseleave = ()  => { edDragging = false; };
+  edCanvas.ontouchstart = (e) => { e.preventDefault(); edDragging = true; handleEdTouch(e); };
+  edCanvas.ontouchmove  = (e) => { e.preventDefault(); if (edDragging) handleEdTouch(e); };
+  edCanvas.ontouchend   = ()  => { edDragging = false; };
+}
+
+function getEdCellSize() {
+  const W = edCanvas.width, H = edCanvas.height;
+  const pad = 24;
+  const gW = W - pad*2, gH = H - pad*2;
+  return { w: gW/ED_COLS, h: gH/ED_ROWS, ox: pad, oy: pad };
+}
+
+function pixelToCell(px, py) {
+  const {w, h, ox, oy} = getEdCellSize();
+  const col = Math.floor((px - ox) / w);
+  const row = Math.floor((py - oy) / h);
+  if (col < 0 || col >= ED_COLS || row < 0 || row >= ED_ROWS) return null;
+  return {col, row};
+}
+
+function getEdCanvasPos(e) {
+  const rect = edCanvas.getBoundingClientRect();
+  const scaleX = edCanvas.width  / rect.width;
+  const scaleY = edCanvas.height / rect.height;
+  return {
+    px: (e.clientX - rect.left) * scaleX,
+    py: (e.clientY - rect.top)  * scaleY,
+  };
+}
+
+function handleEdClick(e) {
+  const {px, py} = getEdCanvasPos(e);
+  const cell = pixelToCell(px, py);
+  if (!cell) return;
+  applyEdTool(cell.col, cell.row);
+}
+
+function handleEdTouch(e) {
+  const t = e.touches[0];
+  const rect = edCanvas.getBoundingClientRect();
+  const scaleX = edCanvas.width  / rect.width;
+  const scaleY = edCanvas.height / rect.height;
+  const px = (t.clientX - rect.left) * scaleX;
+  const py = (t.clientY - rect.top)  * scaleY;
+  const cell = pixelToCell(px, py);
+  if (!cell) return;
+  applyEdTool(cell.col, cell.row);
+}
+
+function applyEdTool(col, row) {
+  if (edTool === 'robot') {
+    if (edTarget && edTarget.col === col && edTarget.row === row) return; // can't overlap target
+    edRobot = {col, row};
+  } else if (edTool === 'target') {
+    if (edRobot && edRobot.col === col && edRobot.row === row) return;
+    edTarget = {col, row};
+  } else if (edTool === 'obstacle') {
+    // Don't place on robot or target
+    if ((edRobot && edRobot.col===col && edRobot.row===row) ||
+        (edTarget && edTarget.col===col && edTarget.row===row)) return;
+    const existing = edObstacles.findIndex(o => o.col===col && o.row===row);
+    if (existing >= 0) {
+      edObstacles.splice(existing, 1); // toggle off
+    } else {
+      const color = ED_OBS_COLORS[edColorIdx % ED_OBS_COLORS.length];
+      edColorIdx++;
+      edObstacles.push({col, row, type: edObsType, color});
+    }
+    updateEdObsCount();
+  } else if (edTool === 'erase') {
+    const obsIdx = edObstacles.findIndex(o => o.col===col && o.row===row);
+    if (obsIdx >= 0) { edObstacles.splice(obsIdx, 1); updateEdObsCount(); }
+    if (edRobot && edRobot.col===col && edRobot.row===row) edRobot = null;
+    if (edTarget && edTarget.col===col && edTarget.row===row) edTarget = null;
+  }
+  renderEditorGrid();
+}
+
+// ── EDITOR RENDER ────────────────────────────
+function renderEditorGrid() {
+  if (!edCtx) return;
+  const {w, h, ox, oy} = getEdCellSize();
+  const W = edCanvas.width, H = edCanvas.height;
+
+  edCtx.clearRect(0, 0, W, H);
+
+  // Background
+  edCtx.fillStyle = '#070c14';
+  edCtx.fillRect(0, 0, W, H);
+
+  const LABELS = ['A','B','C','D','E'];
+
+  for (let c = 0; c < ED_COLS; c++) {
+    for (let r = 0; r < ED_ROWS; r++) {
+      const x = ox + c*w, y = oy + r*h;
+      const isRobot  = edRobot  && edRobot.col===c  && edRobot.row===r;
+      const isTarget = edTarget && edTarget.col===c && edTarget.row===r;
+      const obs = edObstacles.find(o => o.col===c && o.row===r);
+
+      // Cell bg
+      edCtx.fillStyle = isTarget ? 'rgba(0,245,255,0.1)' : isRobot ? 'rgba(124,255,107,0.08)' : '#0d1b2e';
+      edCtx.beginPath(); edCtx.roundRect(x+2,y+2,w-4,h-4,5); edCtx.fill();
+      edCtx.strokeStyle = isTarget ? '#00f5ff' : isRobot ? '#7cff6b' : '#1e3a5f';
+      edCtx.lineWidth = isTarget||isRobot ? 2 : 1; edCtx.stroke();
+
+      // Obstacle
+      if (obs && !isRobot && !isTarget) {
+        edCtx.save();
+        edCtx.globalAlpha = 0.85;
+        edCtx.fillStyle = obs.color;
+        const cx = x+w/2, cy = y+h/2, s = Math.min(w,h)*0.3;
+        if (obs.type === 'circle') {
+          edCtx.beginPath(); edCtx.arc(cx, cy, s, 0, Math.PI*2); edCtx.fill();
+          edCtx.strokeStyle='#fff3'; edCtx.lineWidth=1; edCtx.stroke();
+        } else if (obs.type === 'square') {
+          edCtx.beginPath(); edCtx.roundRect(cx-s,cy-s,s*2,s*2,4); edCtx.fill();
+          edCtx.strokeStyle='#fff3'; edCtx.lineWidth=1; edCtx.stroke();
+        } else {
+          edCtx.beginPath(); edCtx.roundRect(cx-s,cy-s*0.6,s*2,s*1.2,4); edCtx.fill();
+          edCtx.strokeStyle='#fff3'; edCtx.lineWidth=1; edCtx.stroke();
+        }
+        edCtx.restore();
+      }
+
+      // Robot
+      if (isRobot) {
+        const dirArrows = ['⬆','➡','⬇','⬅'];
+        edCtx.font = `${w*0.42}px serif`;
+        edCtx.textAlign = 'center'; edCtx.textBaseline = 'middle';
+        edCtx.fillText('🤖', x+w/2, y+h/2);
+        edCtx.font = `bold ${w*0.2}px Orbitron`;
+        edCtx.fillStyle = '#7cff6b';
+        edCtx.fillText(dirArrows[edDir], x+w/2, y+h-10);
+      }
+
+      // Target
+      if (isTarget && !isRobot) {
+        edCtx.font = `${w*0.42}px serif`;
+        edCtx.textAlign = 'center'; edCtx.textBaseline = 'middle';
+        edCtx.fillText('🎯', x+w/2, y+h/2);
+      }
+
+      // Coord label
+      const coord = LABELS[c] + (ED_ROWS - r);
+      edCtx.font = `${w*0.14}px Orbitron, monospace`;
+      edCtx.textAlign = 'center'; edCtx.textBaseline = 'top';
+      edCtx.fillStyle = '#223';
+      edCtx.fillText(coord, x+w/2, y+5);
+    }
+  }
+
+  // Column/row labels around grid
+  edCtx.font = `${w*0.18}px Orbitron, monospace`;
+  edCtx.fillStyle = '#334';
+  edCtx.textAlign = 'center'; edCtx.textBaseline = 'middle';
+  for (let c = 0; c < ED_COLS; c++) {
+    edCtx.fillText(LABELS[c], ox + c*w + w/2, oy - 12);
+  }
+  edCtx.textAlign = 'right';
+  for (let r = 0; r < ED_ROWS; r++) {
+    edCtx.fillText(String(ED_ROWS - r), ox - 8, oy + r*h + h/2);
+  }
+}
+
+// Keep editor canvas crisp on resize
+function resizeEditorCanvas() {
+  if (!edCanvas) return;
+  const wrap = edCanvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const cw = wrap.clientWidth - 20;
+  edCanvas.style.width  = cw + 'px';
+  edCanvas.style.height = cw + 'px';
+  renderEditorGrid();
+}
+window.addEventListener('resize', resizeEditorCanvas);
+
+// ── SAVE CUSTOM LEVEL ────────────────────────
+function saveCustomLevel() {
+  if (!edRobot) {
+    alert('⚠️ Posicione o ROBÔ na grade antes de salvar!'); return;
+  }
+  if (!edTarget) {
+    alert('⚠️ Posicione o DESTINO na grade antes de salvar!'); return;
+  }
+  if (edRobot.col===edTarget.col && edRobot.row===edTarget.row) {
+    alert('⚠️ O robô e o destino não podem estar na mesma célula!'); return;
+  }
+
+  const name  = document.getElementById('ed-phase-name').value.trim()  || 'Fase Personalizada';
+  const desc  = document.getElementById('ed-phase-desc').value.trim()  || 'Leve o Georrobô ao destino!';
+  const hint  = document.getElementById('ed-phase-hint').value.trim()  || null;
+
+  customPhase = {
+    name,
+    desc,
+    hint,
+    start:     {col: edRobot.col,  row: edRobot.row},
+    startDir:  edDir,
+    end:       {col: edTarget.col, row: edTarget.row},
+    obstacles: edObstacles.map(o => ({...o})),
+  };
+
+  // Close editor & start custom level
+  document.getElementById('editor-overlay').classList.add('hidden');
+  startCustomLevel();
+}
+
+function startCustomLevel() {
+  if (!customPhase) return;
+  difficulty   = 'custom';
+  currentPhase = 0;
+  score        = 0;
+  document.getElementById('score-disp').textContent = '0';
+  document.getElementById('level-select').classList.add('hidden');
+  document.getElementById('levelcomplete-overlay').classList.add('hidden');
+  const badge = document.getElementById('diff-badge');
+  badge.id = 'diff-badge';
+  badge.textContent = '🛠 CUSTOM';
+  badge.style.color = '#b66dff';
+  badge.style.borderColor = '#b66dff';
+  badge.style.background  = '#b66dff15';
+  loadPhase();
 }
 
 // ── AUDIO SYSTEM (Web Audio API) ─────────────
@@ -1323,10 +2078,49 @@ function drawObstacles() {
   });
 }
 
-function drawRobot() {
+function lerp(a,b,t){return a+(b-a)*t;}
+function easeInOut(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+
+function cellToPixel(col,row){
   const {w,h,ox,oy}=getCellSize();
-  const rx=ox+robotPos.col*w+w/2, ry=oy+robotPos.row*h+h/2;
+  return {x:ox+col*w+w/2, y:oy+row*h+h/2};
+}
+
+function snapRobotPixel(){
+  const p=cellToPixel(robotPos.col,robotPos.row);
+  robotPixel.x=p.x; robotPixel.y=p.y;
+  robotTarget.x=p.x; robotTarget.y=p.y;
+}
+
+function tweenRobotTo(col,row,cb){
+  const from=cellToPixel(robotPos.col,robotPos.row);
+  const to=cellToPixel(col,row);
+  tweenFrom={x:from.x,y:from.y};
+  robotTarget={x:to.x,y:to.y};
+  tweenStart=performance.now();
+  robotTweening=true;
+  tweenCallback=cb;
+  robotPos={col,row};
+}
+
+function updateTween(now){
+  if(!robotTweening)return;
+  const t=Math.min((now-tweenStart)/TWEEN_MS,1);
+  const e=easeInOut(t);
+  robotPixel.x=lerp(tweenFrom.x,robotTarget.x,e);
+  robotPixel.y=lerp(tweenFrom.y,robotTarget.y,e);
+  if(t>=1){
+    robotTweening=false;
+    robotPixel.x=robotTarget.x;
+    robotPixel.y=robotTarget.y;
+    if(tweenCallback){const cb=tweenCallback;tweenCallback=null;cb();}
+  }
+}
+
+function drawRobot() {
+  const rx=robotPixel.x, ry=robotPixel.y;
   ctx.save(); ctx.translate(rx,ry); ctx.rotate(robotDir*Math.PI/2);
+  const {w,h}=getCellSize();
   const s=Math.min(w,h)*0.38;
   ctx.shadowBlur=20; ctx.shadowColor='#00f5ff';
   // Body
@@ -1379,7 +2173,8 @@ function spawnParticles(x,y,color,count) {
   }
 }
 
-function renderFrame() {
+function renderFrame(now) {
+  updateTween(now||performance.now());
   ctx.clearRect(0,0,canvas.width,canvas.height);
   const g=ctx.createRadialGradient(canvas.width/2,canvas.height/2,0,canvas.width/2,canvas.height/2,canvas.width/2);
   g.addColorStop(0,'#0f1929');g.addColorStop(1,'#070c14');
@@ -1403,16 +2198,16 @@ function toggleBattery(){
 // ── QUEUE ────────────────────────────────────
 function addCmd(type){
   const labels={forward:'⬆ Frente',right:'↪ Gir. D',left:'↩ Gir. E'};
-  commandQueue.push({type,label:labels[type]});renderQueue();
+  commandQueue.push({type,label:labels[type]});renderQueue();updateEfficiencyBar();
 }
 function addLogicCmd(){
   const cond=document.getElementById('logic-if').value;
   const action=document.getElementById('logic-then').value;
   const cL={circle:'Círculo',square:'Quadrado',rect:'Retângulo'};
   const aL={jump:'Gir.D',back:'Gir.E',stop:'Parar'};
-  commandQueue.push({type:'logic',cond,action,label:`SE ${cL[cond]}→${aL[action]}`});renderQueue();
+  commandQueue.push({type:'logic',cond,action,label:`SE ${cL[cond]}→${aL[action]}`});renderQueue();updateEfficiencyBar();
 }
-function clearQueue(){commandQueue=[];renderQueue();}
+function clearQueue(){commandQueue=[];renderQueue();updateEfficiencyBar();}
 function renderQueue(){
   const d=document.getElementById('queue-display');
   if(!commandQueue.length){d.innerHTML='<span style="color:#334;font-size:0.75rem;font-family:\'Orbitron\',monospace;padding:4px">Adicione comandos acima...</span>';return;}
@@ -1423,7 +2218,7 @@ function renderQueue(){
       <span style="margin-left:auto;cursor:pointer;color:#446;font-size:0.7rem" onclick="removeCmd(${i})">✕</span>
     </div>`).join('');
 }
-function removeCmd(i){commandQueue.splice(i,1);renderQueue();}
+function removeCmd(i){commandQueue.splice(i,1);renderQueue();updateEfficiencyBar();}
 
 // ── MESSAGE ──────────────────────────────────
 function showMsg(text,color='#ff6b35'){
@@ -1442,31 +2237,83 @@ function executeAlgorithm(){
   if(isExecuting)return;
   if(!batteryOn){soundError();showMsg('⚡ Erro de Eletrônica: Sem energia para mover!','#ff4d6d');return;}
   if(!commandQueue.length){soundError();showMsg('⚠️ Nenhum comando na fila! Adicione blocos.','#f5c842');return;}
-  isExecuting=true;document.getElementById('exec-btn').disabled=true;runQueue(0);
+  attemptCount++;
+  isExecuting=true;document.getElementById('exec-btn').disabled=true;runQueue(0,null);
 }
 
-function runQueue(index){
-  if(index>=commandQueue.length){isExecuting=false;document.getElementById('exec-btn').disabled=false;checkWin();return;}
+function addAttemptLog(type, msg) {
+  const log = document.getElementById('attempt-log');
+  const n = attemptCount;
+  const entry = document.createElement('div');
+  entry.className = 'attempt-entry ' + type;
+  entry.innerHTML = `<span class="att-num">#${n}</span><span class="att-msg">${msg}</span>`;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+}
+
+function finishExec(success, msg, logType) {
+  isExecuting=false;
+  document.getElementById('exec-btn').disabled=false;
+  if(msg) addAttemptLog(logType||'fail', msg);
+  if(success) checkWin();
+}
+
+function runQueue(index, failReason){
+  // If a failure was flagged, stop and log it
+  if(failReason){finishExec(false, failReason.msg, failReason.type);return;}
+
+  if(index>=commandQueue.length){
+    // All commands ran — check win
+    isExecuting=false;
+    document.getElementById('exec-btn').disabled=false;
+    checkWin();
+    return;
+  }
   const items=document.querySelectorAll('.queue-item');
   items.forEach((el,i)=>{el.classList.remove('active');if(i<index)el.classList.add('done');});
   if(items[index])items[index].classList.add('active');
 
   const cmd=commandQueue[index];
   const {w,h,ox,oy}=getCellSize();
+  const STEP = TWEEN_MS + 250; // total delay per step
 
   if(cmd.type==='forward'){
-    if(!batteryOn){soundError();showMsg('⚡ Erro de Eletrônica: Sem energia para mover!','#ff4d6d');isExecuting=false;document.getElementById('exec-btn').disabled=false;return;}
+    if(!batteryOn){
+      soundError();showMsg('⚡ Erro de Eletrônica: Sem energia para mover!','#ff4d6d');
+      finishExec(false,'⚡ Sem energia para mover','fail');return;
+    }
     let nc=robotPos.col,nr=robotPos.row;
     if(robotDir===0)nr--;else if(robotDir===1)nc++;else if(robotDir===2)nr++;else nc--;
-    if(nc<0||nc>=COLS||nr<0||nr>=ROWS){soundError();showMsg('🚧 Erro: Georrobô tentou sair da matriz!','#ff4d6d');}
-    else{
+    if(nc<0||nc>=COLS||nr<0||nr>=ROWS){
+      soundError();showMsg('🚧 Erro: Georrobô tentou sair da matriz!','#ff4d6d');
+      const coord=COLS_LABELS[Math.max(0,Math.min(4,nc))]+(ROWS-Math.max(0,Math.min(4,nr)));
+      setTimeout(()=>runQueue(index+1,{msg:`🚧 Saiu da matriz no passo ${index+1}`,type:'oob'}),STEP);
+    } else {
       const ob=getObstacleAt(nc,nr);
-      if(ob){spawnParticles(ox+ob.col*w+w/2,oy+ob.row*h+h/2,ob.color,20);soundError();showMsg(`⚠️ Colisão com ${ob.type==='circle'?'Círculo':ob.type==='square'?'Quadrado':'Retângulo'}! Bloqueado.`,'#f5c842');}
-      else{robotPos={col:nc,row:nr};spawnParticles(ox+nc*w+w/2,oy+nr*h+h/2,'#00f5ff',8);soundMove();updateCoordDisplay();}
+      if(ob){
+        spawnParticles(ox+ob.col*w+w/2,oy+ob.row*h+h/2,ob.color,20);
+        soundError();
+        const obName=ob.type==='circle'?'Círculo':ob.type==='square'?'Quadrado':'Retângulo';
+        const coord=COLS_LABELS[nc]+(ROWS-nr);
+        showMsg(`⚠️ Colisão com ${obName}! Bloqueado.`,'#f5c842');
+        setTimeout(()=>runQueue(index+1,{msg:`⚠️ Colisão com ${obName} em ${coord} (passo ${index+1})`,type:'fail'}),STEP);
+      } else {
+        // Smooth tween movement
+        soundMove();
+        tweenRobotTo(nc,nr,()=>{
+          spawnParticles(robotPixel.x,robotPixel.y,'#00f5ff',8);
+          updateCoordDisplay();
+          setTimeout(()=>runQueue(index+1,null),80);
+        });
+      }
     }
-  } else if(cmd.type==='right'){soundTurn();robotDir=(robotDir+1)%4;}
-  else if(cmd.type==='left'){soundTurn();robotDir=(robotDir+3)%4;}
-  else if(cmd.type==='logic'){
+  } else if(cmd.type==='right'){
+    soundTurn();robotDir=(robotDir+1)%4;
+    setTimeout(()=>runQueue(index+1,null),STEP);
+  } else if(cmd.type==='left'){
+    soundTurn();robotDir=(robotDir+3)%4;
+    setTimeout(()=>runQueue(index+1,null),STEP);
+  } else if(cmd.type==='logic'){
     let nc=robotPos.col,nr=robotPos.row;
     if(robotDir===0)nr--;else if(robotDir===1)nc++;else if(robotDir===2)nr++;else nc--;
     const ahead=(nc>=0&&nc<COLS&&nr>=0&&nr<ROWS)?getObstacleAt(nc,nr):null;
@@ -1474,24 +2321,59 @@ function runQueue(index){
       soundTurn();
       if(cmd.action==='jump'){robotDir=(robotDir+1)%4;showMsg(`🔀 SE ${cmd.cond} ENTÃO girou direita!`,'#b66dff');}
       else if(cmd.action==='back'){robotDir=(robotDir+3)%4;showMsg(`🔀 SE ${cmd.cond} ENTÃO girou esquerda!`,'#b66dff');}
-      else{soundError();showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`,'#b66dff');isExecuting=false;document.getElementById('exec-btn').disabled=false;return;}
+      else{soundError();showMsg(`🛑 SE ${cmd.cond} ENTÃO parou!`,'#b66dff');
+        finishExec(false,`🛑 Condição SE→PARAR ativada no passo ${index+1}`,'fail');return;}
     }
+    setTimeout(()=>runQueue(index+1,null),STEP);
+  } else {
+    setTimeout(()=>runQueue(index+1,null),STEP);
   }
-  setTimeout(()=>runQueue(index+1),550);
+}
+
+function getOptimalCmdCount(){
+  const p=getPhase();
+  if(!p.hint)return null;
+  // Parse hint: count commands; "F×4, GD, F×4" = 4+1+4=9
+  let total=0;
+  p.hint.split(',').forEach(seg=>{
+    seg=seg.trim();
+    const m=seg.match(/×(\d+)/);
+    total+=m?parseInt(m[1]):1;
+  });
+  return total;
+}
+
+function updateEfficiencyBar(){
+  const mine=commandQueue.length;
+  const opt=getOptimalCmdCount();
+  document.getElementById('eff-mine-val').textContent=mine;
+  const optEl=document.getElementById('eff-opt-val');
+  const badge=document.getElementById('eff-badge');
+  if(opt===null){optEl.textContent='—';badge.className='eff-bonus ok';badge.textContent='—';return;}
+  optEl.textContent=opt;
+  if(mine===0){badge.className='eff-bonus ok';badge.textContent='—';return;}
+  if(mine<=opt){badge.className='eff-bonus great';badge.textContent='⚡ PERFEITO';}
+  else if(mine<=opt+2){badge.className='eff-bonus good';badge.textContent='👍 BOM';}
+  else{badge.className='eff-bonus ok';badge.textContent=`+${mine-opt} extra`;}
 }
 
 function checkWin(){
   const phase=getPhase();
   if(robotPos.col===phase.end.col&&robotPos.row===phase.end.row){
-    const mult={easy:1,medium:2,hard:3}[difficulty];
-    const pts=(100+commandQueue.length*10)*mult;
+    const mult = difficulty==='custom' ? 2 : ({easy:1,medium:2,hard:3}[difficulty]||1);
+    const opt=getOptimalCmdCount()||commandQueue.length;
+    const effBonus=(commandQueue.length<=opt+2)?50:0;
+    const pts=(100+commandQueue.length*10)*mult+effBonus;
     score+=pts;
     document.getElementById('score-disp').textContent=score;
     const {w,h,ox,oy}=getCellSize();
     const px=ox+robotPos.col*w+w/2,py=oy+robotPos.row*h+h/2;
-    for(let i=0;i<5;i++)setTimeout(()=>spawnParticles(px,py,['#00f5ff','#f5c842','#7cff6b','#ff6b35'][i%4],20),i*150);
+    const confettiColors=['#b66dff','#f5c842','#7cff6b','#00f5ff','#ff6b35'];
+    for(let i=0;i<5;i++)setTimeout(()=>spawnParticles(px,py,confettiColors[i%5],20),i*150);
     soundWin();
-    document.getElementById('win-score').textContent=`+${pts} pontos! (×${mult} bônus ${difficulty==='easy'?'fácil':difficulty==='medium'?'médio':'difícil'}) Total: ${score}`;
+    const diffLabel=difficulty==='easy'?'fácil':difficulty==='medium'?'médio':difficulty==='hard'?'difícil':'personalizado';
+    document.getElementById('win-score').textContent=`+${pts} pontos! (×${mult} bônus ${diffLabel}${effBonus?' +bônus eficiência':''}) Total: ${score}`;
+    addAttemptLog('success', `✅ Chegou! ${commandQueue.length} cmd${commandQueue.length<=opt?' (ótimo!)':commandQueue.length<=opt+2?' (eficiente)':''}`);
     document.getElementById('win-overlay').classList.remove('hidden');
   }
 }
@@ -1500,20 +2382,36 @@ function checkWin(){
 function resetPosition(){
   const p=getPhase();
   robotPos={...p.start};robotDir=p.startDir||0;
-  updateCoordDisplay();commandQueue=[];renderQueue();
+  snapRobotPixel();
+  updateCoordDisplay();commandQueue=[];renderQueue();updateEfficiencyBar();
   document.getElementById('exec-btn').disabled=false;isExecuting=false;
 }
 function resetPhase(){document.getElementById('win-overlay').classList.add('hidden');resetPosition();}
 function nextPhase(){
   document.getElementById('win-overlay').classList.add('hidden');
+  if(difficulty==='custom'){
+    soundLevelComplete();
+    const lc=document.getElementById('levelcomplete-overlay');
+    const t=document.getElementById('lc-title');
+    t.textContent='FASE PERSONALIZADA CONCLUÍDA!';
+    t.className='lc-title hard';
+    t.style.color='#b66dff'; t.style.textShadow='0 0 30px #b66dff';
+    document.getElementById('lc-sub').textContent='Parabéns! Seu mapa foi concluído!';
+    document.getElementById('lc-score').textContent=`Pontuação total: ${score} pontos`;
+    const nextBtn=document.getElementById('lc-next-btn');
+    nextBtn.textContent='🛠 EDITAR NOVAMENTE';
+    nextBtn.onclick=()=>{ lc.classList.add('hidden'); openEditor(); };
+    lc.classList.remove('hidden');
+    return;
+  }
   const list=getPhaseList();
   if(currentPhase+1>=list.length){
-    // Level complete!
     soundLevelComplete();
     const lc=document.getElementById('levelcomplete-overlay');
     const t=document.getElementById('lc-title');
     t.textContent=`NÍVEL ${difficulty==='easy'?'FÁCIL':difficulty==='medium'?'MÉDIO':'DIFÍCIL'} COMPLETO!`;
     t.className='lc-title '+difficulty;
+    t.style.color=''; t.style.textShadow='';
     document.getElementById('lc-sub').textContent='Parabéns! Você concluiu todas as '+(list.length)+' fases!';
     document.getElementById('lc-score').textContent=`Pontuação total: ${score} pontos`;
     const nextBtn=document.getElementById('lc-next-btn');
@@ -1536,13 +2434,16 @@ function loadPhase(){
   document.getElementById('phase-disp').textContent=idx+1;
   document.getElementById('coord-start').textContent=coordLabel(p.start)+' '+dirNames[p.startDir||0];
   document.getElementById('coord-end').textContent=coordLabel(p.end);
+  // Reset attempt history for new phase
+  attemptHistory=[];attemptCount=0;
+  document.getElementById('attempt-log').innerHTML='';
   resetPosition();
   showPhasePopup(p, idx);
 }
 
 // ── POPUP ────────────────────────────────────
 function showPhasePopup(p, idx){
-  const diffTxt={easy:'⭐ FÁCIL',medium:'⭐⭐ MÉDIO',hard:'⭐⭐⭐ DIFÍCIL'}[difficulty];
+  const diffTxt={easy:'⭐ FÁCIL',medium:'⭐⭐ MÉDIO',hard:'⭐⭐⭐ DIFÍCIL',custom:'🛠 PERSONALIZADO'}[difficulty]||'🛠 PERSONALIZADO';
   const dirNames=['⬆ Norte','→ Leste','↓ Sul','← Oeste'];
   document.getElementById('popup-icon').textContent='🤖';
   document.getElementById('popup-title').textContent=`FASE ${idx+1} — ${p.name}`;
@@ -1558,7 +2459,7 @@ function closePopup(){document.getElementById('popup').classList.add('hidden');}
 
 // ── INIT ─────────────────────────────────────
 renderFrame();
+// Editor canvas will be set up when openEditor() is called
 </script>
 </body>
 </html>
-
