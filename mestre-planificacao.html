@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Mestre da Planificação</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg1:#1e3a8a;--bg2:#7c3aed;--card:#ffffff;--ink:#1f2937;--muted:#6b7280;
+  --green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;
+  --easy:#22c55e;--medium:#eab308;--hard:#a855f7;
+}
+html,body{height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);overflow:hidden}
+body{background:linear-gradient(135deg,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:8px;user-select:none}
+#app{width:100%;max-width:1100px;height:calc(100vh - 16px);max-height:780px;background:#f8fafc;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:18px;overflow:auto}
+.screen.active{display:flex}
+h1{font-size:clamp(22px,4vw,34px);text-align:center;color:#1e293b}
+h2{font-size:clamp(18px,3vw,24px);color:#1e293b}
+.subtitle{text-align:center;color:var(--muted);margin-top:4px;font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;background:var(--blue);color:#fff;font-size:16px;font-weight:600;padding:12px 22px;border-radius:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 14px rgba(59,130,246,.4)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(59,130,246,.5)}
+.btn:active{transform:translateY(0)}
+.btn.secondary{background:#fff;color:var(--ink);border:2px solid #e5e7eb;box-shadow:none}
+.btn.green{background:var(--green);box-shadow:0 4px 14px rgba(16,185,129,.4)}
+.btn.amber{background:var(--amber)}
+.btn.purple{background:var(--purple)}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.4)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.center{justify-content:center}
+.spacer{flex:1}
+
+/* MENU */
+#menu{align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 30% 20%,#dbeafe,#f8fafc)}
+#menu .logo{font-size:80px;margin-bottom:8px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+#menu .menu-buttons{display:flex;flex-direction:column;gap:14px;margin-top:30px;min-width:260px}
+#menu .stars-total{margin-top:18px;font-size:18px;color:#92400e;background:#fef3c7;padding:8px 16px;border-radius:30px;display:inline-block}
+
+/* ENCYCLOPEDIA */
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.topbar h2{flex:1;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.solid-card{background:#fff;border-radius:14px;padding:12px;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .15s}
+.solid-card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.solid-card svg{width:100%;height:100px}
+.solid-card .name{font-weight:600;margin-top:6px;font-size:14px}
+
+/* MODAL */
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:14px}
+.modal.active{display:flex;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal-body{background:#fff;border-radius:18px;max-width:720px;width:100%;max-height:90vh;overflow:auto;padding:18px;position:relative}
+.modal-body h3{font-size:22px;margin-bottom:4px}
+.modal-body .tag{display:inline-block;background:#e0e7ff;color:#3730a3;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:10px}
+.modal-body .tag.curved{background:#fce7f3;color:#9d174d}
+.modal-body .visual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.modal-body .visual > div{background:#f1f5f9;border-radius:10px;padding:8px;text-align:center}
+.modal-body .visual svg{width:100%;height:160px}
+.modal-body .visual .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.facts div{background:#f8fafc;border-radius:10px;padding:8px;text-align:center;font-size:13px}
+.facts strong{display:block;font-size:20px;color:var(--blue)}
+.modal-body p{font-size:14px;line-height:1.5;margin:6px 0}
+.modal-body .pedagogy{background:#fef3c7;border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.modal-nav{display:flex;gap:8px;justify-content:space-between;margin-top:12px}
+
+/* LEVEL SELECT */
+#levelSelect .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}
+.level-card{background:#fff;border-radius:16px;padding:18px;cursor:pointer;text-align:center;border:3px solid transparent;transition:transform .15s}
+.level-card:hover:not(.locked){transform:translateY(-3px)}
+.level-card.locked{opacity:.55;cursor:not-allowed;filter:grayscale(.7)}
+.level-card .badge{font-size:48px}
+.level-card.easy{border-color:var(--easy)}
+.level-card.medium{border-color:var(--medium)}
+.level-card.hard{border-color:var(--hard)}
+.level-card h3{margin:8px 0 4px}
+.level-card .desc{font-size:13px;color:var(--muted);margin-bottom:8px}
+.level-card .stars{font-size:22px;letter-spacing:2px;color:#fbbf24}
+
+/* GAME */
+#game .hud{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+#game .hud .info{background:#fff;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.progress-bar{height:8px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:6px}
+.progress-bar > div{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s}
+.timer-bar{height:10px;background:#fee2e2;border-radius:10px;overflow:hidden;margin-bottom:6px}
+.timer-bar > div{height:100%;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);transition:width 1s linear}
+#game .area{flex:1;display:flex;flex-direction:column;gap:10px;min-height:0}
+.zone{background:#fff;border-radius:14px;padding:10px;flex:1;overflow:auto}
+.zone h4{font-size:13px;color:var(--muted);margin-bottom:6px;text-align:center;text-transform:uppercase;letter-spacing:1px}
+.tiles{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
+.tile{background:#f1f5f9;border:3px solid #e2e8f0;border-radius:12px;padding:6px;cursor:grab;transition:transform .15s,border-color .2s;position:relative;touch-action:none}
+.tile.solid{width:130px;height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tile.plan{width:140px;height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tile svg{flex:1;width:100%;max-height:100px;pointer-events:none}
+.tile .lbl{font-size:11px;color:var(--muted);text-align:center;pointer-events:none}
+.tile.dragging{opacity:.5;cursor:grabbing}
+.tile.drag-over{border-color:var(--blue);transform:scale(1.05)}
+.tile.correct{border-color:var(--green);background:#d1fae5;animation:popIn .4s}
+.tile.wrong{border-color:var(--red);animation:shake .4s}
+.tile.matched{opacity:.3;cursor:default;pointer-events:none}
+.tile.hint{animation:hintPulse 1s infinite}
+.tile.hint-face .face-hl{fill-opacity:.7 !important}
+@keyframes popIn{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes hintPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.6)}50%{box-shadow:0 0 0 10px rgba(245,158,11,0)}}
+.toast{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:#fff;padding:10px 18px;border-radius:30px;box-shadow:0 6px 20px rgba(0,0,0,.2);font-weight:600;z-index:50;opacity:0;transition:opacity .3s,top .3s;pointer-events:none;max-width:90%;text-align:center;font-size:14px}
+.toast.show{opacity:1;top:34px}
+.toast.ok{background:#d1fae5;color:#065f46}
+.toast.err{background:#fee2e2;color:#991b1b}
+.ghost{position:fixed;pointer-events:none;z-index:200;opacity:.85;transform:translate(-50%,-50%) scale(.9)}
+
+/* RESULT */
+#result{align-items:center;justify-content:center;text-align:center}
+#result .stars-big{font-size:80px;letter-spacing:8px;margin:14px 0;color:#fbbf24}
+#result .score{font-size:30px;font-weight:700;color:#1e293b}
+#result .msg{font-size:16px;color:var(--muted);margin:10px 0 18px;max-width:420px}
+.confetti{position:absolute;top:-10px;width:10px;height:14px;opacity:.9;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(800px) rotate(720deg);opacity:0}}
+
+@media (max-width:600px){
+  .tile.solid,.tile.plan{width:100px;height:100px}
+  .tile svg{max-height:70px}
+  .modal-body .visual{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- MENU -->
+  <section id="menu" class="screen active">
+    <div class="logo">🧊</div>
+    <h1>Mestre da Planificação</h1>
+    <p class="subtitle">Geometria Espacial — 5º ano</p>
+    <div class="menu-buttons">
+      <button class="btn" data-go="levelSelect">▶ Jogar</button>
+      <button class="btn secondary" data-go="encyclopedia">📖 Enciclopédia dos Sólidos</button>
+    </div>
+    <div class="stars-total" id="starsTotal">⭐ 0 / 9 estrelas</div>
+  </section>
+
+  <!-- ENCYCLOPEDIA -->
+  <section id="encyclopedia" class="screen">
+    <div class="topbar">
+      <button class="btn secondary" data-go="menu">🏠</button>
+      <h2>📖 Enciclopédia dos Sólidos</h2>
+      <div style="width:50px"></div>
+    </div>
+    <div class="grid" id="encyGrid"></div>
+  </section>
+
+  <!-- LEVEL SELECT -->
+  <section id="levelSelect" class="screen">
+    <div class="topbar">
+      <button class="btn secondary" data-go="menu">🏠</button>
+      <h2>Escolha o Nível</h2>
+      <div style="width:50px"></div>
+    </div>
+    <div class="levels" id="levelsList"></div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="screen">
+    <div class="hud">
+      <button class="btn secondary" id="btnHome">🏠</button>
+      <button class="btn secondary" id="btnRestart">↺</button>
+      <div class="info" id="hudLevel">Fácil</div>
+      <div class="info" id="hudScore">0 / 0</div>
+      <div class="info" id="hudAttempts">Tentativas: 0</div>
+      <button class="btn amber" id="btnHint" style="display:none">💡 Ver dica</button>
+    </div>
+    <div class="progress-bar"><div id="progressFill" style="width:0%"></div></div>
+    <div class="timer-bar" id="timerBar" style="display:none"><div id="timerFill" style="width:100%"></div></div>
+    <div class="area">
+      <div class="zone">
+        <h4>Sólidos 3D — solte aqui a planificação correta</h4>
+        <div class="tiles" id="solidsZone"></div>
+      </div>
+      <div class="zone">
+        <h4>Planificações — arraste para o sólido</h4>
+        <div class="tiles" id="plansZone"></div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="screen">
+    <h1>Fim da Rodada!</h1>
+    <div class="stars-big" id="resultStars">⭐⭐⭐</div>
+    <div class="score" id="resultScore">0 / 0</div>
+    <p class="msg" id="resultMsg"></p>
+    <div class="row center">
+      <button class="btn secondary" data-go="menu">🏠 Menu</button>
+      <button class="btn" id="btnReplay">↺ Jogar de novo</button>
+      <button class="btn green" id="btnNext" style="display:none">Próximo nível ▶</button>
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal" id="modal">
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+const SVG_NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent){const e=document.createElementNS(SVG_NS,tag);if(attrs)for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function svg(w,h,vb){const s=document.createElementNS(SVG_NS,"svg");s.setAttribute("viewBox",vb||`0 0 ${w} ${h}`);s.setAttribute("width","100%");s.setAttribute("height","100%");s.setAttribute("preserveAspectRatio","xMidYMid meet");return s;}
+
+/* ============ DATA ============ */
+const SOLIDS={
+  cubo:{
+    name:"Cubo",
+    classification:"Poliedro regular",
+    isPolyhedron:true,
+    faces:6,edges:12,vertices:8,
+    planDesc:"6 quadrados iguais (cruz)",
+    desc:"O cubo tem 6 faces que são quadrados todos iguais. Se você abrir um cubo, ele fica parecendo uma cruz!",
+    example:"Parece com um dado de jogo ou um cubo mágico.",
+    curiosity:"O cubo é um poliedro regular — todas as faces são quadrados iguais, e em cada vértice se encontram exatamente 3 faces. Verifique a Fórmula de Euler: 6 + 8 − 12 = 2 ✓",
+    eulerHighlight:true,
+    feedback:"O cubo, quando aberto, forma uma cruz com 6 quadrados iguais!",
+    palette:{a:"#60a5fa",b:"#3b82f6",c:"#1e40af",hl:"#fbbf24"}
+  },
+  paralelepipedo:{
+    name:"Paralelepípedo / Prisma Retangular",
+    classification:"Poliedro",
+    isPolyhedron:true,
+    faces:6,edges:12,vertices:8,
+    planDesc:"6 retângulos (3 pares iguais)",
+    desc:"O paralelepípedo tem 6 faces retangulares em 3 pares de faces iguais. Na escola, também é chamado de prisma retangular — são dois nomes para o mesmo sólido! É como uma caixa de sapatos.",
+    example:"Parece com uma caixa de cereal, um tijolo, um livro, um estojo ou uma barra de manteiga.",
+    curiosity:"O cubo é um caso especial de paralelepípedo, onde todos os lados têm o mesmo comprimento. Por isso o cubo também verifica a Fórmula de Euler: 6 + 8 − 12 = 2 ✓",
+    feedback:"O paralelepípedo aberto mostra 6 retângulos em 3 pares iguais!",
+    eulerHighlight:true,
+    palette:{a:"#fb923c",b:"#ea580c",c:"#9a3412",hl:"#fbbf24"}
+  },
+  piramideQ:{
+    name:"Pirâmide Quadrangular",
+    classification:"Poliedro",
+    isPolyhedron:true,
+    faces:5,edges:8,vertices:5,
+    planDesc:"1 quadrado + 4 triângulos",
+    desc:"A pirâmide quadrangular tem uma base quadrada e 4 faces triangulares que se encontram num ponto (vértice).",
+    example:"As pirâmides do Egito têm exatamente essa forma!",
+    curiosity:"Quando abrimos a pirâmide, os triângulos ficam ao redor do quadrado da base, como pétalas de flor.",
+    feedback:"A pirâmide quadrangular abre com 4 triângulos ao redor de 1 quadrado!",
+    palette:{a:"#fbbf24",b:"#f59e0b",c:"#b45309",hl:"#22c55e"}
+  },
+  piramideT:{
+    name:"Pirâmide Triangular",
+    classification:"Poliedro (Tetraedro)",
+    isPolyhedron:true,
+    faces:4,edges:6,vertices:4,
+    planDesc:"4 triângulos equiláteros",
+    desc:"A pirâmide triangular tem 4 faces que são triângulos. Até a base é um triângulo!",
+    example:"Parece com um dado de 4 faces (o d4 dos jogos de RPG) ou uma decoração triangular de mesa.",
+    curiosity:"Ela é o poliedro com o menor número possível de faces. Não existe poliedro com menos de 4 faces!",
+    feedback:"A pirâmide triangular é formada por 4 triângulos iguais!",
+    palette:{a:"#a78bfa",b:"#7c3aed",c:"#5b21b6",hl:"#fbbf24"}
+  },
+  prismaT:{
+    name:"Prisma Triangular",
+    classification:"Poliedro",
+    isPolyhedron:true,
+    faces:5,edges:9,vertices:6,
+    planDesc:"2 triângulos + 3 retângulos",
+    desc:"O prisma triangular tem 2 bases triangulares e 3 faces retangulares nas laterais.",
+    example:"Parece com o formato de uma barra de chocolate Toblerone!",
+    curiosity:"Se a gente olhar de cima, vemos um triângulo. Se olhar de lado, vemos um retângulo.",
+    feedback:"O prisma triangular abre em 2 triângulos e 3 retângulos!",
+    palette:{a:"#34d399",b:"#10b981",c:"#065f46",hl:"#fbbf24"}
+  },
+  cilindro:{
+    name:"Cilindro",
+    classification:"Corpo redondo (não poliedro)",
+    isPolyhedron:false,
+    faces:null,edges:null,vertices:null,
+    noPEV:true,
+    pevExplain:"O cilindro tem superfície curva, por isso não contamos faces, arestas e vértices como nos poliedros. Ele é chamado de corpo redondo.",
+    planDesc:"2 círculos + 1 retângulo",
+    desc:"O cilindro tem 2 bases circulares e uma superfície lateral curva. Quando abrimos, a lateral vira um retângulo e as bases ficam acima e abaixo dele.",
+    example:"Parece com uma lata de refrigerante ou um rolo de papel.",
+    curiosity:"O cilindro não é um poliedro, pois tem superfície curva. Se você enrolar um retângulo e tampar as duas pontas com círculos, terá um cilindro!",
+    feedback:"O cilindro, quando aberto, forma 1 retângulo com 2 círculos acima e abaixo!",
+    palette:{a:"#22d3ee",b:"#0891b2",c:"#155e75",hl:"#fbbf24"}
+  },
+  cone:{
+    name:"Cone",
+    classification:"Corpo redondo (não poliedro)",
+    isPolyhedron:false,
+    faces:null,edges:null,vertices:null,
+    noPEV:true,
+    pevExplain:"O cone tem superfície curva, por isso não contamos faces, arestas e vértices como nos poliedros. O ponto do topo é chamado de ápice, não de vértice poliedral.",
+    planDesc:"1 círculo + 1 setor circular",
+    desc:"O cone tem 1 base circular e uma superfície lateral curva que termina num ponto chamado vértice ou ápice.",
+    example:"Parece com uma casquinha de sorvete ou um chapéu de festa!",
+    curiosity:"Quando abrimos o cone, a lateral vira um setor circular — como uma fatia de pizza muito grande. Quanto mais 'pontudo' o cone, menor é esse setor.",
+    feedback:"O cone aberto forma um círculo + um setor circular (pizza)!",
+    palette:{a:"#fda4af",b:"#e11d48",c:"#881337",hl:"#fbbf24"}
+  },
+  esfera:{
+    name:"Esfera ✨",
+    classification:"Convidada especial (não poliedro)",
+    isPolyhedron:false,
+    noGame:true,
+    faces:null,edges:null,vertices:null,
+    noPEV:true,
+    pevExplain:"A esfera é totalmente curva — não tem nenhuma superfície plana, nem face, aresta ou vértice.",
+    planDesc:"Impossível planificar!",
+    desc:"A esfera é completamente curva — não tem nenhuma face plana, nenhuma aresta, nenhum vértice. É o único sólido que não pode ser planificado!",
+    example:"Parece com uma bola de futebol, um globo terrestre ou uma laranja.",
+    curiosity:"Nenhum mapa do mundo é perfeito! Como a Terra é (quase) esférica, qualquer planificação do globo distorce continentes ou oceanos. Cartógrafos usam diferentes 'projeções' para tentar minimizar essas distorções.",
+    feedback:"",
+    palette:{a:"#86efac",b:"#22c55e",c:"#15803d",hl:"#fbbf24"}
+  },
+};
+const SOLID_KEYS=Object.keys(SOLIDS);
+
+/* ============ SVG DRAWINGS ============ */
+// Each draws into a fresh <svg> 200x200 and returns it.
+
+function drawSolid(key,white){
+  const s=svg(200,200,"0 0 200 200");
+  let p=SOLIDS[key].palette;
+  if(white)p={a:"#ffffff",b:"#ffffff",c:"#ffffff",hl:p.hl};
+  const dash="6,4";
+  const stroke="#1e293b";
+  switch(key){
+    case "cubo":{
+      // isometric cube
+      const top=[[100,30],[170,65],[100,100],[30,65]];
+      const left=[[30,65],[100,100],[100,170],[30,135]];
+      const right=[[170,65],[100,100],[100,170],[170,135]];
+      el("polygon",{points:left.map(p=>p.join(",")).join(" "),fill:p.a,stroke,"stroke-width":2,class:"face-hl"},s);
+      el("polygon",{points:right.map(p=>p.join(",")).join(" "),fill:p.b,stroke,"stroke-width":2,class:"face-hl"},s);
+      el("polygon",{points:top.map(p=>p.join(",")).join(" "),fill:p.c,stroke,"stroke-width":2,class:"face-hl"},s);
+      // hidden edges
+      el("line",{x1:30,y1:65,x2:170,y2:65,stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      el("line",{x1:100,y1:30,x2:100,y2:100,stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      break;
+    }
+    case "paralelepipedo":{
+      const top=[[60,40],[180,40],[150,80],[30,80]];
+      const front=[[30,80],[150,80],[150,170],[30,170]];
+      const side=[[150,80],[180,40],[180,130],[150,170]];
+      el("polygon",{points:front.map(p=>p.join(",")).join(" "),fill:p.a,stroke,"stroke-width":2,class:"face-hl"},s);
+      el("polygon",{points:side.map(p=>p.join(",")).join(" "),fill:p.b,stroke,"stroke-width":2,class:"face-hl"},s);
+      el("polygon",{points:top.map(p=>p.join(",")).join(" "),fill:p.c,stroke,"stroke-width":2,class:"face-hl"},s);
+      el("line",{x1:60,y1:40,x2:60,y2:130,stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      el("line",{x1:60,y1:130,x2:30,y2:170,stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      el("line",{x1:60,y1:130,x2:180,y2:130,stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      break;
+    }
+    case "piramideQ":{
+      const apex=[100,25];
+      const base=[[30,130],[150,130],[180,100],[60,100]];
+      // back faces via dash
+      el("polygon",{points:base.map(p=>p.join(",")).join(" "),fill:p.a,stroke,"stroke-width":2,class:"face-hl"},s);
+      // left front face
+      el("polygon",{points:`${apex.join(",")} 30,130 150,130`,fill:p.b,stroke,"stroke-width":2,class:"face-hl"},s);
+      // right side
+      el("polygon",{points:`${apex.join(",")} 150,130 180,100`,fill:p.c,stroke,"stroke-width":2,class:"face-hl"},s);
+      el("line",{x1:apex[0],y1:apex[1],x2:60,y2:100,stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      break;
+    }
+    case "piramideT":{
+      // tetraedro: silhueta = apex,b1,b2; b3 é vértice interno (mais próximo do observador)
+      // 3 faces visíveis dividem a silhueta sem sobreposição
+      const apex=[100,30];
+      const b1=[30,175], b2=[170,175], b3=[100,128];
+      // face superior-esquerda
+      el("polygon",{points:`${apex} ${b1} ${b3}`,fill:p.c,stroke,"stroke-width":2,class:"face-hl"},s);
+      // face superior-direita
+      el("polygon",{points:`${apex} ${b3} ${b2}`,fill:p.b,stroke,"stroke-width":2,class:"face-hl"},s);
+      // face inferior frontal
+      el("polygon",{points:`${b1} ${b2} ${b3}`,fill:p.a,stroke,"stroke-width":2,class:"face-hl"},s);
+      break;
+    }
+    case "prismaT":{
+      // prisma triangular em pé (vertical), 3/4 view
+      const bl=[40,180], br=[150,180], bb=[125,150];   // base inferior: front-left, front-right, back
+      const tl=[40,60],  tr=[150,60],  tb=[125,30];    // base superior
+      // face direita (traseira)
+      el("polygon",{points:`${br} ${bb} ${tb} ${tr}`,fill:p.b,stroke,"stroke-width":2,class:"face-hl"},s);
+      // topo (triângulo)
+      el("polygon",{points:`${tl} ${tr} ${tb}`,fill:p.c,stroke,"stroke-width":2,class:"face-hl"},s);
+      // face frontal (retângulo)
+      el("polygon",{points:`${bl} ${br} ${tr} ${tl}`,fill:p.a,stroke,"stroke-width":2,class:"face-hl"},s);
+      // arestas ocultas (face esquerda e base de baixo)
+      el("line",{x1:bl[0],y1:bl[1],x2:bb[0],y2:bb[1],stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      el("line",{x1:tl[0],y1:tl[1],x2:tb[0],y2:tb[1],stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      el("line",{x1:bb[0],y1:bb[1],x2:tb[0],y2:tb[1],stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      break;
+    }
+    case "cilindro":{
+      // body rect
+      el("rect",{x:55,y:50,width:90,height:110,fill:p.a,stroke,"stroke-width":2,class:"face-hl"},s);
+      // bottom ellipse (front)
+      el("ellipse",{cx:100,cy:160,rx:45,ry:14,fill:p.b,stroke,"stroke-width":2,class:"face-hl"},s);
+      // top ellipse
+      el("ellipse",{cx:100,cy:50,rx:45,ry:14,fill:p.c,stroke,"stroke-width":2,class:"face-hl"},s);
+      // hidden line back of bottom
+      el("path",{d:"M 55 160 A 45 14 0 0 1 145 160",fill:"none",stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      break;
+    }
+    case "cone":{
+      const apex=[100,25];
+      // body triangle
+      el("polygon",{points:`${apex} 55,160 145,160`,fill:p.a,stroke,"stroke-width":2,class:"face-hl"},s);
+      // base ellipse
+      el("ellipse",{cx:100,cy:160,rx:45,ry:14,fill:p.b,stroke,"stroke-width":2,class:"face-hl"},s);
+      // hidden back arc
+      el("path",{d:"M 55 160 A 45 14 0 0 1 145 160",fill:"none",stroke,"stroke-width":1,"stroke-dasharray":dash},s);
+      break;
+    }
+    case "esfera":{
+      // sphere with latitude/longitude lines
+      el("circle",{cx:100,cy:100,r:70,fill:p.a,stroke,"stroke-width":2},s);
+      el("ellipse",{cx:100,cy:100,rx:70,ry:22,fill:"none",stroke,"stroke-width":1.5,"stroke-dasharray":"5,3"},s);
+      el("ellipse",{cx:100,cy:100,rx:40,ry:70,fill:"none",stroke,"stroke-width":1.5,"stroke-dasharray":"5,3"},s);
+      el("path",{d:"M 30 100 A 70 70 0 0 1 170 100",fill:"none",stroke,"stroke-width":1.5,"stroke-dasharray":"5,3"},s);
+      break;
+    }
+  }
+  return s;
+}
+
+function drawPlan(key,white){
+  const s=svg(200,200,"0 0 200 200");
+  let p=SOLIDS[key].palette;
+  if(white)p={a:"#ffffff",b:"#ffffff",c:"#ffffff",hl:p.hl};
+  const stroke="#1e293b";
+  const f=p.a;
+  switch(key){
+    case "cubo":{
+      // cross of 6 squares, size 35
+      const sz=32, cx=100, cy=100;
+      const sq=(x,y,c)=>el("rect",{x,y,width:sz,height:sz,fill:c||f,stroke,"stroke-width":2},s);
+      sq(cx-sz/2,cy-sz/2,p.a);
+      sq(cx-sz/2-sz,cy-sz/2,p.b);
+      sq(cx-sz/2+sz,cy-sz/2,p.b);
+      sq(cx-sz/2+2*sz,cy-sz/2,p.c);
+      sq(cx-sz/2,cy-sz/2-sz,p.b);
+      sq(cx-sz/2,cy-sz/2+sz,p.b);
+      break;
+    }
+    case "paralelepipedo":{
+      // cross of rectangles, large=50x30, small=30x30, mid=50x30
+      const a=50,b=28; const cx=100,cy=100;
+      const r=(x,y,w,h,c)=>el("rect",{x,y,width:w,height:h,fill:c,stroke,"stroke-width":2},s);
+      r(cx-a/2,cy-b/2,a,b,p.a);
+      r(cx-a/2-b,cy-b/2,b,b,p.c);
+      r(cx-a/2+a,cy-b/2,b,b,p.c);
+      r(cx-a/2+a+b,cy-b/2,a,b,p.a);
+      r(cx-a/2,cy-b/2-b,a,b,p.b);
+      r(cx-a/2,cy-b/2+b,a,b,p.b);
+      break;
+    }
+    case "piramideQ":{
+      const sz=50, cx=100,cy=100;
+      el("rect",{x:cx-sz/2,y:cy-sz/2,width:sz,height:sz,fill:p.a,stroke,"stroke-width":2},s);
+      // 4 triangles
+      const t=40;
+      el("polygon",{points:`${cx-sz/2},${cy-sz/2} ${cx+sz/2},${cy-sz/2} ${cx},${cy-sz/2-t}`,fill:p.b,stroke,"stroke-width":2},s);
+      el("polygon",{points:`${cx-sz/2},${cy+sz/2} ${cx+sz/2},${cy+sz/2} ${cx},${cy+sz/2+t}`,fill:p.b,stroke,"stroke-width":2},s);
+      el("polygon",{points:`${cx-sz/2},${cy-sz/2} ${cx-sz/2},${cy+sz/2} ${cx-sz/2-t},${cy}`,fill:p.c,stroke,"stroke-width":2},s);
+      el("polygon",{points:`${cx+sz/2},${cy-sz/2} ${cx+sz/2},${cy+sz/2} ${cx+sz/2+t},${cy}`,fill:p.c,stroke,"stroke-width":2},s);
+      break;
+    }
+    case "piramideT":{
+      // 4 triangles unfolded: central triangle + 3 around
+      const cx=100,cy=110;const r=40;
+      const A=[cx,cy-r], B=[cx-r*Math.cos(Math.PI/6),cy+r*Math.sin(Math.PI/6)], C=[cx+r*Math.cos(Math.PI/6),cy+r*Math.sin(Math.PI/6)];
+      el("polygon",{points:`${A} ${B} ${C}`,fill:p.a,stroke,"stroke-width":2},s);
+      // outer triangles reflected over each edge
+      const reflect=(P,Q,R)=>{const mx=(Q[0]+R[0])/2,my=(Q[1]+R[1])/2; return [2*mx-P[0],2*my-P[1]];};
+      const D=reflect(A,B,C), E=reflect(B,A,C), F=reflect(C,A,B);
+      el("polygon",{points:`${B} ${C} ${D}`,fill:p.b,stroke,"stroke-width":2},s);
+      el("polygon",{points:`${A} ${C} ${E}`,fill:p.b,stroke,"stroke-width":2},s);
+      el("polygon",{points:`${A} ${B} ${F}`,fill:p.b,stroke,"stroke-width":2},s);
+      break;
+    }
+    case "prismaT":{
+      // 3 rectangles in a row + 2 triangles top/bottom of middle
+      const w=40,h=50,cx=100,cy=100;
+      el("rect",{x:cx-w*1.5,y:cy-h/2,width:w,height:h,fill:p.a,stroke,"stroke-width":2},s);
+      el("rect",{x:cx-w/2,y:cy-h/2,width:w,height:h,fill:p.b,stroke,"stroke-width":2},s);
+      el("rect",{x:cx+w/2,y:cy-h/2,width:w,height:h,fill:p.a,stroke,"stroke-width":2},s);
+      el("polygon",{points:`${cx-w/2},${cy-h/2} ${cx+w/2},${cy-h/2} ${cx},${cy-h/2-w*0.87}`,fill:p.c,stroke,"stroke-width":2},s);
+      el("polygon",{points:`${cx-w/2},${cy+h/2} ${cx+w/2},${cy+h/2} ${cx},${cy+h/2+w*0.87}`,fill:p.c,stroke,"stroke-width":2},s);
+      break;
+    }
+    case "cilindro":{
+      // canonical: rectangle in middle, 2 circles above and below
+      const w=80,h=60,cx=100,cy=100,r=18;
+      el("rect",{x:cx-w/2,y:cy-h/2,width:w,height:h,fill:p.a,stroke,"stroke-width":2},s);
+      el("circle",{cx,cy:cy-h/2-r,r,fill:p.b,stroke,"stroke-width":2},s);
+      el("circle",{cx,cy:cy+h/2+r,r,fill:p.c,stroke,"stroke-width":2},s);
+      break;
+    }
+    case "cone":{
+      // big sector (pie slice) + small circle
+      const cx=80,cy=110,R=70;
+      // sector ~270deg
+      const a1=-Math.PI*0.75, a2=Math.PI*0.75;
+      const x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+      const x2=cx+R*Math.cos(a2),y2=cy+R*Math.sin(a2);
+      el("path",{d:`M ${cx} ${cy} L ${x1} ${y1} A ${R} ${R} 0 1 1 ${x2} ${y2} Z`,fill:p.a,stroke,"stroke-width":2},s);
+      el("circle",{cx:170,cy:150,r:20,fill:p.b,stroke,"stroke-width":2},s);
+      break;
+    }
+    case "esfera":{
+      // "cannot be unfolded" — sphere with a red prohibition symbol overlay
+      el("circle",{cx:100,cy:100,r:55,fill:p.a,stroke,"stroke-width":2},s);
+      el("ellipse",{cx:100,cy:100,rx:55,ry:18,fill:"none",stroke,"stroke-width":1.5,"stroke-dasharray":"5,3"},s);
+      el("ellipse",{cx:100,cy:100,rx:32,ry:55,fill:"none",stroke,"stroke-width":1.5,"stroke-dasharray":"5,3"},s);
+      // prohibition circle
+      el("circle",{cx:100,cy:100,r:62,fill:"none",stroke:"#ef4444","stroke-width":6},s);
+      el("line",{x1:56,y1:56,x2:144,y2:144,stroke:"#ef4444","stroke-width":6},s);
+      // label
+      const txt=document.createElementNS(SVG_NS,"text");
+      txt.setAttribute("x","100");txt.setAttribute("y","185");txt.setAttribute("text-anchor","middle");
+      txt.setAttribute("font-size","13");txt.setAttribute("fill","#ef4444");txt.setAttribute("font-weight","bold");
+      txt.textContent="Não planificável!";s.appendChild(txt);
+      break;
+    }
+  }
+  return s;
+}
+
+/* ============ STATE ============ */
+const State={
+  screen:"menu",
+  level:null,
+  pool:[],
+  matches:{},
+  attempts:{},
+  score:0,
+  total:0,
+  startTime:0,
+  timerId:null,
+  encyIndex:0,
+  hintShownFor:null,
+  progress:{easy:0,medium:0,hard:0}
+};
+
+function loadProgress(){
+  try{const p=localStorage.getItem("mp_progress");if(p)State.progress={...State.progress,...JSON.parse(p)};}catch(e){}
+}
+function saveProgress(){
+  try{localStorage.setItem("mp_progress",JSON.stringify(State.progress));}catch(e){}
+}
+
+/* ============ AUDIO ============ */
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function beep(freqs,dur,type="sine"){
+  const ctx=ac();if(!ctx)return;
+  const now=ctx.currentTime;
+  freqs.forEach((f,i)=>{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.value=f;
+    g.gain.setValueAtTime(0,now+i*dur);
+    g.gain.linearRampToValueAtTime(.2,now+i*dur+.02);
+    g.gain.exponentialRampToValueAtTime(.001,now+i*dur+dur);
+    o.connect(g).connect(ctx.destination);
+    o.start(now+i*dur);o.stop(now+i*dur+dur);
+  });
+}
+const sndOk=()=>beep([523,659,784],.12);
+const sndErr=()=>beep([200,150],.18,"square");
+const sndWin=()=>beep([523,659,784,1047,1319],.14);
+
+/* ============ NAVIGATION ============ */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  State.screen=id;
+  if(id==="menu")renderStarsTotal();
+  if(id==="encyclopedia")renderEncyclopedia();
+  if(id==="levelSelect")renderLevels();
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{ac();show(b.dataset.go);}));
+
+/* ============ MENU ============ */
+function renderStarsTotal(){
+  const total=State.progress.easy+State.progress.medium+State.progress.hard;
+  document.getElementById("starsTotal").textContent=`⭐ ${total} / 9 estrelas`;
+}
+
+/* ============ ENCYCLOPEDIA ============ */
+function renderEncyclopedia(){
+  const grid=document.getElementById("encyGrid");
+  grid.innerHTML="";
+  SOLID_KEYS.forEach((k,i)=>{
+    const card=document.createElement("div");
+    card.className="solid-card";
+    if(SOLIDS[k].noGame){
+      card.style.cssText="background:#fefce8;border:2px dashed #fbbf24;";
+    }
+    card.appendChild(drawSolid(k));
+    const n=document.createElement("div");n.className="name";n.textContent=SOLIDS[k].name;
+    card.appendChild(n);
+    if(SOLIDS[k].noGame){
+      const badge=document.createElement("div");
+      badge.style.cssText="font-size:10px;color:#92400e;background:#fef3c7;border-radius:8px;padding:2px 6px;margin-top:2px;";
+      badge.textContent="✨ Convidada especial";
+      card.appendChild(badge);
+    }
+    card.setAttribute("aria-label","Ver enciclopédia: "+SOLIDS[k].name);
+    card.addEventListener("click",()=>openEncyModal(i));
+    grid.appendChild(card);
+  });
+}
+function findLevelForSolid(k){
+  const order=["easy","medium","hard"];
+  for(const lk of order){if(LEVELS[lk].pool.includes(k))return lk;}
+  return null;
+}
+function openEncyModal(i){
+  State.encyIndex=i;
+  const k=SOLID_KEYS[i];const s=SOLIDS[k];
+  const body=document.getElementById("modalBody");
+  body.innerHTML="";
+
+  // Title + classification tag
+  const h=document.createElement("h3");h.textContent=s.name;body.appendChild(h);
+  const tag=document.createElement("span");
+  tag.className="tag"+(s.isPolyhedron?"":" curved");
+  tag.textContent=s.classification;
+  body.appendChild(tag);
+
+  // "Convidada especial" banner for sphere
+  if(s.noGame){
+    const banner=document.createElement("div");
+    banner.style.cssText="background:#fef9c3;border:2px dashed #fbbf24;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:13px;color:#92400e;";
+    banner.innerHTML="✨ <b>Convidada Especial!</b> A esfera aparece na Enciclopédia mas não tem planificação — descubra o porquê abaixo!";
+    body.appendChild(banner);
+  }
+
+  // 3D + plan visuals
+  const vis=document.createElement("div");vis.className="visual";
+  const d1=document.createElement("div");
+  d1.appendChild(drawSolid(k));
+  const l1=document.createElement("div");l1.className="lbl";l1.textContent="Sólido 3D";d1.appendChild(l1);
+  const d2=document.createElement("div");
+  d2.appendChild(drawPlan(k));
+  const l2=document.createElement("div");l2.className="lbl";
+  l2.textContent=s.noGame?"Não pode ser planificada":"Planificação: "+s.planDesc;
+  d2.appendChild(l2);
+  vis.append(d1,d2);body.appendChild(vis);
+
+  // Faces / Arestas / Vértices — conditional
+  if(s.isPolyhedron){
+    const facts=document.createElement("div");facts.className="facts";
+    // highlight euler if flagged
+    const eulerNote=s.eulerHighlight?` <span style="font-size:11px;color:#7c3aed;display:block;margin-top:2px;">Euler: F+V−A=2</span>`:"";
+    facts.innerHTML=`<div><strong>${s.faces}</strong>Faces</div><div><strong>${s.edges}</strong>Arestas</div><div><strong>${s.vertices}</strong>Vértices${eulerNote}</div>`;
+    body.appendChild(facts);
+  } else {
+    // curved bodies / sphere: show explanation instead
+    const pevBox=document.createElement("div");
+    pevBox.style.cssText="background:#fce7f3;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:13px;color:#831843;";
+    pevBox.innerHTML="<b>⚠️ Faces, Arestas e Vértices:</b> "+s.pevExplain;
+    body.appendChild(pevBox);
+  }
+
+  // Euler highlight box for polyhedra with flag
+  if(s.eulerHighlight&&s.isPolyhedron){
+    const euler=document.createElement("div");
+    euler.style.cssText="background:#ede9fe;border-left:4px solid #7c3aed;border-radius:0 10px 10px 0;padding:8px 12px;margin:6px 0;font-size:13px;";
+    euler.innerHTML=`<b>🔢 Fórmula de Euler:</b> Para qualquer poliedro convexo, <b>Faces + Vértices − Arestas = 2</b>. Verifique: <b>${s.faces} + ${s.vertices} − ${s.edges} = ${s.faces+s.vertices-s.edges}</b> ✓`;
+    body.appendChild(euler);
+  }
+
+  // Description, example, curiosity
+  const p1=document.createElement("p");p1.innerHTML="<b>📝 Descrição:</b> "+s.desc;body.appendChild(p1);
+  if(s.example){
+    const p2=document.createElement("p");p2.innerHTML="<b>🏠 Cotidiano:</b> "+s.example;body.appendChild(p2);
+  }
+  const ped=document.createElement("div");ped.className="pedagogy";ped.innerHTML="<b>✨ Curiosidade:</b> "+s.curiosity;body.appendChild(ped);
+
+  // Navigation row
+  const nav=document.createElement("div");nav.className="modal-nav";
+  const prev=document.createElement("button");
+  prev.className="btn secondary";prev.textContent="← Anterior";
+  prev.setAttribute("aria-label","Ver sólido anterior na enciclopédia");
+  prev.onclick=()=>openEncyModal((i-1+SOLID_KEYS.length)%SOLID_KEYS.length);
+
+  const close=document.createElement("button");
+  close.className="btn";close.textContent="Fechar";
+  close.setAttribute("aria-label","Fechar enciclopédia");
+  close.onclick=closeModal;
+
+  const next=document.createElement("button");
+  next.className="btn secondary";next.textContent="Próximo →";
+  next.setAttribute("aria-label","Ver próximo sólido na enciclopédia");
+  next.onclick=()=>openEncyModal((i+1)%SOLID_KEYS.length);
+
+  nav.append(prev,close,next);
+
+  // "Ver no Jogo" button — only for solids that appear in a level
+  const levelKey=findLevelForSolid(k);
+  if(levelKey&&LEVELS[levelKey].unlock()){
+    const play=document.createElement("button");
+    play.className="btn green";
+    play.style.cssText="font-size:13px;padding:8px 14px;";
+    const levelName=LEVELS[levelKey].name;
+    play.textContent=`▶ Ver no Jogo (${levelName})`;
+    play.setAttribute("aria-label",`Jogar o nível ${levelName} onde este sólido aparece`);
+    play.onclick=()=>{closeModal();startGame(levelKey);};
+    nav.appendChild(play);
+  }
+
+  body.appendChild(nav);
+  document.getElementById("modal").classList.add("active");
+}
+function closeModal(){document.getElementById("modal").classList.remove("active");}
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
+
+/* ============ LEVEL SELECT ============ */
+const LEVELS={
+  easy:{name:"Fácil",emoji:"🟢",sub:"Reconhecendo os Sólidos",cls:"easy",pool:["cubo","cilindro","cone","piramideQ"],hints:true,time:0,unlock:()=>true},
+  medium:{name:"Médio",emoji:"🟡",sub:"Associando as Planificações",cls:"medium",pool:["cubo","paralelepipedo","piramideQ","piramideT","prismaT","cilindro"],hints:false,time:0,unlock:()=>State.progress.easy>=1},
+  hard:{name:"Difícil",emoji:"🟣",sub:"Mestre da Planificação",cls:"hard",pool:["cubo","paralelepipedo","piramideQ","piramideT","prismaT","cilindro","cone"],hints:false,time:240,unlock:()=>State.progress.medium>=1}
+};
+function renderLevels(){
+  const c=document.getElementById("levelsList");c.innerHTML="";
+  Object.entries(LEVELS).forEach(([k,L])=>{
+    const div=document.createElement("div");
+    div.className="level-card "+L.cls;
+    const unlocked=L.unlock();
+    if(!unlocked)div.classList.add("locked");
+    const stars=State.progress[k]||0;
+    div.innerHTML=`<div class="badge">${L.emoji}</div><h3>${L.name}</h3><div class="desc">${L.sub}</div><div class="stars">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>${unlocked?"":'<div style="margin-top:6px;font-size:12px;color:#991b1b">🔒 Conclua o nível anterior</div>'}`;
+    if(unlocked)div.addEventListener("click",()=>startGame(k));
+    c.appendChild(div);
+  });
+}
+
+/* ============ GAME ============ */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startGame(levelKey){
+  State.level=levelKey;
+  const L=LEVELS[levelKey];
+  State.pool=shuffle(L.pool);
+  State.matches={};State.attempts={};State.score=0;State.total=State.pool.length;State.hintShownFor=null;
+  document.getElementById("hudLevel").textContent=L.emoji+" "+L.name;
+  document.getElementById("btnHint").style.display="none";
+  renderGame();
+  show("game");
+  if(L.time>0){
+    State.startTime=Date.now();
+    const bar=document.getElementById("timerBar");bar.style.display="block";
+    const fill=document.getElementById("timerFill");
+    clearInterval(State.timerId);
+    State.timerId=setInterval(()=>{
+      const elapsed=(Date.now()-State.startTime)/1000;
+      const left=Math.max(0,L.time-elapsed);
+      fill.style.width=(left/L.time*100)+"%";
+      if(left<=0){clearInterval(State.timerId);endGame(true);}
+    },200);
+  }else{
+    document.getElementById("timerBar").style.display="none";
+    clearInterval(State.timerId);
+  }
+  updateHud();
+}
+
+function renderGame(){
+  const sz=document.getElementById("solidsZone");
+  const pz=document.getElementById("plansZone");
+  sz.innerHTML="";pz.innerHTML="";
+  State.pool.forEach(k=>{
+    const t=document.createElement("div");
+    t.className="tile solid";t.dataset.solid=k;
+    t.setAttribute("role","button");
+    t.setAttribute("aria-label","Sólido: "+SOLIDS[k].name+". Solte aqui a planificação correspondente.");
+    t.appendChild(drawSolid(k,LEVELS[State.level].cls==="hard"));
+    if(LEVELS[State.level].cls!=="hard"){
+      const l=document.createElement("div");l.className="lbl";l.textContent=SOLIDS[k].name;t.appendChild(l);
+    }
+    sz.appendChild(t);
+  });
+  shuffle(State.pool).forEach(k=>{
+    const t=document.createElement("div");
+    t.className="tile plan";t.dataset.plan=k;t.draggable=true;
+    t.setAttribute("role","button");
+    t.setAttribute("aria-label","Planificação de "+SOLIDS[k].name+". Arraste para o sólido correspondente.");
+    t.appendChild(drawPlan(k,LEVELS[State.level].cls==="hard"));
+    if(LEVELS[State.level].cls==="easy"){
+      const l=document.createElement("div");l.className="lbl";l.textContent=SOLIDS[k].planDesc;t.appendChild(l);
+    }
+    pz.appendChild(t);
+    enableDrag(t);
+  });
+}
+
+function updateHud(){
+  document.getElementById("hudScore").textContent=`${State.score} / ${State.total}`;
+  const atk=State.hintShownFor;
+  const tries=atk?(State.attempts[atk]||0):Object.values(State.attempts).reduce((a,b)=>a+b,0);
+  document.getElementById("hudAttempts").textContent=`Tentativas: ${Object.values(State.attempts).reduce((a,b)=>a+b,0)}`;
+  document.getElementById("progressFill").style.width=(State.score/State.total*100)+"%";
+}
+
+/* ====== Drag & drop (mouse + touch) ====== */
+let dragging=null, ghost=null;
+function enableDrag(tile){
+  // mouse drag
+  tile.addEventListener("dragstart",e=>{
+    if(tile.classList.contains("matched"))return e.preventDefault();
+    dragging=tile;tile.classList.add("dragging");
+    e.dataTransfer.setData("text/plain",tile.dataset.plan);
+    e.dataTransfer.effectAllowed="move";
+  });
+  tile.addEventListener("dragend",()=>{tile.classList.remove("dragging");dragging=null;clearHover();});
+  // touch
+  tile.addEventListener("touchstart",e=>{
+    if(tile.classList.contains("matched"))return;
+    ac();
+    dragging=tile;
+    const t=e.touches[0];
+    ghost=tile.cloneNode(true);ghost.classList.add("ghost");
+    document.body.appendChild(ghost);
+    moveGhost(t.clientX,t.clientY);
+    e.preventDefault();
+  },{passive:false});
+  tile.addEventListener("touchmove",e=>{
+    if(!ghost)return;
+    const t=e.touches[0];
+    moveGhost(t.clientX,t.clientY);
+    const over=document.elementFromPoint(t.clientX,t.clientY);
+    const solidTile=over&&over.closest(".tile.solid");
+    clearHover();
+    if(solidTile)solidTile.classList.add("drag-over");
+    e.preventDefault();
+  },{passive:false});
+  tile.addEventListener("touchend",e=>{
+    if(!ghost)return;
+    const t=e.changedTouches[0];
+    const over=document.elementFromPoint(t.clientX,t.clientY);
+    const solidTile=over&&over.closest(".tile.solid");
+    if(solidTile)attemptMatch(dragging,solidTile);
+    ghost.remove();ghost=null;dragging=null;clearHover();
+  });
+}
+function moveGhost(x,y){if(ghost){ghost.style.left=x+"px";ghost.style.top=y+"px";}}
+function clearHover(){document.querySelectorAll(".drag-over").forEach(e=>e.classList.remove("drag-over"));}
+
+// solids zone receives drops
+document.getElementById("solidsZone").addEventListener("dragover",e=>{
+  const st=e.target.closest(".tile.solid");
+  if(st){e.preventDefault();clearHover();st.classList.add("drag-over");}
+});
+document.getElementById("solidsZone").addEventListener("dragleave",e=>{
+  const st=e.target.closest(".tile.solid");if(st)st.classList.remove("drag-over");
+});
+document.getElementById("solidsZone").addEventListener("drop",e=>{
+  e.preventDefault();
+  const st=e.target.closest(".tile.solid");
+  if(st&&dragging)attemptMatch(dragging,st);
+  clearHover();
+});
+
+function attemptMatch(planTile,solidTile){
+  if(!planTile||!solidTile)return;
+  if(solidTile.classList.contains("matched"))return;
+  const planKey=planTile.dataset.plan;
+  const solidKey=solidTile.dataset.solid;
+  if(planKey===solidKey){
+    solidTile.classList.add("correct");
+    planTile.classList.add("correct","matched");
+    State.matches[solidKey]=true;
+    State.score++;
+    sndOk();
+    showToast("✓ Correto! "+SOLIDS[solidKey].feedback,"ok");
+    setTimeout(()=>{solidTile.classList.add("matched");solidTile.classList.remove("correct","hint","hint-face");},800);
+    if(State.hintShownFor===solidKey){State.hintShownFor=null;document.getElementById("btnHint").style.display="none";}
+    updateHud();
+    if(State.score>=State.total){clearInterval(State.timerId);setTimeout(()=>endGame(false),700);}
+  }else{
+    solidTile.classList.add("wrong");
+    planTile.classList.add("wrong");
+    sndErr();
+    showToast("✗ Tente de novo!","err");
+    State.attempts[solidKey]=(State.attempts[solidKey]||0)+1;
+    setTimeout(()=>{solidTile.classList.remove("wrong");planTile.classList.remove("wrong");},500);
+    if(LEVELS[State.level].hints&&State.attempts[solidKey]>=2){
+      // pulse the correct plan
+      const correctPlan=document.querySelector(`.tile.plan[data-plan="${solidKey}"]`);
+      if(correctPlan&&!correctPlan.classList.contains("matched"))correctPlan.classList.add("hint");
+    }
+    if(State.attempts[solidKey]>=2){
+      State.hintShownFor=solidKey;
+      document.getElementById("btnHint").style.display="inline-flex";
+    }
+    updateHud();
+  }
+}
+
+document.getElementById("btnHint").addEventListener("click",()=>{
+  const k=State.hintShownFor;if(!k)return;
+  const tile=document.querySelector(`.tile.solid[data-solid="${k}"]`);
+  if(tile)tile.classList.add("hint-face");
+  showToast("💡 Veja as faces destacadas — conte as formas!","ok");
+});
+
+let toastTimer=null;
+function showToast(msg,kind){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.className="toast show "+(kind||"");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.classList.remove("show");},2200);
+}
+
+document.getElementById("btnHome").addEventListener("click",()=>{clearInterval(State.timerId);show("menu");});
+document.getElementById("btnRestart").addEventListener("click",()=>startGame(State.level));
+
+/* ============ RESULT ============ */
+function endGame(timeOut){
+  clearInterval(State.timerId);
+  const pct=State.score/State.total;
+  let stars=1;if(pct>=1)stars=3;else if(pct>=.7)stars=2;else stars=pct>0?1:0;
+  const prev=State.progress[State.level]||0;
+  if(stars>prev){State.progress[State.level]=stars;saveProgress();}
+  document.getElementById("resultStars").textContent="⭐".repeat(stars)+"☆".repeat(3-stars);
+  document.getElementById("resultScore").textContent=`${State.score} / ${State.total} acertos`;
+  let msg="";
+  if(timeOut&&State.score<State.total)msg="⏰ O tempo acabou! Tente outra vez para ganhar todas as estrelas.";
+  else if(stars===3)msg="🎉 Perfeito! Você é um verdadeiro Mestre da Planificação!";
+  else if(stars===2)msg="👏 Muito bem! Você já entende quase todas as planificações.";
+  else msg="💪 Continue praticando! Visite a Enciclopédia para revisar os sólidos.";
+  document.getElementById("resultMsg").textContent=msg;
+  // next level button
+  const nextBtn=document.getElementById("btnNext");
+  const order=["easy","medium","hard"];const idx=order.indexOf(State.level);
+  if(stars===3&&idx<2){
+    nextBtn.style.display="inline-flex";
+    nextBtn.onclick=()=>startGame(order[idx+1]);
+  }else nextBtn.style.display="none";
+  if(stars===3){sndWin();confetti();}
+  show("result");
+}
+document.getElementById("btnReplay").addEventListener("click",()=>startGame(State.level));
+
+function confetti(){
+  const colors=["#ef4444","#f59e0b","#10b981","#3b82f6","#a855f7","#ec4899"];
+  const app=document.getElementById("app");
+  for(let i=0;i<80;i++){
+    const c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"%";
+    c.style.background=colors[i%colors.length];
+    c.style.animationDuration=(2+Math.random()*2)+"s";
+    c.style.animationDelay=(Math.random()*.5)+"s";
+    app.appendChild(c);
+    setTimeout(()=>c.remove(),4500);
+  }
+}
+
+/* ============ INIT ============ */
+loadProgress();
+renderStarsTotal();
+</script>
+</body>
+</html>
