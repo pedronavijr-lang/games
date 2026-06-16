@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planificação de Sólidos - 5 Ano</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --panel:  rgba(255,255,255,0.88);
+      --head:   #5b2d8e;
+      --body:   #3e3a4f;
+      --accent: #ff7043;
+      --green:  #4caf50;
+      --purple: #7c4dff;
+      --track:  #e0d7f5;
+      --sh:     0 6px 24px rgba(90,50,140,0.15);
+      --side-w: 172px;
+      --foot-h: 52px;
+    }
+    html, body {
+      height: 100%; font-family: 'Nunito', sans-serif;
+      background: linear-gradient(155deg, #fce4ec 0%, #e8f5e9 100%);
+      overflow: hidden;
+    }
+
+    /* ---- Layout raiz ---- */
+    #app {
+      display: grid;
+      grid-template-columns: var(--side-w) 1fr var(--side-w);
+      grid-template-rows: 1fr var(--foot-h);
+      width: 100vw; height: 100vh;
+    }
+
+    /* ---- Canvas ocupa célula central (linha 1, coluna 2) ---- */
+    #c {
+      grid-column: 1 / 4;
+      grid-row: 1 / 2;
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* ---- Painéis laterais e rodapé: sobrepostos ao canvas via position:absolute ---- */
+    #panel-left, #panel-right, #footer-bar {
+      position: absolute;
+      z-index: 10;
+      backdrop-filter: blur(14px);
+      background: var(--panel);
+      border: 2px solid rgba(255,255,255,.95);
+      box-shadow: var(--sh);
+    }
+
+    /* ---- Painel esquerdo: seleção de sólido ---- */
+    #panel-left {
+      top: 12px; left: 12px;
+      width: var(--side-w);
+      bottom: calc(var(--foot-h) + 20px);
+      border-radius: 18px;
+      padding: 14px 12px;
+      display: flex; flex-direction: column; gap: 8px;
+      overflow-y: auto;
+    }
+    #panel-left h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: .85rem; color: var(--head);
+      text-align: center; margin-bottom: 2px;
+    }
+    .sol-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 12px; cursor: pointer;
+      border: 2px solid transparent; background: rgba(124,77,255,.07);
+      font-family: 'Nunito', sans-serif; font-size: .8rem; font-weight: 700;
+      color: var(--body); transition: background .18s, border-color .18s;
+      text-align: left; width: 100%;
+    }
+    .sol-btn:hover  { background: rgba(124,77,255,.15); }
+    .sol-btn.active {
+      background: rgba(124,77,255,.18);
+      border-color: var(--purple); color: var(--head);
+    }
+    .sol-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+    /* ---- Painel direito: info do sólido ---- */
+    #panel-right {
+      top: 12px; right: 12px;
+      width: var(--side-w);
+      bottom: calc(var(--foot-h) + 20px);
+      border-radius: 18px;
+      padding: 14px 12px;
+      display: flex; flex-direction: column; gap: 8px;
+      overflow-y: auto;
+    }
+    #panel-right h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.05rem; color: var(--head); line-height: 1.15;
+      text-align: center;
+    }
+    #panel-right h1 em { color: var(--accent); font-style: normal; }
+    #panel-right p {
+      font-size: .78rem; color: var(--body); line-height: 1.5;
+    }
+    #badge {
+      display: block; padding: 6px 10px; border-radius: 14px;
+      font-family: 'Fredoka One', cursive; font-size: .78rem;
+      background: var(--green); color: #fff; transition: background .4s;
+      text-align: center; margin-top: auto;
+    }
+
+    /* ---- Rodapé: apenas a barra de planificação ---- */
+    #footer-bar {
+      left: calc(var(--side-w) + 20px);
+      right: calc(var(--side-w) + 20px);
+      bottom: 10px;
+      border-radius: 40px;
+      padding: 0 18px;
+      height: var(--foot-h);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .lbl {
+      font-family: 'Fredoka One', cursive; font-size: .78rem;
+      color: var(--head); white-space: nowrap;
+    }
+    #slider {
+      -webkit-appearance: none; appearance: none; flex: 1; height: 8px;
+      border-radius: 8px; background: var(--track); outline: none; cursor: pointer;
+    }
+    #slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--purple); border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(124,77,255,.4); cursor: grab;
+    }
+    #slider::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--purple); border: 3px solid #fff; cursor: grab;
+    }
+
+    /* ---- Responsivo estreito ---- */
+    @media (max-width: 600px) {
+      :root { --side-w: 130px; --foot-h: 48px; }
+      .sol-btn { font-size: .72rem; padding: 6px 8px; }
+      #panel-right h1 { font-size: .9rem; }
+      #panel-right p  { font-size: .72rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <canvas id="c"></canvas>
+
+  <!-- Painel esquerdo: seleção de sólido -->
+  <div id="panel-left">
+    <h2>🔷 Sólidos</h2>
+    <button class="sol-btn active" data-sol="cubo">
+      <span class="sol-icon">⬛</span>Cubo
+    </button>
+    <button class="sol-btn" data-sol="piramideQ">
+      <span class="sol-icon">🔺</span>Pirâmide Quadrangular
+    </button>
+    <button class="sol-btn" data-sol="piramideT">
+      <span class="sol-icon">🔺</span>Tetraedro
+    </button>
+    <button class="sol-btn" data-sol="cilindro">
+      <span class="sol-icon">🔵</span>Cilindro
+    </button>
+    <button class="sol-btn" data-sol="prismaT">
+      <span class="sol-icon">🔹</span>Prisma Triangular
+    </button>
+    <button class="sol-btn" data-sol="prismaR">
+      <span class="sol-icon">📦</span>Prisma Retangular
+    </button>
+    <button class="sol-btn" data-sol="cone">
+      <span class="sol-icon">🍦</span>Cone
+    </button>
+  </div>
+
+  <!-- Painel direito: info do sólido selecionado -->
+  <div id="panel-right">
+    <h1>Planificação do <em id="tituloSolido">Cubo</em></h1>
+    <p id="descSolido">Um cubo tem <strong>6 faces</strong> quadradas iguais, <strong>12 arestas</strong> e <strong>8 vertices</strong>. A planificação em cruz mostra todas as faces abertas num plano!</p>
+    <span id="badge">Sólido fechado — mova o slider!</span>
+  </div>
+
+  <!-- Rodapé fino: apenas a barra de planificação -->
+  <div id="footer-bar">
+    <span class="lbl">Sólido</span>
+    <input type="range" id="slider" min="0" max="100" value="0" />
+    <span class="lbl">Plano</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script>
+/* ================================================================
+   PLANIFICAÇÃO DE SOLIDOS — educativo 3D, Three.js r128
+   Arquitetura: cada face = THREE.Group independente na cena.
+   Animacao: lerpVectors + slerp entre dois estados absolutos.
+   ================================================================ */
+
+// ----------------------------------------------------------------
+// RENDERER / CENA / CAMERA
+// ----------------------------------------------------------------
+var canvas   = document.getElementById('c');
+var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+
+var scene  = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+camera.position.set(3.5, 2.8, 5.0);
+camera.lookAt(0, 0, 0);
+
+function onResize() {
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+// ----------------------------------------------------------------
+// ILUMINACAO
+// ----------------------------------------------------------------
+scene.add(new THREE.AmbientLight(0xfff8f0, 0.85));
+var sun = new THREE.DirectionalLight(0xffffff, 1.0);
+sun.position.set(5, 8, 6);
+scene.add(sun);
+var fill = new THREE.DirectionalLight(0xd0e8ff, 0.4);
+fill.position.set(-5, -3, -4);
+scene.add(fill);
+
+// ----------------------------------------------------------------
+// ORBIT CONTROLS (inline, sem CDN extra)
+// ----------------------------------------------------------------
+(function () {
+  THREE.OrbitControls = function (cam, el) {
+    var scope = this;
+    this.enabled       = true;
+    this.target        = new THREE.Vector3(0, 0, 0);
+    this.minDistance   = 2;
+    this.maxDistance   = 22;
+    this.dampingFactor = 0.09;
+
+    var offset = new THREE.Vector3().subVectors(cam.position, scope.target);
+    var sph    = new THREE.Spherical().setFromVector3(offset);
+    var dsph   = new THREE.Spherical(0, 0, 0);
+    var last   = { x: 0, y: 0 };
+    var down   = false;
+
+    function onDown(x, y) { down = true; last.x = x; last.y = y; }
+    function onMove(x, y) {
+      if (!down || !scope.enabled) return;
+      var H = el.clientHeight || 600;
+      dsph.theta -= 2 * Math.PI * (x - last.x) / H * 0.9;
+      dsph.phi   -= 2 * Math.PI * (y - last.y) / H * 0.9;
+      last.x = x; last.y = y;
+    }
+    function onUp() { down = false; }
+
+    el.addEventListener('mousedown',  function (e) { onDown(e.clientX, e.clientY); });
+    el.addEventListener('mousemove',  function (e) { onMove(e.clientX, e.clientY); });
+    el.addEventListener('mouseup',    onUp);
+    el.addEventListener('mouseleave', onUp);
+    el.addEventListener('touchstart', function (e) { if (e.touches.length === 1) onDown(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    el.addEventListener('touchmove',  function (e) { if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    el.addEventListener('touchend',   onUp);
+    el.addEventListener('wheel', function (e) {
+      sph.radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, sph.radius + e.deltaY * 0.013));
+    }, { passive: true });
+
+    this.update = function () {
+      sph.theta += dsph.theta * scope.dampingFactor;
+      sph.phi   += dsph.phi   * scope.dampingFactor;
+      dsph.theta *= (1 - scope.dampingFactor);
+      dsph.phi   *= (1 - scope.dampingFactor);
+      sph.phi = Math.max(0.05, Math.min(Math.PI - 0.05, sph.phi));
+      sph.makeSafe();
+      offset.setFromSpherical(sph);
+      cam.position.copy(scope.target).add(offset);
+      cam.lookAt(scope.target);
+    };
+  };
+})();
+
+var controls = new THREE.OrbitControls(camera, canvas);
+
+// ----------------------------------------------------------------
+// CONSTANTES E UTILITARIOS
+// ----------------------------------------------------------------
+var PI = Math.PI;
+var H2 = PI / 2;  // 90 graus em radianos
+
+// Cria Quaternion a partir de angulos de Euler (ordem XYZ)
+function qE(rx, ry, rz) {
+  return new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz));
+}
+
+// Quaternion identidade: face no plano XY, normal aponta para +Z
+var Q0 = qE(0, 0, 0);
+
+// Material para arestas (instancia unica, nao geometria)
+var eMat = new THREE.LineBasicMaterial({ color: 0x333333 });
+
+// Cria um Mesh triangular via BufferGeometry. 
+// pts: [x1,y1, x2,y2, x3,y3] no plano local Z=0, centrado no centroide.
+function triMesh(pts, cor) {
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+    pts[0], pts[1], 0,
+    pts[2], pts[3], 0,
+    pts[4], pts[5], 0
+  ]), 3));
+  g.computeVertexNormals();
+  return new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: cor, side: THREE.DoubleSide }));
+}
+
+// Cria LineSegments de aresta para um triangulo (geometria propria)
+function triEdge(pts) {
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+    pts[0], pts[1], 0,  pts[2], pts[3], 0,  pts[4], pts[5], 0
+  ]), 3));
+  return new THREE.LineSegments(new THREE.EdgesGeometry(g), eMat);
+}
+
+// Cria Mesh retangular via PlaneGeometry (geometria propria por chamada)
+function rectMesh(w, h, cor) {
+  return new THREE.Mesh(
+    new THREE.PlaneGeometry(w, h),
+    new THREE.MeshLambertMaterial({ color: cor, side: THREE.DoubleSide })
+  );
+}
+
+// Cria LineSegments de aresta para um retangulo (geometria propria)
+function rectEdge(w, h) {
+  return new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.PlaneGeometry(w, h)),
+    eMat
+  );
+}
+
+// Cria um Group com mesh+arestas, posiciona no estado fechado, adiciona a cena.
+// Retorna { group, def } para uso no loop de animacao.
+function mkGroup(mesh, edge, def) {
+  var g = new THREE.Group();
+  g.add(mesh);
+  g.add(edge);
+  g.position.copy(def.cp);
+  g.quaternion.copy(def.cq);
+  scene.add(g);
+  return { group: g, def: def };
+}
+
+// Quaternion que rotaciona +Z para apontar na direcao do vetor 'n' (normalizado)
+function qFromN(n) {
+  return new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+}
+
+// ----------------------------------------------------------------
+// REGISTRO DE SOLIDOS
+// ----------------------------------------------------------------
+var SOLIDOS = {};
+
+/* ================================================================
+   1. CUBO
+   Lado S = 1.  6 faces quadradas.
+   Planificação em cruz: Frente centro, Topo/Base acima/abaixo,
+   Direita/Esquerda nos flancos, Fundo mais a direita.
+   ================================================================ */
+(function () {
+  var S = 1.0;
+  // Definicoes: cp=closedPos, cq=closedQuat, op=openPos, oq=openQuat
+  var DEFS = [
+    { cor: 0xff8a80, cp: new THREE.Vector3(0, 0,  S/2), cq: qE(0, 0, 0),   op: new THREE.Vector3(0,    0, 0), oq: Q0 }, // Frente
+    { cor: 0xffcc80, cp: new THREE.Vector3(0,  S/2, 0), cq: qE(-H2, 0, 0), op: new THREE.Vector3(0,    S, 0), oq: Q0 }, // Topo
+    { cor: 0x80cbc4, cp: new THREE.Vector3(0, -S/2, 0), cq: qE( H2, 0, 0), op: new THREE.Vector3(0,   -S, 0), oq: Q0 }, // Base
+    { cor: 0x80d8ff, cp: new THREE.Vector3( S/2, 0, 0), cq: qE(0,  H2, 0), op: new THREE.Vector3( S,   0, 0), oq: Q0 }, // Direita
+    { cor: 0xce93d8, cp: new THREE.Vector3(-S/2, 0, 0), cq: qE(0, -H2, 0), op: new THREE.Vector3(-S,   0, 0), oq: Q0 }, // Esquerda
+    { cor: 0xa5d6a7, cp: new THREE.Vector3(0, 0, -S/2), cq: qE(0,  PI, 0), op: new THREE.Vector3(2*S,  0, 0), oq: Q0 }  // Fundo
+  ];
+  var items = [];
+  DEFS.forEach(function (d) {
+    items.push(mkGroup(rectMesh(S, S, d.cor), rectEdge(S, S), d));
+  });
+  SOLIDOS['cubo'] = {
+    items: items,
+    titulo: 'Cubo',
+    desc: 'O cubo tem <strong>6 faces</strong> quadradas iguais, <strong>12 arestas</strong> e <strong>8 vertices</strong>. A planificação em cruz mostra todas as faces abertas num plano!'
+  };
+})();
+
+/* ================================================================
+   2. PIRAMIDE QUADRANGULAR
+   Base quadrada S=1, altura H=0.8.
+   apotema da face = sqrt(H^2 + (S/2)^2).
+   Inclinacao da face sobre a base: thetaInc = atan(H / (S/2)).
+
+   Planificação: base no centro + 4 triangulos ao redor.
+   Cada triangulo isoceles: base S, altura apot.
+   Centroide do triangulo esta a apot/3 da base (1/3 da altura).
+   ================================================================ */
+(function () {
+  var S    = 1.0;
+  var H    = 0.8;
+  var S2   = S / 2;
+  // Apotema = distancia do centro da base ate o meio da aresta lateral
+  var apot = Math.sqrt(H * H + S2 * S2);
+  // Angulo de inclinacao da face lateral com o plano horizontal
+  // tan(thetaInc) = H / S2  =>  thetaInc = atan2(H, S2)
+  var thetaInc = Math.atan2(H, S2);
+  // Distancia do centroide do triangulo isoceles ate sua base
+  var tCent = apot / 3;
+  // Distancia do centroide ate o apex
+  var tApex = 2 * apot / 3;
+
+  // Vertices do triangulo isoceles centrado no centroide (plano local)
+  // Base em y = +tCent (perto do centro da planificação)
+  // Apex em y = -tApex
+  var TV = [-S2, tCent,   S2, tCent,   0, -tApex];
+
+  // ---- ESTADO FECHADO ----
+  // Base quadrada: plano XZ em Y=0, normal aponta para +Y => rotX = +90
+  // (PlaneGeometry criado no plano XY, rotX=+90 coloca no plano XZ com normal +Y)
+  var BASE_CP = new THREE.Vector3(0, 0, 0);
+  var BASE_CQ = qE(H2, 0, 0);  // normal +Y
+
+  // Centroide de cada face triangular no solido:
+  // Frente (aresta Z=+S2): apex em (0,H,0), base em (-S2,0,S2),(S2,0,S2)
+  //   centroide = (0, H/3, S2*2/3)
+  // A face esta inclinada thetaInc em relacao ao plano XZ.
+  // Normal aponta para +Z e +Y => rotX = -(PI/2 - thetaInc) = thetaInc - PI/2
+  var nDx =  H / apot;   // componente X da normal das faces dir/esq
+  var nDy = S2 / apot;   // componente Y da normal das faces dir/esq
+
+  // Regra geral para cada face lateral (TV: base ao longo de X_local em y=+tCent,
+  // apex em y=-tApex). Para que TV "caia" sobre a face do solido:
+  //   X_local = direcao da aresta da base 3D
+  //   Y_local = (face_centroide -> meio_da_aresta), normalizado
+  //             (assim +Y_local aponta para o lado da base do TV, que coincide
+  //              com a aresta da base; e -Y_local aponta para o apex)
+  //   Z_local = normal exterior (= X x Y para basis dextrogiro)
+
+  // Face FRENTE: aresta da base entre (-S2,0,S2) e (+S2,0,S2). Apex em (0,H,0).
+  // face_centroide = (0, H/3, 2S2/3); meio_aresta = (0,0,S2).
+  // X_local = (-1,0,0) (de V1 para V0) para manter dextrogiro com normal +Z,+Y.
+  var CQ_FRENTE = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(-1,    0,    0   ),  // X local = aresta da base
+      new THREE.Vector3( 0,   -nDx,  nDy ),  // Y local = centro->meio_aresta
+      new THREE.Vector3( 0,    nDy,  nDx )   // Z local = normal exterior
+    )
+  );
+  var CP_FRENTE = new THREE.Vector3(0, H / 3,  S2 * 2 / 3);
+
+  // Face TRAS: aresta entre (-S2,0,-S2) e (+S2,0,-S2). normal = (0,nDy,-nDx).
+  var CQ_TRAS = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(
+      new THREE.Vector3( 1,    0,    0   ),  // X local = aresta da base
+      new THREE.Vector3( 0,   -nDx, -nDy ),  // Y local = centro->meio_aresta
+      new THREE.Vector3( 0,    nDy, -nDx )   // Z local = normal exterior
+    )
+  );
+  var CP_TRAS   = new THREE.Vector3(0, H / 3, -S2 * 2 / 3);
+
+  // Face DIREITA: aresta entre (S2,0,-S2) e (S2,0,S2). normal = (nDx,nDy,0).
+  var CQ_DIR = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(0,    0,   1),     // X local = aresta da base (eixo Z global)
+      new THREE.Vector3(nDy, -nDx, 0),     // Y local = do meio da aresta ao centro (oposto ao apex)
+      new THREE.Vector3(nDx,  nDy, 0)      // Z local = normal exterior
+    )
+  );
+  var CP_DIR = new THREE.Vector3( S2 * 2 / 3, H / 3, 0);
+
+  // Face ESQUERDA: aresta entre (-S2,0,S2) e (-S2,0,-S2). normal = (-nDx,nDy,0).
+  // centroide=(-S2*2/3,H/3,0); meio_aresta=(-S2,0,0) => Y=(-nDy,-nDx,0)
+  // Verificacao: (0,0,-1) x (-nDy,-nDx,0) = (-nDx,nDy,0) = normal ✓
+  var CQ_ESQ = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(0,     0,   -1),   // X local = aresta da base
+      new THREE.Vector3(-nDy, -nDx,  0),   // Y local = centroide->meio_aresta
+      new THREE.Vector3(-nDx,  nDy,  0)    // Z local = normal exterior
+    )
+  );
+  var CP_ESQ = new THREE.Vector3(-S2 * 2 / 3, H / 3, 0);
+
+  // ---- ESTADO ABERTO ----
+  // Centroide do triangulo esta a tCent da aresta => afastamento total = S2 + tCent
+  var OP_FRENTE = new THREE.Vector3(0, -(S2 + tCent), 0);  // base em cima (toca borda Y-)
+  var OQ_FRENTE = Q0;
+  var OP_TRAS   = new THREE.Vector3(0,  (S2 + tCent), 0);  // base embaixo (toca borda Y+)
+  var OQ_TRAS   = qE(0, 0, PI);                             // girado 180: base em baixo
+  var OP_DIR    = new THREE.Vector3( (S2 + tCent), 0, 0);
+  var OQ_DIR    = qE(0, 0,  H2);                            // base a esquerda
+  var OP_ESQ    = new THREE.Vector3(-(S2 + tCent), 0, 0);
+  var OQ_ESQ    = qE(0, 0, -H2);                            // base a direita
+
+  var items = [];
+  // BASE
+  items.push(mkGroup(rectMesh(S, S, 0xffcc80), rectEdge(S, S),
+    { cp: BASE_CP, cq: BASE_CQ, op: new THREE.Vector3(0,0,0), oq: Q0 }));
+  // 4 faces laterais (mesma geometria TV, criadas individualmente)
+  function mkLat(cor, cp, cq, op, oq) {
+    return mkGroup(triMesh(TV, cor), triEdge(TV), { cp: cp, cq: cq, op: op, oq: oq });
+  }
+  items.push(mkLat(0xff8a80, CP_FRENTE, CQ_FRENTE, OP_FRENTE, OQ_FRENTE));
+  items.push(mkLat(0x80cbc4, CP_TRAS,   CQ_TRAS,   OP_TRAS,   OQ_TRAS  ));
+  items.push(mkLat(0x80d8ff, CP_DIR,    CQ_DIR,    OP_DIR,    OQ_DIR   ));
+  items.push(mkLat(0xce93d8, CP_ESQ,    CQ_ESQ,    OP_ESQ,    OQ_ESQ   ));
+
+  SOLIDOS['piramideQ'] = {
+    items: items,
+    titulo: 'Piramide Quadrangular',
+    desc: 'A piramide quadrangular tem <strong>5 faces</strong> (1 base quadrada + 4 triangulares), <strong>8 arestas</strong> e <strong>5 vertices</strong>. A planificação mostra a base no centro e os 4 triangulos ao redor!'
+  };
+})();
+
+/* ================================================================
+   3. PIRAMIDE TRIANGULAR (TETRAEDRO REGULAR)
+   Aresta A = 1.  4 faces triangulares equilateras.
+
+   Triangulo equilatero: altura H = A*sqrt(3)/2
+     centroide a hT = H/3 da base, a hA = 2H/3 do apex.
+
+   Planificação: base central + 3 faces dobradas pelas arestas da base.
+   Para cada aresta da base, a face lateral e colocada com sua
+   aresta coincidindo com a aresta correspondente da base,
+   com o apex apontando para fora.
+
+   Calculo das posicoes abertas por reflexao:
+     midpoint(aresta) + normal_exterior * hA
+   ================================================================ */
+(function () {
+  var A   = 1.0;
+  var SQ3 = Math.sqrt(3);
+  var Ht  = A * SQ3 / 2;   // altura do triangulo equilatero
+  var hT  = Ht / 3;        // centroide -> base
+  var hA  = 2 * Ht / 3;   // centroide -> apex
+
+  // Vertices do triangulo equilatero centrado no centroide (plano local Z=0)
+  var TV = [-A/2, -hT,   A/2, -hT,   0, hA];
+
+  // ---- VERTICES DO TETRAEDRO NO ESPACO 3D ----
+  // Base equilatera no plano Y=0, centrada na origem
+  //   V0 = ( A/2,  0, -A/(2*SQ3) )
+  //   V1 = (-A/2,  0, -A/(2*SQ3) )
+  //   V2 = (   0,  0,  A/SQ3     )
+  // Apex: V3 = ( 0, A*sqrt(2/3), 0 )
+  var HT = A * Math.sqrt(2.0 / 3.0);  // altura do tetraedro regular
+  var V0 = new THREE.Vector3( A/2, 0, -A/(2*SQ3));
+  var V1 = new THREE.Vector3(-A/2, 0, -A/(2*SQ3));
+  var V2 = new THREE.Vector3(0,    0,  A/SQ3    );
+  var V3 = new THREE.Vector3(0,   HT,  0        );
+
+  // Centroide de 3 vertices
+  function ctr(a, b, c) {
+    return new THREE.Vector3((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
+  }
+  // Normal exterior de uma face (produto vetorial dos vetores das arestas)
+  function nFace(a, b, c) {
+    return new THREE.Vector3()
+      .crossVectors(new THREE.Vector3().subVectors(b,a), new THREE.Vector3().subVectors(c,a))
+      .normalize();
+  }
+
+  // Helper: constroi basis para uma face triangular do tetraedro tal que
+  // o triangulo local TV (base ao longo de +X em y=-hT, apex em y=+hA) caia
+  // exatamente sobre a face do solido. Escolhemos uma aresta como base e o
+  // terceiro vertice como apex; ordem de P0,P1 garante basis dextrogiro com
+  // normal apontando para FORA (oposto ao vertice opVert).
+  function faceBasis(P0, P1, P2, opVert) {
+    var X = new THREE.Vector3().subVectors(P1, P0).normalize();
+    var mid = new THREE.Vector3().addVectors(P0, P1).multiplyScalar(0.5);
+    var Y = new THREE.Vector3().subVectors(P2, mid).normalize();
+    var Z = new THREE.Vector3().crossVectors(X, Y).normalize();
+    var c = new THREE.Vector3(
+      (P0.x+P1.x+P2.x)/3, (P0.y+P1.y+P2.y)/3, (P0.z+P1.z+P2.z)/3
+    );
+    var toOut = new THREE.Vector3().subVectors(c, opVert);
+    if (Z.dot(toOut) < 0) {
+      // basis esquerdo: troca P0<->P1 (inverte X e Z para virar dextrogiro)
+      X.multiplyScalar(-1);
+      Z.multiplyScalar(-1);
+    }
+    return new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().makeBasis(X, Y, Z)
+    );
+  }
+
+  // Face base: V0,V1,V2  -- vertice oposto = V3 (apex do tetraedro)
+  var cBase  = ctr(V0, V1, V2);
+  var qBase  = faceBasis(V0, V1, V2, V3);
+
+  // Face frente: V0,V2,V3  -- vertice oposto = V1
+  var cFront = ctr(V0, V2, V3);
+  var qFront = faceBasis(V0, V2, V3, V1);
+
+  // Face esquerda: V1,V0,V3 -- vertice oposto = V2
+  var cLeft  = ctr(V1, V0, V3);
+  var qLeft  = faceBasis(V1, V0, V3, V2);
+
+  // Face traseira: V2,V1,V3 -- vertice oposto = V0
+  var cBack  = ctr(V2, V1, V3);
+  var qBack  = faceBasis(V2, V1, V3, V0);
+
+  // ---- PLANIFICAÇÃO ----
+  // Base centrada em (0,0). Vertices da base no plano:
+  //   B0 = (-A/2, -hT), B1 = (A/2, -hT), B2 = (0, hA)
+  //
+  // Para cada aresta da base, calculamos:
+  //   midAresta = ponto medio da aresta no plano 2D
+  //   normalExt = perpendicular a aresta, apontando para FORA do triangulo (normalizado)
+  //   openPos   = midAresta + normalExt * hA  (centro da face lateral aberta)
+  //   openQuat  = rotacao tal que a base do triangulo lateral se alinhe com a aresta
+  //
+  // ARESTA 0: B0->B1 (base inferior em y=-hT)
+  //   midAresta = (0, -hT).  normalExt = (0, -1)
+  //   openPos = (0, -hT - hA) = (0, -Ht)
+  //   O triangulo aberto tem sua base em cima => Q0 (base em y=+tCent relativo ao centro)
+  //
+  // ARESTA 1: B1->B2 (lado direito)
+  //   vetor B1->B2 = (-A/2, Ht). normalExt (girado -90) = (Ht, A/2) normalizado
+  //
+  // ARESTA 2: B2->B0 (lado esquerdo)
+  //   vetor B2->B0 = (-A/2, -Ht). normalExt (girado -90) = (-Ht, A/2) normalizado
+
+  // ---- PLANIFICAÇÃO: posicoes e rotacoes corretas ----
+  // Base no plano: B0=(-A/2,-hT), B1=(A/2,-hT), B2=(0,hA)
+  // TV: base ao longo de X em y=-hT (local), apex em y=+hA.
+  // openPos = midAresta + normalExt*hA; oq = qE(0,0,angulo_aresta)
+
+  // openPos = midAresta + normalExt * hT  (centroide fica a hT da aresta)
+  // Valores calculados geometricamente e verificados numericamente.
+  // ARESTA B0->B1 (inferior): mid=(0,-hT), normal=(0,-1) => openPos=(0, -2*hT)
+  var OP_FRONT = new THREE.Vector3(0, -2 * hT, 0);
+  var OQ_FRONT = qE(0, 0, -PI);
+
+  // ARESTA B1->B2 (direita): mid=(A/4, hT/2-hT/2)... openPos=(0.5, hT)
+  var OP_RIGHT = new THREE.Vector3(A/2, hT, 0);
+  var OQ_RIGHT = qE(0, 0, -PI / 3);
+
+  // ARESTA B2->B0 (esquerda): openPos=(-A/2, hT)
+  var OP_LEFT = new THREE.Vector3(-A/2, hT, 0);
+  var OQ_LEFT = qE(0, 0, PI / 3);
+  var items = [];
+  function mkT(cor, cp, cq, op, oq) {
+    return mkGroup(triMesh(TV, cor), triEdge(TV), { cp:cp, cq:cq, op:op, oq:oq });
+  }
+  items.push(mkT(0xffcc80, cBase,  qBase,  new THREE.Vector3(0,0,0), Q0     ));
+  items.push(mkT(0xff8a80, cFront, qFront, OP_FRONT,                 OQ_FRONT));
+  items.push(mkT(0x80d8ff, cLeft,  qLeft,  OP_RIGHT,                 OQ_RIGHT));
+  items.push(mkT(0xa5d6a7, cBack,  qBack,  OP_LEFT,                  OQ_LEFT ));
+
+  SOLIDOS['piramideT'] = {
+    items: items,
+    titulo: 'Piramide Triangular (Tetraedro)',
+    desc: 'O tetraedro regular tem <strong>4 faces</strong> triangulares equilateras, <strong>6 arestas</strong> e <strong>4 vertices</strong>. Na Planificação a base fica no centro e os 3 triangulos se abrem ao redor!'
+  };
+})();
+
+/* ================================================================
+   4. CILINDRO
+   Raio r=0.5, altura h=1.0.
+   Circunferencia C = 2*pi*r.
+
+   Faces: Tampa sup (circulo r), Tampa inf (circulo r), Lateral (ret. C x h).
+
+   Planificação:
+     Lateral: retangulo C x h centrado em (0,0)
+     Tampa sup: (0, +h/2 + r, 0)  — toca a borda superior do retangulo
+     Tampa inf: (0, -(h/2 + r), 0) — toca a borda inferior
+
+   Para o estado FECHADO, como o cilindro e curvo, a lateral e
+   representada por um CylinderGeometry (casca aberta) que fica visivel
+   enquanto o slider esta em 0..50%, e o plano plano fica visivel em 50..100%.
+   ================================================================ */
+(function () {
+  var r = 0.5;
+  var h = 1.0;
+  var C = 2 * PI * r;   // circunferencia = largura do retangulo desenvolvido
+
+  var items = [];
+
+  // Tampa Superior: circulo centrado em (0, h/2, 0), normal +Y
+  // Estado fechado: plano XZ em y=+h/2. Estado aberto: plano XY em y=+(h/2+r).
+  (function () {
+    var geo  = new THREE.CircleGeometry(r, 40);
+    var mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: 0xff8a80, side: THREE.DoubleSide }));
+    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CircleGeometry(r, 40)), eMat);
+    items.push(mkGroup(mesh, edge, {
+      cp: new THREE.Vector3(0,  h/2, 0), cq: qE(-H2, 0, 0),
+      op: new THREE.Vector3(0,  h/2 + r, 0), oq: Q0
+    }));
+  })();
+
+  // Tampa Inferior: circulo centrado em (0, -h/2, 0), normal -Y
+  (function () {
+    var geo  = new THREE.CircleGeometry(r, 40);
+    var mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: 0x80cbc4, side: THREE.DoubleSide }));
+    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CircleGeometry(r, 40)), eMat);
+    items.push(mkGroup(mesh, edge, {
+      cp: new THREE.Vector3(0, -h/2, 0), cq: qE( H2, 0, 0),
+      op: new THREE.Vector3(0, -(h/2 + r), 0), oq: Q0
+    }));
+  })();
+
+  // Lateral: plano C x h (aberto) + casca cilindrica (fechado)
+  // A lateral nao translada nem rotaciona (fica no centro).
+  // A troca visual cilindro->plano ocorre em e=0.5, controlada no loop de animacao.
+  // edgePlane so fica visivel no estado aberto (junto com meshPlane).
+  (function () {
+    var meshPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(C, h),
+      new THREE.MeshLambertMaterial({ color: 0xffcc80, side: THREE.DoubleSide })
+    );
+    var edgePlane = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.PlaneGeometry(C, h)), eMat
+    );
+
+    var meshCyl = new THREE.Mesh(
+      new THREE.CylinderGeometry(r, r, h, 40, 1, true),
+      new THREE.MeshLambertMaterial({ color: 0xffcc80, side: THREE.DoubleSide })
+    );
+
+    var grp = new THREE.Group();
+    grp.add(meshPlane);
+    grp.add(edgePlane);
+    grp.add(meshCyl);
+    grp.position.set(0, 0, 0);
+    scene.add(grp);
+
+    items.push({
+      group: grp,
+      def: { cp: new THREE.Vector3(0,0,0), cq: Q0, op: new THREE.Vector3(0,0,0), oq: Q0 },
+      meshCyl: meshCyl, meshPlane: meshPlane, edgePlane: edgePlane
+    });
+  })();
+
+  SOLIDOS['cilindro'] = {
+    items: items,
+    titulo: 'Cilindro',
+    desc: 'O cilindro tem <strong>3 faces</strong> (2 circulares + 1 lateral curva), <strong>2 arestas</strong> circulares e <strong>0 vertices</strong>. A lateral se "desenrola" formando um retangulo de largura igual a circunferencia da base!'
+  };
+})();
+
+/* ================================================================
+   5. PRISMA TRIANGULAR
+   Base triangular equilatera A=1, comprimento L=1.2.
+   5 faces: 2 triangulos (bases) + 3 retangulos (laterais A x L).
+
+   Solido: eixo ao longo de Z. Triangulo base no plano XY.
+   Vertices da base: B0=(-A/2,-hT), B1=(A/2,-hT), B2=(0,hA)
+
+   Faces retangulares A x L:
+     FaceINF:  entre B0 e B1 => normal (0,-1,0), centro (0,-hT,0)
+     FaceDIR:  entre B1 e B2 => normal perpendicular ao lado B1B2 no plano XY
+     FaceESQ:  entre B2 e B0 => normal perpendicular ao lado B2B0 no plano XY
+
+   Planificação: faixa horizontal de 3 retangulos A x L, lado a lado.
+     FaceINF  no centro  (0, 0)
+     FaceDIR  a direita  (+A, 0)
+     FaceESQ  a esquerda (-A, 0)
+   Bases triangulares nas extremidades da faixa, rotacionadas 90deg.
+   ================================================================ */
+(function () {
+  var A   = 1.0;
+  var L   = 1.2;
+  var SQ3 = Math.sqrt(3);
+  var Ht  = A * SQ3 / 2;   // altura do triangulo
+  var hT  = Ht / 3;        // centroide -> base
+  var hA  = 2 * Ht / 3;   // centroide -> apex
+
+  // Vertices do triangulo centrado no centroide
+  var TV = [-A/2, -hT,   A/2, -hT,   0, hA];
+
+  // ---- FACES RETANGULARES (ESTADO FECHADO) ----
+  // Face INF: entre B0=(-A/2,-hT,L/2) e B1=(A/2,-hT,L/2).
+  //   rectMesh(L,A): X_local=L (eixo Z do solido), Y_local=A (aresta B0B1).
+  //   Normal -Y. PlaneGeometry no plano XY: girar X->Z e Y->X para encaixar.
+  //   X_local = (0,0,1) [eixo Z], Y_local = (1,0,0) [aresta B0B1], Z_local = (0,-1,0) normal -Y
+  var CP_INF = new THREE.Vector3(0, -hT, 0);
+  var CQ_INF = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(
+      new THREE.Vector3( 0, 0, -1),  // X local = eixo Z negativo (comprimento L)
+      new THREE.Vector3( 1, 0,  0),  // Y local = aresta B0->B1 (comprimento A)
+      new THREE.Vector3( 0,-1,  0)   // Z local = normal -Y = X cross Y
+    )
+  );
+
+  // Face DIR: aresta B1(A/2,-hT) -> B2(0,hA).
+  //   X_local = (0,0,-1) [comprimento L], Y_local = B1->B2 = (-0.5,SQ3/2,0) [comprimento A]
+  //   Z = X cross Y = (SQ3/2, 0.5, 0) = normal exterior ✓
+  var CP_DIR = new THREE.Vector3((A/2+0)/2, (-hT+hA)/2, 0);
+  var CQ_DIR = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(
+      new THREE.Vector3( 0,      0,    -1),  // X local = eixo Z negativo (comprimento L)
+      new THREE.Vector3(-0.5,    SQ3/2, 0),  // Y local = direcao B1->B2 (comprimento A)
+      new THREE.Vector3( SQ3/2,  0.5,   0)   // Z local = normal exterior
+    )
+  );
+
+  // Face ESQ: aresta B2(0,hA) -> B0(-A/2,-hT).
+  //   X_local = (0,0,-1), Y_local = B2->B0 = (-0.5,-SQ3/2,0)
+  //   Z = X cross Y = (-SQ3/2, 0.5, 0) = normal exterior ✓
+  var CP_ESQ = new THREE.Vector3((0+(-A/2))/2, (hA+(-hT))/2, 0);
+  var CQ_ESQ = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(
+      new THREE.Vector3( 0,      0,      -1),  // X local = eixo Z negativo (comprimento L)
+      new THREE.Vector3(-0.5,   -SQ3/2,   0),  // Y local = direcao B2->B0 (comprimento A)
+      new THREE.Vector3(-SQ3/2,  0.5,     0)   // Z local = normal exterior
+    )
+  );
+
+  // ---- BASES TRIANGULARES (ESTADO FECHADO) ----
+  // Base traseira: no plano Z=+L/2, normal +Z => plano XY, Q0
+  var CP_BTRAS  = new THREE.Vector3(0, 0,  L/2);
+  var CQ_BTRAS  = Q0;
+  // Base frontal: no plano Z=-L/2, normal -Z => rotY = PI
+  var CP_BFRONT = new THREE.Vector3(0, 0, -L/2);
+  var CQ_BFRONT = qE(0, PI, 0);
+
+  // ---- PLANIFICAÇÃO ----
+  // 3 retangulos L x A em faixa horizontal (L=largura em X, A=altura em Y)
+  // Assim a aresta de comprimento A fica em Y, coincidindo com a base do triangulo.
+  var OP_INF = new THREE.Vector3(0,  0, 0);
+  var OP_DIR = new THREE.Vector3( L, 0, 0);
+  var OP_ESQ = new THREE.Vector3(-L, 0, 0);
+  // Todos ficam planos => Q0
+
+  // Triangulos nas extremidades da faixa.
+  // A faixa vai de x = -3L/2 ate x = +3L/2.
+  // Triangulo direito: base do TV (comprimento A, em y=-hT..+hA local) encosta em x=+3L/2.
+  // Apos qE(0,0,-H2): Y_local -> X_world. Base y=-hT -> x = centX - hT = 3L/2 => centX = 3L/2 + hT
+  var OP_BTRAS  = new THREE.Vector3( 3*L/2 + hT, 0, 0);
+  var OQ_BTRAS  = qE(0, 0, -H2);  // gira -90: apex vai para +X
+  // Triangulo esquerdo: simetrico.
+  var OP_BFRONT = new THREE.Vector3(-3*L/2 - hT, 0, 0);
+  var OQ_BFRONT = qE(0, 0,  H2);  // gira +90: apex vai para -X
+
+  var items = [];
+  function mkR(cor, cp, cq, op) {
+    return mkGroup(rectMesh(L, A, cor), rectEdge(L, A), { cp:cp, cq:cq, op:op, oq:Q0 });
+  }
+  function mkTri(cor, cp, cq, op, oq) {
+    return mkGroup(triMesh(TV, cor), triEdge(TV), { cp:cp, cq:cq, op:op, oq:oq });
+  }
+
+  items.push(mkR(  0xffcc80, CP_INF,   CQ_INF,   OP_INF));
+  items.push(mkR(  0xff8a80, CP_DIR,   CQ_DIR,   OP_DIR));
+  items.push(mkR(  0x80d8ff, CP_ESQ,   CQ_ESQ,   OP_ESQ));
+  items.push(mkTri(0xa5d6a7, CP_BTRAS, CQ_BTRAS, OP_BTRAS,  OQ_BTRAS ));
+  items.push(mkTri(0xce93d8, CP_BFRONT,CQ_BFRONT,OP_BFRONT, OQ_BFRONT));
+
+  SOLIDOS['prismaT'] = {
+    items: items,
+    titulo: 'Prisma Triangular',
+    desc: 'O prisma triangular tem <strong>5 faces</strong> (2 triangulares + 3 retangulares), <strong>9 arestas</strong> e <strong>6 vertices</strong>. Na planificação os 3 retangulos ficam em faixa e os triangulos nas pontas!'
+  };
+})();
+
+/* ================================================================
+   6. PRISMA RETANGULAR
+   W=1.2, HP=0.8, D=1.0.  6 faces retangulares.
+   Planificação em cruz: Frente centro, Topo/Base acima/abaixo,
+   Direita/Esquerda nos flancos, Fundo a direita da Direita.
+   ================================================================ */
+(function () {
+  var W  = 1.2;  // largura (X)
+  var HP = 0.8;  // altura (Y)
+  var D  = 1.0;  // profundidade (Z)
+
+  function mkRF(w, h, cor, cp, cq, op, oq) {
+    return mkGroup(rectMesh(w, h, cor), rectEdge(w, h), { cp:cp, cq:cq, op:op, oq:oq });
+  }
+  var items = [];
+
+  // Frente W x HP (Z=+D/2, normal +Z)
+  items.push(mkRF(W, HP, 0xff8a80,
+    new THREE.Vector3(0, 0,  D/2),   qE(0, 0, 0),
+    new THREE.Vector3(0, 0,    0),   Q0));
+
+  // Topo W x D (Y=+HP/2, normal +Y)
+  items.push(mkRF(W, D, 0xffcc80,
+    new THREE.Vector3(0,  HP/2, 0),  qE(-H2, 0, 0),
+    new THREE.Vector3(0,  HP/2 + D/2, 0),  Q0));
+
+  // Base W x D (Y=-HP/2, normal -Y)
+  items.push(mkRF(W, D, 0x80cbc4,
+    new THREE.Vector3(0, -HP/2, 0),  qE( H2, 0, 0),
+    new THREE.Vector3(0, -(HP/2 + D/2), 0),  Q0));
+
+  // Direita D x HP (X=+W/2, normal +X)
+  items.push(mkRF(D, HP, 0x80d8ff,
+    new THREE.Vector3( W/2, 0, 0),   qE(0,  H2, 0),
+    new THREE.Vector3( W/2 + D/2, 0, 0),  Q0));
+
+  // Esquerda D x HP (X=-W/2, normal -X)
+  items.push(mkRF(D, HP, 0xce93d8,
+    new THREE.Vector3(-W/2, 0, 0),   qE(0, -H2, 0),
+    new THREE.Vector3(-(W/2 + D/2), 0, 0), Q0));
+
+  // Fundo W x HP (Z=-D/2, normal -Z): abre para direita da face Direita
+  items.push(mkRF(W, HP, 0xa5d6a7,
+    new THREE.Vector3(0, 0, -D/2),   qE(0, PI, 0),
+    new THREE.Vector3(W/2 + D + W/2, 0, 0), Q0));
+
+  SOLIDOS['prismaR'] = {
+    items: items,
+    titulo: 'Prisma Retangular',
+    desc: 'O prisma retangular tem <strong>6 faces</strong> retangulares, <strong>12 arestas</strong> e <strong>8 vertices</strong>. A planificação em cruz e semelhante a do cubo, mas com proporcoes distintas!'
+  };
+})();
+
+/* ================================================================
+   7. CONE
+   Raio r=0.5, altura h=1.0.
+   Geratriz l = sqrt(r^2 + h^2).
+   Angulo do setor: alfa = 2*pi*r / l.
+
+   Planificação:
+     Setor circular (lateral desenvolvida): raio l, angulo alfa,
+       centrado no centroide do setor.
+     Base circular: posicionada logo abaixo do arco do setor.
+
+   Centroide do setor: dist = (2*l*sin(alfa/2)) / (3*(alfa/2))
+   ================================================================ */
+(function () {
+  var r    = 0.5;
+  var h    = 1.0;
+  var l    = Math.sqrt(r*r + h*h);       // geratriz
+  var alfa = 2 * PI * r / l;             // angulo do setor
+
+  // Centroide do setor a partir do bico (apex)
+  var centDist = (alfa > 1e-4) ? (2*l*Math.sin(alfa/2)) / (3*(alfa/2)) : 2*l/3;
+  // No referencial local do grupo, o bico fica em y = +centDist (acima do centro)
+  // O arco fica em y = centDist - l (abaixo do centro, a distancia l do bico)
+  var bicoY = centDist;
+  var arcoY = centDist - l;   // valor negativo (abaixo)
+
+  // Posicao da base circular na planificação:
+  // O circulo de raio r fica abaixo do arco, tocando-o:
+  //   openBaseY = arcoY - r
+  var openBaseY = arcoY - r;
+
+  // ---- SETOR CIRCULAR ----
+  // Vertices: bico em (0, bicoY, 0) + N pontos no arco.
+  // O arco vai de angulo (PI/2 + alfa/2) ate (PI/2 - alfa/2) no sentido horario
+  // (bico aponta para +Y, arco se abre abaixo simetricamente).
+  var NS = 64;   // segmentos do arco
+  var angStart = PI/2 + alfa/2;  // angulo inicial (lado esquerdo)
+  var angEnd   = PI/2 - alfa/2;  // angulo final   (lado direito)
+
+  // Setor com bico em CIMA (em y=+bicoY) e abertura para BAIXO.
+  // O angulo 3*PI/2 (= 270deg) aponta para -Y; o arco vai de
+  // (3*PI/2 - alfa/2) ate (3*PI/2 + alfa/2), centrado no bico, raio l.
+  var vsArr = [];
+  var idxArr = [];
+  vsArr.push(0, bicoY, 0);  // bico = vertice 0
+  var a0 = 3*PI/2 - alfa/2;
+  var a1 = 3*PI/2 + alfa/2;
+  for (var i = 0; i <= NS; i++) {
+    var ang = a0 + (a1 - a0) * i / NS;
+    vsArr.push(l * Math.cos(ang), bicoY + l * Math.sin(ang), 0);
+  }
+  // Triangulos: bico + pares consecutivos do arco
+  for (var k = 0; k < NS; k++) {
+    idxArr.push(0, k+1, k+2);
+  }
+
+  var geoSetor = new THREE.BufferGeometry();
+  geoSetor.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vsArr), 3));
+  geoSetor.setIndex(idxArr);
+  geoSetor.computeVertexNormals();
+  var meshSetor = new THREE.Mesh(geoSetor, new THREE.MeshLambertMaterial({ color: 0xffcc80, side: THREE.DoubleSide }));
+  var edgeSetor = new THREE.LineSegments(new THREE.EdgesGeometry(geoSetor), eMat);
+
+  // Casca do cone para estado fechado (superficie lateral apenas)
+  var meshCone = new THREE.Mesh(
+    new THREE.ConeGeometry(r, h, 40, 1, true),
+    new THREE.MeshLambertMaterial({ color: 0xffcc80, side: THREE.DoubleSide })
+  );
+
+  var items = [];
+
+  // BASE CIRCULAR
+  (function () {
+    var geo  = new THREE.CircleGeometry(r, 40);
+    var mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: 0xff8a80, side: THREE.DoubleSide }));
+    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CircleGeometry(r, 40)), eMat);
+    items.push(mkGroup(mesh, edge, {
+      cp: new THREE.Vector3(0, -h/2, 0),  cq: qE(H2, 0, 0),  // normal -Y
+      op: new THREE.Vector3(0, openBaseY, 0), oq: Q0
+    }));
+  })();
+
+  // LATERAL (setor + casca)
+  (function () {
+    var grp = new THREE.Group();
+    grp.add(meshSetor);
+    grp.add(edgeSetor);
+    grp.add(meshCone);
+    grp.position.set(0, 0, 0);
+    scene.add(grp);
+    items.push({
+      group: grp,
+      def: { cp: new THREE.Vector3(0,0,0), cq: Q0, op: new THREE.Vector3(0,0,0), oq: Q0 },
+      meshCone: meshCone, meshSetor: meshSetor, edgeSetor: edgeSetor
+    });
+  })();
+
+  SOLIDOS['cone'] = {
+    items: items,
+    titulo: 'Cone',
+    desc: 'O cone tem <strong>2 faces</strong> (1 base circular + 1 lateral curva), <strong>1 aresta</strong> circular e <strong>1 vertice</strong> (o apex). A lateral se "abre" como um setor de circulo!'
+  };
+})();
+
+// ----------------------------------------------------------------
+// VISIBILIDADE: todos invisiveis exceto o solido inicial
+// ----------------------------------------------------------------
+var SOLIDO_ATUAL = 'cubo';
+
+function setSolVis(nome, vis) {
+  var sol = SOLIDOS[nome];
+  if (!sol) return;
+  sol.items.forEach(function (it) { it.group.visible = vis; });
+}
+Object.keys(SOLIDOS).forEach(function (k) { setSolVis(k, false); });
+setSolVis('cubo', true);
+
+// ----------------------------------------------------------------
+// EASING (cubic in-out)
+// ----------------------------------------------------------------
+function ease(t) {
+  return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+}
+
+// ----------------------------------------------------------------
+// UI
+// ----------------------------------------------------------------
+var slider   = document.getElementById('slider');
+var badge    = document.getElementById('badge');
+var titEl    = document.getElementById('tituloSolido');
+var descEl   = document.getElementById('descSolido');
+var targetT  = 0;
+var currentT = 0;
+var LERP_K   = 0.07;
+
+function updBadge(pct) {
+  var s = SOLIDOS[SOLIDO_ATUAL] || {};
+  if (pct === 0) {
+    badge.style.background = '#4caf50';
+    badge.textContent = (s.titulo || SOLIDO_ATUAL) + ' fechado — mova o slider!';
+  } else if (pct === 100) {
+    badge.style.background = '#ff7043';
+    badge.textContent = 'Planificação completa!';
+  } else {
+    badge.style.background = '#7c4dff';
+    badge.textContent = 'Abrindo... ' + pct + '%';
+  }
+}
+
+slider.addEventListener('input', function () {
+  targetT = parseInt(slider.value, 10) / 100;
+  updBadge(Math.round(targetT * 100));
+});
+
+// Botões laterais de seleção de sólido
+document.querySelectorAll('.sol-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var novo = btn.getAttribute('data-sol');
+    if (novo === SOLIDO_ATUAL) return;
+    setSolVis(SOLIDO_ATUAL, false);
+    SOLIDO_ATUAL = novo;
+    setSolVis(SOLIDO_ATUAL, true);
+
+    slider.value = 0;
+    targetT = 0;
+    currentT = 0;
+
+    var s = SOLIDOS[SOLIDO_ATUAL] || {};
+    titEl.textContent = s.titulo || SOLIDO_ATUAL;
+    descEl.innerHTML  = s.desc   || '';
+    updBadge(0);
+    aplicar(0);
+
+    // Atualiza visual do botão ativo
+    document.querySelectorAll('.sol-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+});
+
+// ----------------------------------------------------------------
+// LOOP DE ANIMACAO
+// ----------------------------------------------------------------
+function aplicar(t) {
+  var e  = ease(t);
+  var sol = SOLIDOS[SOLIDO_ATUAL];
+  if (!sol) return;
+
+  for (var j = 0; j < sol.items.length; j++) {
+    var it  = sol.items[j];
+    var def = it.def;
+
+    // Lerp de posicao e slerp de rotacao entre estado fechado e aberto
+    it.group.position.lerpVectors(def.cp, def.op, e);
+    it.group.quaternion.copy(def.cq).slerp(def.oq, e);
+
+    // Cilindro: alterna casca cilindrica (fechado) / plano desenvolvido (aberto)
+    if (it.meshCyl !== undefined) {
+      it.meshCyl.visible        = (e < 0.5);
+      it.meshPlane.visible      = (e >= 0.5);
+      it.edgePlane.visible      = (e >= 0.5);
+    }
+
+    // Cone: alterna casca conica (fechado) / setor plano (aberto)
+    if (it.meshCone !== undefined) {
+      it.meshCone.visible   = (e < 0.5);
+      it.meshSetor.visible  = (e >= 0.5);
+      it.edgeSetor.visible  = (e >= 0.5);
+    }
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  currentT += (targetT - currentT) * LERP_K;
+  aplicar(currentT);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
