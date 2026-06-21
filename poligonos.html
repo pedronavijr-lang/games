@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>O Clube dos Polígonos</title>
+<style>
+/* ============================================================
+   VARIÁVEIS — edite aqui para personalizar cores e tamanhos
+============================================================ */
+:root {
+  --fundo:          #ffffff;
+  --fundo2:         #f5f5f3;
+  --fundo3:         #eeedea;
+  --texto:          #111111;
+  --texto2:         #555555;
+  --borda:          #d0cfc9;
+  --verde-fundo:    #EAF3DE;
+  --verde-texto:    #27500A;
+  --verde-borda:    #3B6D11;
+  --vermelho-fundo: #FCEBEB;
+  --vermelho-texto: #501313;
+  --vermelho-borda: #A32D2D;
+  --roxo-fundo:     #EEEDFE;
+  --roxo-texto:     #26215C;
+  --roxo-borda:     #534AB7;
+  --laranja-fundo:  #FFF3E0;
+  --laranja-texto:  #5D2900;
+  --laranja-borda:  #E65100;
+  --raio:           12px;
+}
+
+/* ============================================================
+   RESET
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, Verdana, sans-serif;
+  background: var(--fundo2);
+  color: var(--texto);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1rem 0.75rem 2rem;
+}
+
+/* ============================================================
+   CONTÊINER PRINCIPAL
+============================================================ */
+#app {
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 1.25rem 1.1rem 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  position: relative;
+}
+
+h1 { font-size: 22px; font-weight: 500; color: var(--texto); text-align: center; }
+.subtitulo { font-size: 13px; color: var(--texto2); line-height: 1.55; text-align: center; max-width: 340px; }
+
+/* ============================================================
+   TELAS — visibilidade
+============================================================ */
+.tela { display: none; flex-direction: column; align-items: center; gap: 13px; width: 100%; }
+.tela.ativa { display: flex; }
+
+/* ============================================================
+   INTRODUÇÃO
+============================================================ */
+.intro-canvas-wrap { width: 100%; max-width: 280px; }
+#introCanvas { display: block; width: 100%; height: auto; border-radius: var(--raio); }
+
+.campo-nome { display: flex; flex-direction: column; gap: 5px; width: 100%; max-width: 300px; }
+.campo-nome label { font-size: 13px; color: var(--texto2); font-weight: 500; }
+.campo-nome input {
+  padding: 9px 12px; border: 1.5px solid var(--borda); border-radius: var(--raio);
+  font-size: 15px; font-family: inherit; color: var(--texto); background: var(--fundo);
+  outline: none; transition: border-color 0.15s;
+}
+.campo-nome input:focus { border-color: var(--roxo-borda); }
+
+.dif-wrap { display: flex; flex-direction: column; gap: 5px; width: 100%; max-width: 300px; }
+.dif-wrap label { font-size: 13px; color: var(--texto2); font-weight: 500; }
+.dif-opcoes { display: flex; gap: 8px; }
+.btn-dif {
+  flex: 1; padding: 7px 6px; border-radius: var(--raio); font-size: 13px; cursor: pointer;
+  border: 1.5px solid var(--borda); background: var(--fundo2); color: var(--texto2);
+  font-family: inherit; font-weight: 500; transition: background .12s, border-color .12s, color .12s;
+}
+.btn-dif.ativo { background: var(--roxo-fundo); border-color: var(--roxo-borda); color: var(--roxo-texto); }
+
+.caixa-regras {
+  background: var(--fundo2); border: 1px solid var(--borda); border-radius: var(--raio);
+  padding: 11px 14px; font-size: 13px; line-height: 1.75;
+  text-align: left; width: 100%; max-width: 340px;
+}
+.caixa-regras b { font-weight: 500; }
+
+/* ============================================================
+   BOTÃO PRINCIPAL
+============================================================ */
+.btn-principal {
+  background: var(--roxo-fundo); color: var(--roxo-texto);
+  border: 1.5px solid var(--roxo-borda); padding: 12px 28px;
+  font-size: 15px; border-radius: var(--raio); font-weight: 500;
+  cursor: pointer; font-family: inherit;
+  transition: transform .12s, box-shadow .12s;
+}
+.btn-principal:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(83,74,183,.2); }
+.btn-principal:active { transform: scale(.97); box-shadow: none; }
+
+.btn-secundario {
+  background: var(--fundo2); color: var(--texto2);
+  border: 1.5px solid var(--borda); padding: 11px 24px;
+  font-size: 14px; border-radius: var(--raio); font-weight: 500;
+  cursor: pointer; font-family: inherit;
+  transition: transform .12s;
+}
+.btn-secundario:hover { transform: translateY(-1px); }
+
+/* ============================================================
+   JOGO — cabeçalho
+============================================================ */
+.cabecalho { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.fase-tag {
+  font-size: 12px; color: var(--roxo-texto); background: var(--roxo-fundo);
+  border: 1px solid var(--roxo-borda); border-radius: 99px; padding: 3px 12px; font-weight: 500;
+}
+.cabecalho-dir { display: flex; align-items: center; gap: 8px; }
+.contador { font-size: 12px; color: var(--texto2); }
+.btn-icone {
+  width: 27px; height: 27px; border-radius: 50%; border: 1px solid var(--borda);
+  background: var(--fundo2); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--texto2); transition: background .15s;
+}
+.btn-icone:hover { background: var(--fundo3); }
+
+/* ============================================================
+   PLACAR
+============================================================ */
+.placar { display: flex; gap: 10px; width: 100%; }
+.placar-card {
+  flex: 1; background: var(--fundo2); border: 1px solid var(--borda);
+  border-radius: var(--raio); padding: 8px 10px; text-align: center;
+}
+.placar-label { font-size: 10px; color: var(--texto2); text-transform: uppercase; letter-spacing: .05em; }
+.placar-valor { font-size: 22px; font-weight: 500; color: var(--texto); transition: transform .2s, color .2s; }
+.placar-valor.bump { transform: scale(1.3); color: var(--verde-borda); }
+
+/* ============================================================
+   BARRA DE PROGRESSO
+============================================================ */
+.barra-wrap { width: 100%; background: var(--fundo3); border-radius: 99px; height: 6px; overflow: hidden; }
+.barra-fill { height: 6px; background: var(--roxo-borda); border-radius: 99px; transition: width .4s cubic-bezier(.4,0,.2,1); width: 0%; }
+
+/* ============================================================
+   TEMPORIZADOR
+============================================================ */
+.timer-wrap { width: 100%; display: flex; align-items: center; gap: 8px; }
+.timer-label { font-size: 12px; color: var(--texto2); min-width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+.timer-barra-wrap { flex: 1; background: var(--fundo3); border-radius: 99px; height: 5px; overflow: hidden; }
+.timer-fill { height: 5px; background: var(--roxo-borda); border-radius: 99px; transition: width .1s linear, background .3s; width: 100%; }
+.timer-fill.urgente { background: var(--vermelho-borda); }
+
+/* ============================================================
+   CANVAS DE JOGO
+============================================================ */
+.canvas-wrap { position: relative; width: 100%; max-width: 360px; }
+#gameCanvas {
+  display: block; width: 100%; height: auto;
+  border: 1.5px solid var(--borda); border-radius: var(--raio);
+  background: var(--fundo); cursor: default;
+  transition: opacity .15s;
+}
+#gameCanvas.fade { opacity: 0; }
+
+#btn-ver-regra {
+  display: none; position: absolute; bottom: 10px; right: 10px;
+  background: var(--laranja-fundo); color: var(--laranja-texto);
+  border: 1px solid var(--laranja-borda); border-radius: 99px;
+  font-size: 12px; font-weight: 500; padding: 4px 12px;
+  cursor: pointer; font-family: inherit;
+}
+#btn-ver-regra:hover { opacity: .8; }
+
+/* ============================================================
+   BOTÕES DE RESPOSTA
+============================================================ */
+.botoes { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
+.btn {
+  padding: 11px 18px; border-radius: var(--raio); font-size: 14px; font-weight: 500;
+  cursor: pointer; border: 1.5px solid; font-family: inherit;
+  transition: transform .12s, box-shadow .12s, opacity .12s; min-width: 128px;
+}
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.1); }
+.btn:active:not(:disabled) { transform: scale(.96); box-shadow: none; }
+.btn:disabled { opacity: .38; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+.btn-sim  { background: var(--verde-fundo);    color: var(--verde-texto);    border-color: var(--verde-borda); }
+.btn-nao  { background: var(--vermelho-fundo); color: var(--vermelho-texto); border-color: var(--vermelho-borda); }
+.btn-opcao { background: var(--fundo2); color: var(--texto); border-color: var(--borda); min-width: 108px; font-size: 13px; }
+.btn-opcao:hover:not(:disabled) { background: var(--fundo3); }
+
+/* ============================================================
+   FEEDBACK
+============================================================ */
+#feedback {
+  width: 100%; min-height: 50px; padding: 10px 14px; border-radius: var(--raio);
+  font-size: 13px; line-height: 1.55; text-align: center;
+  background: var(--fundo2); border: 1px solid var(--borda); color: var(--texto2);
+  transition: background .25s, border-color .25s, color .25s;
+}
+#feedback.acerto { background: var(--verde-fundo);    border-color: var(--verde-borda);    color: var(--verde-texto); }
+#feedback.erro   { background: var(--vermelho-fundo); border-color: var(--vermelho-borda); color: var(--vermelho-texto); }
+
+/* ============================================================
+   PAUSA (botão flutuante)
+============================================================ */
+#btn-pausa {
+  position: absolute; top: 14px; right: 14px;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--borda); background: var(--fundo2);
+  font-size: 14px; cursor: pointer; display: none;
+  align-items: center; justify-content: center;
+  color: var(--texto2); transition: background .15s;
+}
+#btn-pausa:hover { background: var(--fundo3); }
+#btn-pausa.visivel { display: flex; }
+
+/* ============================================================
+   TRANSIÇÃO DE FASE
+============================================================ */
+.trans-numero { font-size: 56px; font-weight: 500; color: var(--roxo-borda); line-height: 1; }
+.trans-sub { font-size: 14px; color: var(--texto2); max-width: 300px; line-height: 1.55; text-align: center; }
+.trans-pontos {
+  font-size: 13px; background: var(--fundo2); border: 1px solid var(--borda);
+  border-radius: var(--raio); padding: 8px 20px; color: var(--texto2);
+}
+
+/* ============================================================
+   CERTIFICADO
+============================================================ */
+.cert-canvas-wrap { width: 100%; max-width: 180px; }
+#certCanvas { display: block; width: 100%; height: auto; border-radius: var(--raio); }
+
+.certificado {
+  border: 2px solid var(--roxo-borda); border-radius: var(--raio);
+  padding: 1.25rem 1.75rem; background: var(--roxo-fundo);
+  width: 100%; max-width: 360px; text-align: center;
+}
+.cert-titulo { font-size: 11px; color: var(--texto2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+.cert-nome { font-size: 18px; font-weight: 500; color: var(--roxo-texto); margin-bottom: 10px; }
+.cert-pontos { font-size: 48px; font-weight: 500; color: var(--roxo-borda); line-height: 1; }
+.cert-sub { font-size: 12px; color: var(--texto2); margin-top: 4px; }
+.cert-msg { margin-top: 12px; font-size: 13px; color: var(--roxo-texto); line-height: 1.5; }
+
+.cert-selos { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; max-width: 360px; }
+.selo {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--fundo2); border: 1px solid var(--borda);
+  border-radius: 99px; padding: 5px 12px; font-size: 12px; color: var(--texto2);
+}
+.selo.desbloqueado { background: var(--verde-fundo); border-color: var(--verde-borda); color: var(--verde-texto); }
+.resumo-fases { font-size: 13px; color: var(--texto2); }
+
+/* ============================================================
+   REVISÃO DE ERROS
+============================================================ */
+.revisao-titulo { font-size: 16px; font-weight: 500; color: var(--texto); align-self: flex-start; }
+.revisao-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; width: 100%; }
+.revisao-item {
+  border-radius: var(--raio); overflow: hidden;
+  border: 1.5px solid var(--vermelho-borda); background: var(--vermelho-fundo);
+  display: flex; flex-direction: column;
+}
+.revisao-canvas { display: block; width: 100%; }
+.revisao-legenda { font-size: 11px; padding: 5px 6px; color: var(--vermelho-texto); text-align: center; line-height: 1.3; }
+
+/* ============================================================
+   OVERLAYS / MODAIS
+============================================================ */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.4); z-index: 100;
+  align-items: center; justify-content: center; padding: 1rem;
+}
+.overlay.visivel { display: flex; }
+.modal {
+  background: var(--fundo); border-radius: var(--raio); padding: 1.5rem;
+  max-width: 360px; width: 100%; display: flex; flex-direction: column; gap: 13px;
+  border: 1px solid var(--borda);
+}
+.modal h2 { font-size: 17px; font-weight: 500; color: var(--texto); }
+.modal-regra {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px; border-radius: var(--raio); border: 1px solid var(--borda);
+  background: var(--fundo2); font-size: 13px; line-height: 1.5;
+}
+.modal-regra-icone { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.modal-regra b { font-weight: 500; display: block; margin-bottom: 2px; }
+
+/* ============================================================
+   CONFETE
+============================================================ */
+#confete-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 200; display: none; }
+
+/* ============================================================
+   RESPONSIVO
+============================================================ */
+@media (max-width: 400px) {
+  .btn { min-width: 100px; font-size: 13px; padding: 10px 10px; }
+  h1 { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confete-canvas"></canvas>
+
+<div id="app">
+  <button id="btn-pausa" onclick="pausarJogo()" title="Pausar">⏸</button>
+
+  <!-- ==================== TELA: INTRODUÇÃO ==================== -->
+  <div id="tela-intro" class="tela ativa">
+    <h1>O Clube dos Polígonos</h1>
+    <div class="intro-canvas-wrap">
+      <canvas id="introCanvas" width="560" height="160"></canvas>
+    </div>
+    <p class="subtitulo">Para entrar no clube, prove que sabe identificar polígonos e conhece seus nomes!</p>
+
+    <div class="campo-nome">
+      <label for="input-nome">Seu nome (opcional)</label>
+      <input type="text" id="input-nome" placeholder="Ex: Ana, Pedro…" maxlength="24" autocomplete="off"/>
+    </div>
+
+    <div class="dif-wrap">
+      <label>Dificuldade</label>
+      <div class="dif-opcoes">
+        <button class="btn-dif" onclick="selecionarDif(this,'facil')">Fácil</button>
+        <button class="btn-dif ativo" onclick="selecionarDif(this,'medio')">Médio</button>
+        <button class="btn-dif" onclick="selecionarDif(this,'dificil')">Difícil</button>
+      </div>
+    </div>
+
+    <div class="caixa-regras">
+      <b>As 3 Regras dos Polígonos:</b><br>
+      1. Formados só por <b>linhas retas</b> (sem curvas)<br>
+      2. A figura deve ser <b>fechada</b> (sem aberturas)<br>
+      3. Os lados <b>não podem se cruzar</b>
+    </div>
+
+    <button class="btn-principal" onclick="iniciarJogo()">Entrar no Clube! →</button>
+  </div>
+
+  <!-- ==================== TELA: JOGO ==================== -->
+  <div id="tela-jogo" class="tela">
+
+    <div class="cabecalho">
+      <span class="fase-tag" id="etiqueta-fase">Fase 1 — Teste de Admissão</span>
+      <div class="cabecalho-dir">
+        <span class="contador" id="contador">1 / 10</span>
+        <button class="btn-icone" onclick="abrirModalRegras()" title="Ver as regras">?</button>
+      </div>
+    </div>
+
+    <div class="placar">
+      <div class="placar-card">
+        <div class="placar-label">Pontos</div>
+        <div class="placar-valor" id="disp-pontos">0</div>
+      </div>
+      <div class="placar-card">
+        <div class="placar-label">Sequência</div>
+        <div class="placar-valor" id="disp-seq">0 🔥</div>
+      </div>
+      <div class="placar-card" id="card-tempo" style="display:none">
+        <div class="placar-label">Tempo</div>
+        <div class="placar-valor" id="disp-tempo">—</div>
+      </div>
+    </div>
+
+    <div class="barra-wrap"><div class="barra-fill" id="barra"></div></div>
+
+    <div class="timer-wrap" id="timer-wrap" style="display:none">
+      <span class="timer-label" id="timer-label">10s</span>
+      <div class="timer-barra-wrap"><div class="timer-fill" id="timer-fill"></div></div>
+    </div>
+
+    <p id="texto-pergunta" style="font-size:15px;font-weight:500;text-align:center;min-height:20px;">
+      Esta figura é um polígono?
+    </p>
+
+    <div class="canvas-wrap">
+      <canvas id="gameCanvas"></canvas>
+      <button id="btn-ver-regra" onclick="animarRegra()">Ver a regra 🔍</button>
+    </div>
+
+    <div class="botoes" id="area-botoes"></div>
+    <div id="feedback">Observe a figura e faça sua escolha!</div>
+  </div>
+
+  <!-- ==================== TELA: TRANSIÇÃO ==================== -->
+  <div id="tela-transicao" class="tela">
+    <h1>O Clube dos Polígonos</h1>
+    <div class="trans-numero">2</div>
+    <div style="font-size:20px;font-weight:500;color:var(--roxo-texto)">Fase 2!</div>
+    <p class="trans-sub" id="trans-sub">Agora nomeie os polígonos pelo número de lados!</p>
+    <div class="trans-pontos" id="trans-pontos">Fase 1: 0 pts</div>
+    <button class="btn-principal" onclick="comecarFase2()">Continuar →</button>
+  </div>
+
+  <!-- ==================== TELA: CERTIFICADO ==================== -->
+  <div id="tela-cert" class="tela">
+    <h1>O Clube dos Polígonos</h1>
+    <div class="cert-canvas-wrap">
+      <canvas id="certCanvas" width="360" height="360"></canvas>
+    </div>
+    <div class="certificado">
+      <div class="cert-titulo">Certificado de Conclusão</div>
+      <div class="cert-nome" id="cert-nome">Aluno</div>
+      <div class="cert-pontos" id="cert-pontos">0</div>
+      <div class="cert-sub">pontos conquistados</div>
+      <div class="cert-msg" id="cert-msg"></div>
+    </div>
+    <div class="cert-selos" id="cert-selos"></div>
+    <div class="resumo-fases" id="resumo-fases"></div>
+    <button class="btn-principal" id="btn-revisao" onclick="mostrarRevisao()" style="display:none">
+      Ver erros para revisar →
+    </button>
+    <button class="btn-secundario" onclick="reiniciarJogo()">Jogar Novamente</button>
+  </div>
+
+  <!-- ==================== TELA: REVISÃO ==================== -->
+  <div id="tela-revisao" class="tela">
+    <div class="revisao-titulo">Questões para revisar</div>
+    <p style="font-size:13px;color:var(--texto2);align-self:flex-start;line-height:1.5">
+      Estas figuras você errou — observe-as com calma!
+    </p>
+    <div class="revisao-grid" id="revisao-grid"></div>
+    <button class="btn-secundario" onclick="reiniciarJogo()">Jogar Novamente</button>
+  </div>
+
+</div><!-- #app -->
+
+<!-- ==================== OVERLAY: PAUSA ==================== -->
+<div class="overlay" id="overlay-pausa">
+  <div class="modal">
+    <h2>⏸ Jogo Pausado</h2>
+    <p style="font-size:13px;color:var(--texto2);line-height:1.5">O jogo está pausado. Continue quando quiser!</p>
+    <div class="caixa-regras">
+      <b>Lembrete:</b><br>
+      1. Só <b>linhas retas</b><br>
+      2. Figura <b>fechada</b><br>
+      3. Sem <b>cruzamentos</b>
+    </div>
+    <button class="btn-principal" onclick="retornarJogo()">Retomar →</button>
+  </div>
+</div>
+
+<!-- ==================== OVERLAY: REGRAS ==================== -->
+<div class="overlay" id="overlay-regras">
+  <div class="modal">
+    <h2>As 3 Regras dos Polígonos</h2>
+    <div class="modal-regra">
+      <div class="modal-regra-icone">📏</div>
+      <div><b>Regra 1 — Lados retos</b>Todos os lados devem ser segmentos de reta. Figuras com curvas não são polígonos.</div>
+    </div>
+    <div class="modal-regra">
+      <div class="modal-regra-icone">🔒</div>
+      <div><b>Regra 2 — Figura fechada</b>Os segmentos devem se encontrar, formando uma figura completamente fechada.</div>
+    </div>
+    <div class="modal-regra">
+      <div class="modal-regra-icone">✂️</div>
+      <div><b>Regra 3 — Sem cruzamentos</b>Os lados não podem se cruzar. Uma "ampulheta" não é um polígono.</div>
+    </div>
+    <button class="btn-principal" onclick="fecharModal('overlay-regras');retornarTemporizador()">Fechar</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO — altere aqui para personalizar o jogo
+============================================================ */
+const CFG = {
+  total_fase1:  10,   // questões na Fase 1
+  total_fase2:  10,   // questões na Fase 2
+  tempo_facil:   0,   // segundos por questão (0 = sem limite)
+  tempo_medio:   0,
+  tempo_dificil: 12,
+  max_dpr:       2    // Device Pixel Ratio máximo (evita consumo excessivo em telas 3x)
+};
+
+/* ============================================================
+   DADOS DOS POLÍGONOS
+   Para adicionar novos, inclua { nome, lados, cor, corBorda }
+============================================================ */
+const TODOS_POLIGONOS = [
+  { nome:'Triângulo',    lados:3,  cor:'#FFF3E0', corBorda:'#BF360C' },
+  { nome:'Quadrilátero', lados:4,  cor:'#E3F2FD', corBorda:'#1565C0' },
+  { nome:'Pentágono',    lados:5,  cor:'#F3E5F5', corBorda:'#6A1B9A' },
+  { nome:'Hexágono',     lados:6,  cor:'#E8F5E9', corBorda:'#2E7D32' },
+  { nome:'Heptágono',    lados:7,  cor:'#FFF9C4', corBorda:'#F57F17' },
+  { nome:'Octógono',     lados:8,  cor:'#FCE4EC', corBorda:'#880E4F' },
+  { nome:'Eneágono',     lados:9,  cor:'#E0F7FA', corBorda:'#006064' },
+  { nome:'Decágono',     lados:10, cor:'#FFFDE7', corBorda:'#795548' },
+];
+
+const POLIGONOS_DIF = {
+  facil:   TODOS_POLIGONOS.slice(0, 3),
+  medio:   TODOS_POLIGONOS.slice(0, 6),
+  dificil: TODOS_POLIGONOS
+};
+
+const TIPOS_NAO = ['curva', 'aberta', 'cruzada'];
+const MSG_REGRA = {
+  curva:   'Polígonos só têm lados retos — sem curvas!',
+  aberta:  'Polígonos são figuras fechadas — sem aberturas!',
+  cruzada: 'Os lados de um polígono não podem se cruzar!'
+};
+
+/* ============================================================
+   ESTADO GLOBAL
+============================================================ */
+const J = {
+  pontos:0, seq:0, fase:1, idx:0,
+  pts_f1:0, pts_f2:0,
+  travado:false, pausado:false,
+  q:null,                     // questão atual
+  erros:[],                   // histórico para revisão
+  nome:'Aluno',
+  dif:'medio',
+  lista:[],                   // polígonos disponíveis no nível
+  c:{                         // conquistas
+    f1_perfeita:true, f2_perfeita:true,
+    seq3:false, seq5:false
+  },
+  // temporizador
+  timerMax:0, timerRestante:0, timerInicio:0,
+  timerAtivo:false, timerRAF:null,
+  // animações
+  introRAF:null, certRAF:null, introRot:0
+};
+
+/* ============================================================
+   UTILITÁRIO DE TELAS
+============================================================ */
+function mostrarTela(id) {
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  document.getElementById(id).classList.add('ativa');
+  const noJogo = id === 'tela-jogo';
+  document.getElementById('btn-pausa').classList.toggle('visivel', noJogo);
+}
+
+function abrirModal(id)  { document.getElementById(id).classList.add('visivel'); }
+function fecharModal(id) { document.getElementById(id).classList.remove('visivel'); }
+
+function abrirModalRegras() {
+  pausarTemporizador();
+  abrirModal('overlay-regras');
+}
+
+/* ============================================================
+   ÁUDIO SINTÉTICO (Web Audio API — sem arquivos externos)
+============================================================ */
+let _audioCtx = null;
+function getAudio() {
+  if (!_audioCtx) {
+    try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+  }
+  return _audioCtx;
+}
+
+function tocarSom(tipo) {
+  const ctx = getAudio(); if (!ctx) return;
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const g   = ctx.createGain();
+  osc.connect(g); g.connect(ctx.destination);
+
+  if (tipo === 'acerto') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(520, t);
+    osc.frequency.linearRampToValueAtTime(800, t+.15);
+    g.gain.setValueAtTime(.16, t);
+    g.gain.exponentialRampToValueAtTime(.001, t+.35);
+    osc.start(); osc.stop(t+.35);
+
+  } else if (tipo === 'erro') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.linearRampToValueAtTime(130, t+.2);
+    g.gain.setValueAtTime(.09, t);
+    g.gain.exponentialRampToValueAtTime(.001, t+.3);
+    osc.start(); osc.stop(t+.3);
+
+  } else if (tipo === 'vitoria') {
+    [523,659,784,1047].forEach((freq,i) => {
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.type = 'sine';
+      o2.frequency.setValueAtTime(freq, t+i*.12);
+      g2.gain.setValueAtTime(.13, t+i*.12);
+      g2.gain.exponentialRampToValueAtTime(.001, t+i*.12+.25);
+      o2.start(t+i*.12); o2.stop(t+i*.12+.25);
+    });
+
+  } else if (tipo === 'timeout') {
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, t);
+    osc.frequency.linearRampToValueAtTime(80, t+.4);
+    g.gain.setValueAtTime(.07, t);
+    g.gain.exponentialRampToValueAtTime(.001, t+.4);
+    osc.start(); osc.stop(t+.4);
+  }
+}
+
+/* ============================================================
+   CANVAS — UTILITÁRIOS
+   Toda a lógica usa coordenadas CSS (px visuais).
+   O DPR é aplicado UMA vez via ctx.scale() no setup.
+============================================================ */
+
+// Configura DPR no canvas e devolve {ctx, W, H}
+function setupCanvas(canvas, cssW, cssH) {
+  const dpr = Math.min(window.devicePixelRatio || 1, CFG.max_dpr);
+  canvas.width  = cssW * dpr;
+  canvas.height = cssH * dpr;
+  canvas.style.width  = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, W: cssW, H: cssH };
+}
+
+// Vértices de um polígono regular (coordenadas CSS)
+function ptsPoli(cx, cy, r, n, rot) {
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = rot + (2*Math.PI*i/n) - Math.PI/2;
+    pts.push([cx + r*Math.cos(a), cy + r*Math.sin(a)]);
+  }
+  return pts;
+}
+
+// Grade de fundo estilo caderno quadriculado
+function desenharGrade(ctx, W, H) {
+  const step = 22;
+  ctx.save();
+  ctx.strokeStyle = '#e6e5e0';
+  ctx.lineWidth = 0.6;
+  for (let x = 0; x <= W; x += step) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += step) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.restore();
+}
+
+// Bolinhas nos vértices com numeração opcional
+function desenharVertices(ctx, pts, cor, numerar) {
+  const cx = pts.reduce((s,p)=>s+p[0],0)/pts.length;
+  const cy = pts.reduce((s,p)=>s+p[1],0)/pts.length;
+  pts.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(p[0], p[1], 4.5, 0, Math.PI*2);
+    ctx.fillStyle = cor;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    if (numerar) {
+      const ang = Math.atan2(p[1]-cy, p[0]-cx);
+      const lx  = p[0] + Math.cos(ang)*14;
+      const ly  = p[1] + Math.sin(ang)*14;
+      ctx.font = 'bold 10px Arial';
+      ctx.fillStyle = '#444';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(i+1, lx, ly);
+    }
+  });
+}
+
+/* ============================================================
+   FUNÇÃO PRINCIPAL DE DESENHO
+   @param canvas  — elemento <canvas>
+   @param q       — objeto de questão
+   @param flash   — cor hexadecimal para feedback, ou null
+   @param extras  — { mostrarNome, destacarRegra, numerar }
+============================================================ */
+function desenhar(canvas, q, flash, extras={}) {
+  // Dimensões CSS definidas via style (aplicadas no setupCanvas)
+  const W = parseInt(canvas.style.width)  || 360;
+  const H = parseInt(canvas.style.height) || 360;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const cx = W/2, cy = H/2;
+  const r  = W * 0.30;
+  const rot = q.rotacao;
+
+  // Espessura adaptativa: mais lados → linha ligeiramente mais fina
+  ctx.lineWidth = Math.max(2.5, 5 - q.lados * 0.22);
+  ctx.lineJoin  = 'round';
+  ctx.lineCap   = 'round';
+
+  desenharGrade(ctx, W, H);
+
+  const corBorda = flash || q.corBorda || '#1565C0';
+  const corFill  = flash ? flash+'22' : (q.cor || '#E3F2FD');
+
+  // ---- POLÍGONO VÁLIDO ----
+  if (q.ePoligono) {
+    const pts = ptsPoli(cx, cy, r, q.lados, rot);
+
+    ctx.shadowColor   = 'rgba(0,0,0,0.10)';
+    ctx.shadowBlur    = 12;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
+    ctx.fillStyle   = corFill;
+    ctx.strokeStyle = corBorda;
+
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.stroke();
+
+    desenharVertices(ctx, pts, corBorda, extras.numerar);
+
+    // Nome do polígono no centro ao acertar
+    if (extras.mostrarNome) {
+      ctx.font = '500 15px Arial';
+      ctx.fillStyle = corBorda;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(q.nome, cx, cy);
+    }
+
+  // ---- NÃO POLÍGONO: CURVA ----
+  } else if (q.tipoNaoPoligono === 'curva') {
+    const n   = q.lados;
+    const pts = ptsPoli(cx, cy, r, n, rot);
+    const mx  = (pts[n-1][0]+pts[0][0])/2 + (cy-pts[n-1][1])*0.45;
+    const my  = (pts[n-1][1]+pts[0][1])/2 - (cx-pts[n-1][0])*0.45;
+
+    ctx.fillStyle   = corFill;
+    ctx.strokeStyle = corBorda;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i=1; i<n-1; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.lineTo(pts[n-1][0], pts[n-1][1]);
+    ctx.quadraticCurveTo(mx, my, pts[0][0], pts[0][1]);
+    ctx.fill(); ctx.stroke();
+
+    // Destaque animado da curva
+    if (extras.destacarRegra) {
+      ctx.save();
+      ctx.strokeStyle = '#E65100';
+      ctx.lineWidth   = ctx.lineWidth * 2.2;
+      ctx.beginPath();
+      ctx.moveTo(pts[n-1][0], pts[n-1][1]);
+      ctx.quadraticCurveTo(mx, my, pts[0][0], pts[0][1]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.font = 'bold 12px Arial';
+    ctx.fillStyle = '#A32D2D';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('↩ curva!', mx, my+6);
+
+    desenharVertices(ctx, pts.slice(0,n-1), corBorda, false);
+
+  // ---- NÃO POLÍGONO: ABERTA ----
+  } else if (q.tipoNaoPoligono === 'aberta') {
+    const n   = q.lados;
+    const pts = ptsPoli(cx, cy, r, n, rot);
+
+    ctx.strokeStyle = corBorda;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i=1; i<n; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.stroke();
+
+    // Lacuna tracejada
+    ctx.save();
+    ctx.setLineDash([6, 5]);
+    ctx.strokeStyle = extras.destacarRegra ? '#E65100' : '#aaa';
+    ctx.lineWidth   = extras.destacarRegra ? ctx.lineWidth*1.6 : ctx.lineWidth*0.8;
+    ctx.beginPath();
+    ctx.moveTo(pts[n-1][0], pts[n-1][1]);
+    ctx.lineTo(pts[0][0], pts[0][1]);
+    ctx.stroke();
+    ctx.restore();
+
+    const ox = (pts[n-1][0]+pts[0][0])/2;
+    const oy = (pts[n-1][1]+pts[0][1])/2;
+    const oy2 = oy + (oy < cy ? -18 : 18);
+    ctx.font = 'bold 12px Arial';
+    ctx.fillStyle = '#A32D2D';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('aberta!', ox, oy2);
+
+    desenharVertices(ctx, pts, corBorda, false);
+
+  // ---- NÃO POLÍGONO: CRUZADA ----
+  } else if (q.tipoNaoPoligono === 'cruzada') {
+    const pts = ptsPoli(cx, cy, r, 4, rot);
+    ctx.fillStyle   = corFill;
+    ctx.strokeStyle = corBorda;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    ctx.lineTo(pts[2][0], pts[2][1]);
+    ctx.lineTo(pts[1][0], pts[1][1]);
+    ctx.lineTo(pts[3][0], pts[3][1]);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    const ix = (pts[0][0]+pts[2][0])/2;
+    const iy = (pts[0][1]+pts[2][1])/2;
+
+    if (extras.destacarRegra) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(ix, iy, 18, 0, Math.PI*2);
+      ctx.strokeStyle = '#E65100';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = '#A32D2D';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✕', ix, iy-8);
+  }
+}
+
+/* ============================================================
+   FLASH DE FEEDBACK NO CANVAS
+============================================================ */
+function flash(canvas, cor, q, extras={}) {
+  let n = 0;
+  function passo() {
+    desenhar(canvas, q, n%2===0 ? cor : null, extras);
+    n++;
+    if (n <= 4) setTimeout(passo, 130);
+    else desenhar(canvas, q, null, extras);
+  }
+  passo();
+}
+
+/* ============================================================
+   ANIMAÇÃO "VER REGRA" (destaque piscante da regra quebrada)
+============================================================ */
+function animarRegra() {
+  const canvas = document.getElementById('gameCanvas');
+  const q = J.q;
+  let n = 0;
+  function passo() {
+    desenhar(canvas, q, null, { destacarRegra: n%2===0 });
+    n++;
+    if (n < 8) setTimeout(passo, 260);
+  }
+  passo();
+  document.getElementById('btn-ver-regra').style.display = 'none';
+}
+
+/* ============================================================
+   ANIMAÇÃO DE INTRODUÇÃO — três polígonos girando
+============================================================ */
+function animarIntro() {
+  const canvas = document.getElementById('introCanvas');
+  // Resoluçaõ física com DPR
+  const dpr = Math.min(window.devicePixelRatio||1, CFG.max_dpr);
+  const cssW = 280, cssH = 80;
+  canvas.width  = cssW * dpr;
+  canvas.height = cssH * dpr;
+  canvas.style.width  = cssW+'px';
+  canvas.style.height = cssH+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const formas = [
+    { lados:3, cx:cssW*0.17, cy:cssH/2, r:cssH*0.32, cor:'#FFF3E0', corBorda:'#BF360C' },
+    { lados:4, cx:cssW*0.50, cy:cssH/2, r:cssH*0.32, cor:'#E3F2FD', corBorda:'#1565C0' },
+    { lados:6, cx:cssW*0.83, cy:cssH/2, r:cssH*0.32, cor:'#E8F5E9', corBorda:'#2E7D32' },
+  ];
+
+  function frame() {
+    ctx.clearRect(0, 0, cssW, cssH);
+    J.introRot += 0.007;
+    formas.forEach(f => {
+      const pts = ptsPoli(f.cx, f.cy, f.r, f.lados, J.introRot);
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      pts.forEach(p => ctx.lineTo(p[0], p[1]));
+      ctx.closePath();
+      ctx.fillStyle   = f.cor;
+      ctx.strokeStyle = f.corBorda;
+      ctx.lineWidth   = 2;
+      ctx.fill(); ctx.stroke();
+    });
+    J.introRAF = requestAnimationFrame(frame);
+  }
+  if (J.introRAF) cancelAnimationFrame(J.introRAF);
+  frame();
+}
+
+/* ============================================================
+   ANIMAÇÃO DE CERTIFICADO — polígono grande girando
+============================================================ */
+function animarCertificado(poly) {
+  const canvas = document.getElementById('certCanvas');
+  const { ctx, W, H } = setupCanvas(canvas, 180, 180);
+  let rot = 0;
+
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    rot += 0.009;
+    const pts = ptsPoli(W/2, H/2, W*0.38, poly.lados, rot);
+    ctx.fillStyle   = poly.cor;
+    ctx.strokeStyle = poly.corBorda;
+    ctx.lineWidth   = 4;
+    ctx.shadowColor   = 'rgba(0,0,0,0.12)';
+    ctx.shadowBlur    = 14;
+    ctx.shadowOffsetY = 4;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.forEach(p=>ctx.lineTo(p[0],p[1]));
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.stroke();
+    pts.forEach(p => {
+      ctx.beginPath(); ctx.arc(p[0],p[1],4,0,Math.PI*2);
+      ctx.fillStyle = poly.corBorda; ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+    });
+    J.certRAF = requestAnimationFrame(frame);
+  }
+  if (J.certRAF) cancelAnimationFrame(J.certRAF);
+  frame();
+}
+
+/* ============================================================
+   CONFETE
+============================================================ */
+function lancarConfete() {
+  const c = document.getElementById('confete-canvas');
+  c.style.display = 'block';
+  c.width = window.innerWidth; c.height = window.innerHeight;
+  const ctx = c.getContext('2d');
+  const cores = ['#534AB7','#27500A','#3B6D11','#E65100','#1565C0','#6A1B9A','#BF360C'];
+  const P = Array.from({length:90}, () => ({
+    x: Math.random()*c.width, y:-10,
+    vx: (Math.random()-.5)*2, vy: 2+Math.random()*3,
+    r: 4+Math.random()*6,
+    cor: cores[Math.floor(Math.random()*cores.length)],
+    rot: Math.random()*360, vr: 1+Math.random()*3
+  }));
+  let n=0;
+  function step() {
+    ctx.clearRect(0,0,c.width,c.height);
+    P.forEach(p => {
+      p.x+=p.vx+Math.sin(n/15)*0.8; p.y+=p.vy; p.rot+=p.vr;
+      ctx.save();
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle = p.cor;
+      ctx.fillRect(-p.r/2, -p.r*0.2, p.r, p.r*0.4);
+      ctx.restore();
+    });
+    n++;
+    if (n<160) requestAnimationFrame(step);
+    else { c.style.display='none'; ctx.clearRect(0,0,c.width,c.height); }
+  }
+  step();
+}
+
+/* ============================================================
+   MINI-CANVAS para revisão de erros
+============================================================ */
+function criarMiniCanvas(q) {
+  const cv = document.createElement('canvas');
+  cv.className = 'revisao-canvas';
+  const S = 100;
+  cv.width=S; cv.height=S;
+  cv.style.width=S+'px'; cv.style.height=S+'px';
+  const ctx = cv.getContext('2d');
+  const cx=S/2, cy=S/2, r=S*0.30;
+  ctx.lineWidth=2; ctx.lineJoin='round';
+  ctx.strokeStyle = q.corBorda || '#A32D2D';
+  ctx.fillStyle   = (q.cor || '#fdd') + 'bb';
+
+  if (q.ePoligono) {
+    const pts = ptsPoli(cx,cy,r,q.lados,q.rotacao);
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.forEach(p=>ctx.lineTo(p[0],p[1]));
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  } else if (q.tipoNaoPoligono==='curva') {
+    const n=q.lados, pts=ptsPoli(cx,cy,r,n,q.rotacao);
+    const mx=(pts[n-1][0]+pts[0][0])/2+(cy-pts[n-1][1])*0.45;
+    const my=(pts[n-1][1]+pts[0][1])/2-(cx-pts[n-1][0])*0.45;
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<n-1;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+    ctx.lineTo(pts[n-1][0],pts[n-1][1]);
+    ctx.quadraticCurveTo(mx,my,pts[0][0],pts[0][1]);
+    ctx.fill(); ctx.stroke();
+  } else if (q.tipoNaoPoligono==='aberta') {
+    const n=q.lados, pts=ptsPoli(cx,cy,r,n,q.rotacao);
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    pts.forEach(p=>ctx.lineTo(p[0],p[1])); ctx.stroke();
+  } else if (q.tipoNaoPoligono==='cruzada') {
+    const pts=ptsPoli(cx,cy,r,4,q.rotacao);
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    ctx.lineTo(pts[2][0],pts[2][1]); ctx.lineTo(pts[1][0],pts[1][1]);
+    ctx.lineTo(pts[3][0],pts[3][1]); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+  }
+  return cv;
+}
+
+/* ============================================================
+   GERAÇÃO DE QUESTÕES
+============================================================ */
+function novaQuestaoF1() {
+  const eP = Math.random() < 0.5;
+  if (eP) {
+    const p = J.lista[Math.floor(Math.random()*J.lista.length)];
+    return { ePoligono:true, lados:p.lados, nome:p.nome, cor:p.cor, corBorda:p.corBorda,
+             tipoNaoPoligono:null, rotacao:Math.random()*Math.PI*2 };
+  } else {
+    const tipo  = TIPOS_NAO[Math.floor(Math.random()*TIPOS_NAO.length)];
+    const lados = [3,4,5,6][Math.floor(Math.random()*4)];
+    const ref   = TODOS_POLIGONOS.find(p=>p.lados===lados) || TODOS_POLIGONOS[1];
+    return { ePoligono:false, lados, nome:null, cor:ref.cor, corBorda:ref.corBorda,
+             tipoNaoPoligono:tipo, rotacao:Math.random()*Math.PI*2 };
+  }
+}
+
+function novaQuestaoF2() {
+  const correto = J.lista[Math.floor(Math.random()*J.lista.length)];
+  const outros  = J.lista.filter(p=>p.lados!==correto.lados).sort(()=>Math.random()-.5).slice(0,2);
+  const opcoes  = [correto,...outros].sort(()=>Math.random()-.5);
+  return { ePoligono:true, lados:correto.lados, nome:correto.nome,
+           cor:correto.cor, corBorda:correto.corBorda,
+           tipoNaoPoligono:null, rotacao:Math.random()*Math.PI*2, opcoes };
+}
+
+/* ============================================================
+   TEMPORIZADOR
+============================================================ */
+function iniciarTemporizador(seg) {
+  if (!seg) return;
+  J.timerMax       = seg * 1000;
+  J.timerRestante  = J.timerMax;
+  J.timerInicio    = performance.now();
+  J.timerAtivo     = true;
+  document.getElementById('timer-wrap').style.display = 'flex';
+  document.getElementById('card-tempo').style.display = 'block';
+  tickTimer();
+}
+
+function tickTimer() {
+  if (!J.timerAtivo || J.travado || J.pausado) return;
+  J.timerRestante = J.timerMax - (performance.now() - J.timerInicio);
+  if (J.timerRestante <= 0) {
+    J.timerRestante = 0;
+    atualizarTimerUI();
+    J.timerAtivo = false;
+    timeoutQuestao();
+    return;
+  }
+  atualizarTimerUI();
+  J.timerRAF = requestAnimationFrame(tickTimer);
+}
+
+function atualizarTimerUI() {
+  const seg = Math.ceil(J.timerRestante/1000);
+  const pct = (J.timerRestante/J.timerMax)*100;
+  document.getElementById('timer-label').textContent = seg+'s';
+  document.getElementById('disp-tempo').textContent  = seg;
+  const fill = document.getElementById('timer-fill');
+  fill.style.width = pct+'%';
+  fill.classList.toggle('urgente', pct < 35);
+}
+
+function pausarTemporizador() {
+  J.timerAtivo = false;
+  if (J.timerRAF) cancelAnimationFrame(J.timerRAF);
+}
+
+function retornarTemporizador() {
+  if (!J.timerMax || !J.timerRestante) return;
+  J.timerInicio = performance.now() - (J.timerMax - J.timerRestante);
+  J.timerAtivo  = true;
+  tickTimer();
+}
+
+function pararTemporizador() {
+  J.timerAtivo = false; J.timerMax = 0; J.timerRestante = 0;
+  if (J.timerRAF) cancelAnimationFrame(J.timerRAF);
+  document.getElementById('timer-wrap').style.display = 'none';
+  document.getElementById('card-tempo').style.display = 'none';
+}
+
+function timeoutQuestao() {
+  if (J.travado) return;
+  J.travado = true;
+  tocarSom('timeout');
+  J.seq = 0;
+  atualizarPlacar();
+  const q = J.q;
+  const fb = document.getElementById('feedback');
+  fb.className = 'erro';
+  fb.textContent = 'Tempo esgotado! ' + (q.ePoligono
+    ? `Era um ${q.nome} com ${q.lados} lados.`
+    : MSG_REGRA[q.tipoNaoPoligono]);
+  J.erros.push({...q});
+  if (!q.ePoligono) document.getElementById('btn-ver-regra').style.display = 'block';
+  flash(document.getElementById('gameCanvas'), '#A32D2D', q);
+  J.c.f1_perfeita = J.fase===1 ? false : J.c.f1_perfeita;
+  J.c.f2_perfeita = J.fase===2 ? false : J.c.f2_perfeita;
+  avancarJogo();
+}
+
+/* ============================================================
+   PAUSA / RETORNO
+============================================================ */
+function pausarJogo() {
+  J.pausado = true;
+  pausarTemporizador();
+  abrirModal('overlay-pausa');
+}
+
+function retornarJogo() {
+  J.pausado = false;
+  fecharModal('overlay-pausa');
+  fecharModal('overlay-regras');
+  retornarTemporizador();
+}
+
+/* ============================================================
+   SELEÇÃO DE DIFICULDADE
+============================================================ */
+function selecionarDif(btn, nivel) {
+  document.querySelectorAll('.btn-dif').forEach(b=>b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  J.dif = nivel;
+}
+
+/* ============================================================
+   FLUXO DO JOGO
+============================================================ */
+function iniciarJogo() {
+  cancelAnimationFrame(J.introRAF);
+  J.nome = document.getElementById('input-nome').value.trim() || 'Aluno';
+  J.lista = POLIGONOS_DIF[J.dif];
+  J.pontos=0; J.seq=0; J.fase=1; J.idx=0;
+  J.pts_f1=0; J.pts_f2=0;
+  J.travado=false; J.pausado=false;
+  J.erros=[];
+  J.c = { f1_perfeita:true, f2_perfeita:true, seq3:false, seq5:false };
+
+  // Setup do gameCanvas com DPR
+  const canvas = document.getElementById('gameCanvas');
+  setupCanvas(canvas, 360, 360);
+
+  atualizarPlacar();
+  mostrarTela('tela-jogo');
+  carregarQuestao();
+}
+
+function reiniciarJogo() {
+  cancelAnimationFrame(J.certRAF);
+  pararTemporizador();
+  mostrarTela('tela-intro');
+  animarIntro();
+}
+
+function carregarQuestao() {
+  J.travado = false;
+  pararTemporizador();
+
+  const total = J.fase===1 ? CFG.total_fase1 : CFG.total_fase2;
+  J.q = J.fase===1 ? novaQuestaoF1() : novaQuestaoF2();
+
+  document.getElementById('etiqueta-fase').textContent =
+    J.fase===1 ? 'Fase 1 — Teste de Admissão' : 'Fase 2 — Mestre do Prefixo';
+  document.getElementById('contador').textContent = `${J.idx+1} / ${total}`;
+  document.getElementById('barra').style.width = ((J.idx/total)*100)+'%';
+  document.getElementById('texto-pergunta').textContent = J.fase===1
+    ? 'Esta figura é um polígono?'
+    : 'Quantos lados tem esta figura? Escolha o nome correto:';
+
+  document.getElementById('btn-ver-regra').style.display = 'none';
+  resetarFeedback();
+  renderizarBotoes();
+
+  // Fade in do canvas
+  const canvas = document.getElementById('gameCanvas');
+  canvas.classList.add('fade');
+  setTimeout(() => {
+    desenhar(canvas, J.q, null, {});
+    canvas.classList.remove('fade');
+    // Iniciar temporizador após fade
+    const tempos = { facil:CFG.tempo_facil, medio:CFG.tempo_medio, dificil:CFG.tempo_dificil };
+    iniciarTemporizador(tempos[J.dif]);
+  }, 140);
+}
+
+function renderizarBotoes() {
+  const area = document.getElementById('area-botoes');
+  area.innerHTML = '';
+  if (J.fase===1) {
+    area.appendChild(criarBtn('✔ Sim, é polígono', 'btn btn-sim', ()=>responder(true)));
+    area.appendChild(criarBtn('✘ Não é polígono',  'btn btn-nao',  ()=>responder(false)));
+  } else {
+    J.q.opcoes.forEach(op => {
+      area.appendChild(criarBtn(op.nome, 'btn btn-opcao', ()=>responder(op.nome)));
+    });
+  }
+}
+
+function criarBtn(txt, cls, fn) {
+  const b = document.createElement('button');
+  b.className=cls; b.textContent=txt;
+  b.addEventListener('click', fn);
+  return b;
+}
+
+function resetarFeedback() {
+  const fb = document.getElementById('feedback');
+  fb.className = '';
+  fb.textContent = 'Observe a figura e faça sua escolha!';
+}
+
+/* ============================================================
+   LÓGICA DE RESPOSTA
+============================================================ */
+function responder(valor) {
+  if (J.travado) return;
+  J.travado = true;
+  pausarTemporizador();
+
+  const q = J.q;
+  const acertou = J.fase===1 ? (valor===true)===q.ePoligono : valor===q.nome;
+  const canvas  = document.getElementById('gameCanvas');
+  const fb      = document.getElementById('feedback');
+
+  if (acertou) {
+    tocarSom('acerto');
+    J.seq++;
+    const pts = J.fase===1 ? 10 : 5;
+    J.pontos += pts;
+    if (J.fase===1) J.pts_f1+=pts; else J.pts_f2+=pts;
+    if (J.seq>=3) J.c.seq3=true;
+    if (J.seq>=5) J.c.seq5=true;
+
+    fb.className  = 'acerto';
+    fb.textContent = montarMsgAcerto(q, pts);
+
+    flash(canvas, '#27500A', q, { mostrarNome:true });
+
+  } else {
+    tocarSom('erro');
+    J.seq = 0;
+    if (J.fase===1) J.c.f1_perfeita=false; else J.c.f2_perfeita=false;
+    J.erros.push({...q});
+
+    fb.className  = 'erro';
+    fb.textContent = montarMsgErro(q, valor);
+
+    if (!q.ePoligono) document.getElementById('btn-ver-regra').style.display = 'block';
+    flash(canvas, '#A32D2D', q);
+  }
+
+  atualizarPlacar();
+  avancarJogo();
+}
+
+function montarMsgAcerto(q, pts) {
+  let m = J.fase===1
+    ? (q.ePoligono
+        ? `Correto! ${q.nome} com ${q.lados} lados. +${pts} pts`
+        : `Correto! ${MSG_REGRA[q.tipoNaoPoligono]} +${pts} pts`)
+    : `Correto! ${q.nome} = ${q.lados} lados. +${pts} pts`;
+  if (J.seq>=5) m += ' 🔥🔥 Sequência incrível!';
+  else if (J.seq>=3) m += ' 🔥 Ótima sequência!';
+  if (J.nome!=='Aluno') m = `Muito bem, ${J.nome}! ` + m;
+  return m;
+}
+
+function montarMsgErro(q, val) {
+  if (J.fase===1) {
+    return val===true && !q.ePoligono
+      ? `Ops! Não é polígono. ${MSG_REGRA[q.tipoNaoPoligono]}`
+      : `Ops! Era um ${q.nome} com ${q.lados} lados — é sim um polígono!`;
+  }
+  return `Não era esse! O correto é ${q.nome} (${q.lados} lados). Continue!`;
+}
+
+function atualizarPlacar() {
+  document.getElementById('disp-pontos').textContent = J.pontos;
+  document.getElementById('disp-seq').textContent    = J.seq+' 🔥';
+  const el = document.getElementById('disp-pontos');
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+  setTimeout(()=>el.classList.remove('bump'), 350);
+}
+
+function avancarJogo() {
+  J.idx++;
+  const total = J.fase===1 ? CFG.total_fase1 : CFG.total_fase2;
+  setTimeout(() => {
+    if (J.idx >= total) {
+      if (J.fase===1) { J.fase=2; J.idx=0; mostrarTransicao(); }
+      else            { mostrarCertificado(); }
+    } else {
+      carregarQuestao();
+    }
+  }, 1600);
+}
+
+/* ============================================================
+   TRANSIÇÃO DE FASE
+============================================================ */
+function mostrarTransicao() {
+  pararTemporizador();
+  document.getElementById('trans-pontos').textContent = `Fase 1: ${J.pts_f1} pts`;
+  mostrarTela('tela-transicao');
+}
+
+function comecarFase2() {
+  mostrarTela('tela-jogo');
+  carregarQuestao();
+}
+
+/* ============================================================
+   CERTIFICADO FINAL
+============================================================ */
+function mostrarCertificado() {
+  pararTemporizador();
+
+  const total = CFG.total_fase1*10 + CFG.total_fase2*5;
+  const pct   = J.pontos / total;
+
+  let msg = pct>=.9 ? 'Desempenho excepcional! Você é um verdadeiro Mestre dos Polígonos!'
+          : pct>=.7 ? 'Muito bem! Você conhece bem as regras dos polígonos!'
+          : pct>=.5 ? 'Bom trabalho! Continue praticando e supere sua pontuação!'
+                    : 'Continue estudando! Reveja as 3 regras e tente novamente!';
+
+  document.getElementById('cert-nome').textContent  = J.nome;
+  document.getElementById('cert-pontos').textContent = J.pontos;
+  document.getElementById('cert-msg').textContent   = msg;
+  document.getElementById('resumo-fases').innerHTML =
+    `Fase 1: ${J.pts_f1} pts &nbsp;|&nbsp; Fase 2: ${J.pts_f2} pts`;
+
+  // Selos
+  const SELOS = [
+    { key:'f1_perfeita', icone:'⭐', texto:'Fase 1 Perfeita' },
+    { key:'f2_perfeita', icone:'⭐', texto:'Fase 2 Perfeita' },
+    { key:'seq3',        icone:'🔥', texto:'Sequência de 3'  },
+    { key:'seq5',        icone:'🔥', texto:'Sequência de 5'  },
+  ];
+  const cont = document.getElementById('cert-selos');
+  cont.innerHTML = '';
+  SELOS.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'selo'+(J.c[s.key] ? ' desbloqueado' : '');
+    d.textContent = (J.c[s.key] ? s.icone : '🔒') + ' ' + s.texto;
+    cont.appendChild(d);
+  });
+
+  document.getElementById('btn-revisao').style.display =
+    J.erros.length > 0 ? 'block' : 'none';
+
+  // Animar polígono: usa o mais difícil que o aluno encontrou
+  const poly = J.lista[J.lista.length-1];
+  animarCertificado(poly);
+
+  mostrarTela('tela-cert');
+
+  if (pct >= 0.7) { tocarSom('vitoria'); setTimeout(lancarConfete, 300); }
+  else              tocarSom('acerto');
+}
+
+/* ============================================================
+   REVISÃO DE ERROS
+============================================================ */
+function mostrarRevisao() {
+  cancelAnimationFrame(J.certRAF);
+  const grid = document.getElementById('revisao-grid');
+  grid.innerHTML = '';
+
+  J.erros.forEach(q => {
+    const item = document.createElement('div');
+    item.className = 'revisao-item';
+    item.appendChild(criarMiniCanvas(q));
+    const leg = document.createElement('div');
+    leg.className = 'revisao-legenda';
+    leg.textContent = q.ePoligono
+      ? `${q.nome} (${q.lados} lados)`
+      : ({ curva:'Com curva', aberta:'Aberta', cruzada:'Cruzada' }[q.tipoNaoPoligono] || '');
+    item.appendChild(leg);
+    grid.appendChild(item);
+  });
+
+  mostrarTela('tela-revisao');
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+============================================================ */
+window.addEventListener('DOMContentLoaded', () => {
+  animarIntro();
+});
+</script>
+</body>
+</html>
