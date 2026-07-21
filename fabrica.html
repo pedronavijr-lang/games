@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fábrica de Robôs Malucos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap');
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #0f172a; 
+            color: #f8fafc;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(167, 139, 250, 0.1) 0%, transparent 50%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, .title-font { font-family: 'Fredoka', sans-serif; }
+
+        .card-if { background: linear-gradient(145deg, #7c3aed, #5b21b6); border: 3px solid #a78bfa; border-radius: 16px; }
+        .card-then { background: linear-gradient(145deg, #10b981, #047857); border: 3px solid #34d399; border-radius: 16px; }
+
+        .play-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .play-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+        .play-card:active { transform: translateY(2px) scale(0.98); }
+
+        .play-card.selected-if { box-shadow: 0 0 0 4px #fff, 0 0 20px #8b5cf6; transform: scale(1.05) translateY(-5px); }
+        .play-card.selected-then { box-shadow: 0 0 0 4px #fff, 0 0 20px #10b981; transform: scale(1.05) translateY(-5px); }
+
+        .block-logic { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        #robot-preview-container { position: relative; width: 150px; height: 150px; margin: 0 auto; }
+
+        .robot-part {
+            position: absolute;
+            font-size: 3rem;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: dropPart 0.4s ease-out;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        @keyframes dropPart {
+            0% { opacity: 0; transform: translateY(-30px) scale(0.5); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .error-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 8px; border: 2px solid #1e293b; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        .difficulty-btn { transition: all 0.2s; }
+        .difficulty-btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body class="p-4 md:p-6 flex flex-col min-h-screen">
+
+    <!-- Modal de Seleção de Dificuldade -->
+    <div id="level-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+        <div class="bg-slate-800 border-4 border-slate-600 rounded-3xl p-8 max-w-2xl w-full text-center shadow-2xl relative overflow-hidden">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 mb-2 drop-shadow-lg title-font">
+                🤖 Fábrica de Robôs Malucos
+            </h1>
+            <p class="text-slate-300 mb-8 font-bold text-lg">Escolha o nível da sua missão espacial:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="startGame('facil')" class="difficulty-btn bg-emerald-600 border-4 border-emerald-400 rounded-2xl p-4 flex flex-col items-center gap-2 shadow-[0_6px_0_#047857] active:translate-y-[6px] active:shadow-none">
+                    <span class="text-4xl mb-2">⭐</span>
+                    <span class="font-extrabold title-font text-white text-xl">FÁCIL</span>
+                    <span class="text-emerald-200 text-xs text-center font-bold">1 ou 2 problemas.<br>Os sensores indicam as peças.</span>
+                </button>
+                <button onclick="startGame('medio')" class="difficulty-btn bg-amber-500 border-4 border-amber-300 rounded-2xl p-4 flex flex-col items-center gap-2 shadow-[0_6px_0_#b45309] active:translate-y-[6px] active:shadow-none">
+                    <span class="text-4xl mb-2">⭐⭐</span>
+                    <span class="font-extrabold title-font text-white text-xl">MÉDIO</span>
+                    <span class="text-amber-100 text-xs text-center font-bold">2 problemas.<br>Você precisa descobrir lendo!</span>
+                </button>
+                <button onclick="startGame('dificil')" class="difficulty-btn bg-red-600 border-4 border-red-400 rounded-2xl p-4 flex flex-col items-center gap-2 shadow-[0_6px_0_#991b1b] active:translate-y-[6px] active:shadow-none">
+                    <span class="text-4xl mb-2">⭐⭐⭐</span>
+                    <span class="font-extrabold title-font text-white text-xl">DIFÍCIL</span>
+                    <span class="text-red-200 text-xs text-center font-bold">3 problemas ao mesmo tempo.<br>Apenas para mestres!</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <header class="text-center mb-4 flex-shrink-0">
+        <div class="flex items-center justify-center gap-4 mb-2">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 drop-shadow-lg title-font">
+                🤖 Fábrica de Robôs
+            </h1>
+            <button onclick="showDifficultyMenu()" class="bg-slate-700 hover:bg-slate-600 text-white p-2 rounded-xl border-2 border-slate-500 shadow" title="Trocar Dificuldade">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+        <p class="text-slate-300 text-sm md:text-lg max-w-2xl mx-auto bg-slate-800/50 py-2 px-4 rounded-full border border-slate-700/50 inline-block">
+            Combine uma condição <span class="text-purple-400 font-bold">(SE)</span> com a peça certa <span class="text-emerald-400 font-bold">(ENTÃO)</span>!
+        </p>
+    </header>
+
+    <main class="flex-grow w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 min-h-0">
+        
+        <div class="lg:col-span-5 flex flex-col gap-4 min-h-0">
+            <!-- Quadro da Missão -->
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 border-4 border-slate-700 rounded-3xl p-5 shadow-xl flex flex-col flex-shrink-0 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 opacity-10 text-9xl" id="mission-bg-icon">🗺️</div>
+
+                <div class="flex justify-between items-center mb-4 z-10">
+                    <h2 class="text-blue-400 font-bold uppercase tracking-wider text-sm lg:text-base title-font">
+                        🎯 A Missão
+                    </h2>
+                    <span id="mission-counter" class="bg-blue-500 text-white text-xs lg:text-sm py-1 px-3 rounded-full font-bold shadow">
+                        Fase 1/10
+                    </span>
+                </div>
+                
+                <div class="z-10 text-center mb-4">
+                    <h3 id="mission-title" class="text-2xl lg:text-3xl font-extrabold text-white mb-2 title-font text-shadow"></h3>
+                    <p id="mission-desc" class="text-slate-300 text-sm lg:text-base"></p>
+                </div>
+
+                <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800 z-10">
+                    <p id="variables-title" class="text-xs text-slate-400 mb-2 text-center font-bold uppercase">Sensores do Robô Encontraram:</p>
+                    <div id="mission-variables" class="flex flex-wrap justify-center gap-2">
+                        <!-- Badges visuais entram aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projeto do Robô -->
+            <div class="bg-indigo-950/40 border-4 border-indigo-900/50 rounded-3xl p-4 flex-grow flex flex-col shadow-inner min-h-[220px] relative">
+                <h2 class="text-indigo-300 font-bold uppercase tracking-wider text-sm title-font text-center mb-2">
+                    🛠️ Projeto do Robô
+                </h2>
+                <div class="flex-grow flex items-center justify-center relative">
+                    <div class="w-40 h-40 bg-indigo-900/30 rounded-full border-2 border-indigo-500/30 border-dashed absolute animate-pulse"></div>
+                    <div id="robot-preview-container">
+                        <div class="absolute inset-0 flex items-center justify-center text-6xl z-10 filter drop-shadow-lg">🤖</div>
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                    <button onclick="compileAndTest()" id="btn-compile" class="w-full bg-gradient-to-b from-green-400 to-green-600 hover:from-green-300 hover:to-green-500 text-white font-bold text-xl py-3 rounded-2xl shadow-[0_6px_0_#166534] active:shadow-[0_0px_0_#166534] active:translate-y-[6px] transition-all title-font uppercase tracking-wide">
+                        🚀 Testar Robô!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col gap-4 bg-slate-800/30 p-4 rounded-3xl border-4 border-slate-700/50">
+            <!-- Área de Montagem -->
+            <div class="bg-slate-900 border-4 border-slate-700 rounded-2xl flex flex-col min-h-[250px] lg:h-[300px] shadow-inner relative overflow-hidden">
+                <div class="bg-slate-800 px-4 py-3 border-b-4 border-slate-700 flex justify-between items-center">
+                    <span class="text-slate-300 font-bold title-font flex items-center gap-2">
+                        <i class="fa-solid fa-puzzle-piece text-amber-400"></i> Seus Blocos de Comando
+                    </span>
+                    <button onclick="clearAssembly()" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1 rounded-full text-xs font-bold transition-colors">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Limpar
+                    </button>
+                </div>
+                
+                <div id="assembly-line" class="p-4 flex-grow overflow-y-auto space-y-3 relative z-10">
+                    <div id="assembly-empty" class="text-slate-500 text-center mt-8 font-bold flex flex-col items-center gap-3">
+                        <div class="text-4xl opacity-50">🧩</div>
+                        <p>A mente do robô está vazia.<br>Clique em uma carta Roxa e depois em uma Verde para programar!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caixa de Ferramentas -->
+            <div class="flex flex-col h-[350px] lg:h-[400px]">
+                <h2 class="text-slate-300 font-bold uppercase tracking-wider text-sm title-font mb-2 text-center">
+                    Caixa de Ferramentas
+                </h2>
+                <div class="grid grid-cols-2 gap-4 flex-grow min-h-0">
+                    <div class="bg-purple-950/30 border-2 border-purple-900/50 rounded-2xl p-2 flex flex-col h-full overflow-hidden">
+                        <div class="text-purple-300 text-center font-bold text-xs mb-2 uppercase title-font bg-purple-900/50 py-1 rounded-lg shrink-0">
+                            Condição ( SE )
+                        </div>
+                        <div id="deck-if" class="flex-grow overflow-y-auto flex flex-col gap-2 p-1 pr-2"></div>
+                    </div>
+                    <div class="bg-emerald-950/30 border-2 border-emerald-900/50 rounded-2xl p-2 flex flex-col h-full overflow-hidden">
+                        <div class="text-emerald-300 text-center font-bold text-xs mb-2 uppercase title-font bg-emerald-900/50 py-1 rounded-lg shrink-0">
+                            Ação ( ENTÃO )
+                        </div>
+                        <div id="deck-then" class="flex-grow overflow-y-auto flex flex-col gap-2 p-1 pr-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal de Feedback/Resultados -->
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="bg-slate-800 border-4 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl transform scale-95 transition-transform duration-300 relative overflow-hidden">
+            <div id="modal-icon" class="text-7xl mb-4 animate-bounce"></div>
+            <h2 id="modal-title" class="text-3xl font-extrabold text-white mb-2 title-font"></h2>
+            <div class="bg-slate-900 p-4 rounded-2xl mb-6 border-2 border-slate-700">
+                <p id="modal-desc" class="text-slate-300 text-lg font-bold leading-snug"></p>
+                <div id="modal-hint" class="mt-3 text-sm text-amber-400 font-bold hidden bg-amber-900/30 p-2 rounded-xl border border-amber-500/30"></div>
+            </div>
+            <button id="btn-modal-action" class="w-full bg-slate-200 hover:bg-white text-slate-900 font-extrabold text-xl py-4 px-6 rounded-2xl transition-colors title-font uppercase shadow-[0_6px_0_#94a3b8] active:shadow-[0_0px_0_#94a3b8] active:translate-y-[6px]">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DADOS DAS CARTAS ---
+        const conditionCards = [
+            { id: "c1", target: "escuro", text: "Estiver Escuro", icon: "🌑" },
+            { id: "c2", target: "pedras", text: "Tiver Pedras", icon: "🪨" },
+            { id: "c3", target: "buracos", text: "Tiver Buracos", icon: "🕳️" },
+            { id: "c4", target: "agua", text: "Tiver Água", icon: "💧" },
+            { id: "c5", target: "velocidade", text: "Precisar Correr", icon: "🏎️" },
+            { id: "c6", target: "peso", text: "For Muito Pesado", icon: "⚓" },
+            { id: "c7", target: "fogo", text: "Tiver Fogo/Lava", icon: "🔥" },
+            { id: "c8", target: "alto", text: "Tiver Muita Altura", icon: "☁️" }
+        ];
+
+        const partCards = [
+            { id: "p1", solves: "escuro", name: "Farol de Luz", icon: "🔦", pos: "top", css: "-top-8 left-1/2 transform -translate-x-1/2 text-5xl" },
+            { id: "p2", solves: "pedras", name: "Rodas de Trator", icon: "🚜", pos: "bottom", css: "-bottom-6 left-1/2 transform -translate-x-1/2 text-5xl" },
+            { id: "p3", solves: "buracos", name: "Pernas de Mola", icon: "🦘", pos: "bottom", css: "-bottom-8 left-1/2 transform -translate-x-1/2 text-5xl" },
+            { id: "p4", solves: "agua", name: "Hélice de Barco", icon: "🚤", pos: "back", css: "-right-6 top-1/2 transform -translate-y-1/2 text-5xl rotate-90" },
+            { id: "p5", solves: "velocidade", name: "Foguetes", icon: "🚀", pos: "back", css: "-left-6 top-1/2 transform -translate-y-1/2 text-5xl -rotate-45" },
+            { id: "p6", solves: "peso", name: "Braço de Ímã", icon: "🧲", pos: "front", css: "-right-4 top-4 text-5xl rotate-45" },
+            { id: "p7", solves: "fogo", name: "Escudo de Gelo", icon: "🧊", pos: "front", css: "-left-4 top-4 text-5xl -rotate-12" },
+            { id: "p8", solves: "alto", name: "Asas a Jato", icon: "🪽", pos: "back", css: "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-7xl -z-10 opacity-80" }
+        ];
+
+        // --- 2. BANCO DE MISSÕES (3 NÍVEIS X 10 FASES) ---
+        const missionDB = {
+            facil: [
+                { title: "Apagão no Laboratório", desc: "A energia caiu e o laboratório apagou as luzes! O robô precisa encontrar a saída.", variables: ["escuro"], icon: "💡" },
+                { title: "Estrada Destruída", desc: "A velha estrada desmoronou e está cheia de precipícios no caminho.", variables: ["buracos"], icon: "🚧" },
+                { title: "Resgate na Enchente", desc: "O lago transbordou. Nosso robô precisa atravessar até a outra margem sem afundar.", variables: ["agua"], icon: "🚣" },
+                { title: "Deslizamento de Terra", desc: "Uma avalanche derrubou rochas enormes, bloqueando todo o caminho do robô.", variables: ["pedras"], icon: "⛰️" },
+                { title: "Entrega Expressa", desc: "O cliente precisa dessa pizza espacial agora! O robô precisa ser muito, muito rápido.", variables: ["velocidade"], icon: "🍕" },
+                { title: "Cofre de Aço", desc: "Um cofre gigante e pesado caiu do caminhão e o robô precisa arrastá-lo de volta.", variables: ["peso"], icon: "🏦" },
+                { title: "Incêndio Florestal", desc: "A floresta alienígena está em chamas! É preciso atravessar o fogo sem derreter.", variables: ["fogo"], icon: "🌲" },
+                { title: "Gato na Árvore", desc: "Um gato cibernético está preso no topo de uma árvore gigantesca.", variables: ["alto"], icon: "🐈" },
+                { title: "Mina Abandonada", desc: "Lá dentro é um breu total e o chão é forrado de rochas soltas.", variables: ["escuro", "pedras"], icon: "⛏️" },
+                { title: "Lancha Rápida", desc: "Perseguição no rio! Precisamos cruzar a água o mais rápido possível.", variables: ["agua", "velocidade"], icon: "🚤" }
+            ],
+            medio: [
+                { title: "O Pântano Falso", desc: "A ponte caiu e o rio está furioso, mas há lama e crateras perigosas escondidas no fundo.", variables: ["agua", "buracos"], icon: "🐸" },
+                { title: "Fuga Noturna", desc: "Um bando de monstros nos achou! Precisamos fugir voando baixo em alta velocidade no escuro.", variables: ["escuro", "velocidade"], icon: "🦇" },
+                { title: "Meteoro Flamejante", desc: "Um asteróide em chamas muito pesado caiu na praça. Precisamos movê-lo antes que queime tudo.", variables: ["fogo", "peso"], icon: "☄️" },
+                { title: "Morcegos da Torre", desc: "O resgate é no topo da torre mais alta, mas não há nenhuma luz para guiar a subida noturna.", variables: ["escuro", "alto"], icon: "🗼" },
+                { title: "Rali no Cânion", desc: "Uma corrida na estrada de terra cheia de crateras, precipícios e pedregulhos no meio do caminho.", variables: ["buracos", "pedras"], icon: "🌵" },
+                { title: "Lava se Aproximando", desc: "O vulcão inundou o vale de lava líquida e super quente. Temos que atravessar isso fervendo!", variables: ["fogo", "agua"], icon: "🌋" },
+                { title: "Alpinista Mecânico", desc: "A escalada final será subindo a montanha de pedra mais alta e acidentada do nosso planeta.", variables: ["pedras", "alto"], icon: "🧗" },
+                { title: "Navio Atolado", desc: "Um enorme cargueiro pesado de chumbo encalhou no rio e a maré está subindo.", variables: ["peso", "agua"], icon: "🚢" },
+                { title: "Fossos do Templo", desc: "O templo antigo exige que se atravesse pulando sobre fossos que cospem jatos de fogo.", variables: ["fogo", "buracos"], icon: "⛩️" },
+                { title: "Satélite Quebrado", desc: "Precisamos carregar a pesada antena espacial sendo muito rápidos antes que a tempestade chegue.", variables: ["peso", "velocidade"], icon: "📡" }
+            ],
+            dificil: [
+                { title: "O Tesouro do Abismo", desc: "Na caverna mais funda, não há luz alguma, o chão está coberto de rochas cortantes e o tesouro pesa toneladas.", variables: ["escuro", "pedras", "peso"], icon: "💎" },
+                { title: "Tsunami Noturno", desc: "Uma terrível tempestade sem luz apagou o farol e afundou o barco. Precisamos nadar super rápido debaixo d'água.", variables: ["agua", "escuro", "velocidade"], icon: "🌊" },
+                { title: "Erupção Explosiva", desc: "Fuja do vulcão em erupção: desvie das enormes crateras abertas enquanto o ar vira fogo e fumaça ao seu redor!", variables: ["fogo", "buracos", "alto"], icon: "🌋" },
+                { title: "Corrida do Desfiladeiro", desc: "A corrida mais perigosa: seja muito rápido passando pelas pedras grandes e salte precipícios mortais.", variables: ["velocidade", "pedras", "buracos"], icon: "🏁" },
+                { title: "Mar de Fogo", desc: "Temos que transportar um reator nuclear super pesado cruzando um oceano inteiro de magma fervente.", variables: ["peso", "agua", "fogo"], icon: "☣️" },
+                { title: "Ninja Cibernético", desc: "Infiltração tática: voe no céu noturno sem ser visto (escuro absoluto) com a maior velocidade possível.", variables: ["alto", "escuro", "velocidade"], icon: "🥷" },
+                { title: "Naufrágio Sombrio", desc: "Puxe a velha âncora gigantesca e enferrujada das profundezas do oceano negro durante a meia-noite.", variables: ["agua", "peso", "escuro"], icon: "⚓" },
+                { title: "O Ninho de Dragão", desc: "Escale a montanha rochosa do vulcão até o topo alto e ardente para resgatar o explorador antes que o fogo consuma tudo.", variables: ["pedras", "fogo", "alto"], icon: "🐉" },
+                { title: "Armadilha Infernal", desc: "O piso desabou revelando crateras de fogo! Corra na velocidade máxima para não ser pego pelo chão desmoronando.", variables: ["fogo", "velocidade", "buracos"], icon: "🔥" },
+                { title: "A Grande Colisão", desc: "Um meteoro hiper pesado e rochoso vai bater no mar. Pare ele em alta velocidade!", variables: ["peso", "pedras", "velocidade"], icon: "🌎" }
+            ]
+        };
+
+        // --- 3. CONTROLE DE ESTADO ---
+        let currentDifficulty = 'facil';
+        let currentMissionIndex = 0;
+        let selectedCondition = null; 
+        let selectedPart = null;      
+        let builtLogic = []; 
+
+        // --- 4. FUNÇÕES DE INICIALIZAÇÃO ---
+        window.onload = () => {
+            shuffleArray(conditionCards);
+            shuffleArray(partCards);
+            renderDeck();
+            // Modal do menu inicial já começa visível via HTML
+        };
+
+        function showDifficultyMenu() {
+            document.getElementById('level-modal').classList.remove('hidden');
+        }
+
+        function startGame(level) {
+            document.getElementById('level-modal').classList.add('hidden');
+            currentDifficulty = level;
+            currentMissionIndex = 0;
+            loadMission();
+        }
+
+        function renderDeck() {
+            const deckIf = document.getElementById('deck-if');
+            const deckThen = document.getElementById('deck-then');
+            
+            deckIf.innerHTML = '';
+            deckThen.innerHTML = '';
+
+            conditionCards.forEach(c => {
+                const div = document.createElement('div');
+                div.className = `play-card card-if text-white p-2 flex items-center gap-2 mb-2`;
+                div.id = `card-${c.id}`;
+                div.onclick = () => selectCondition(c);
+                div.innerHTML = `
+                    <div class="text-2xl bg-white/20 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">${c.icon}</div>
+                    <div>
+                        <div class="text-[9px] text-purple-200 uppercase font-black tracking-wider">Se</div>
+                        <div class="font-bold text-xs lg:text-sm leading-tight">${c.text}</div>
+                    </div>
+                `;
+                deckIf.appendChild(div);
+            });
+
+            partCards.forEach(p => {
+                const div = document.createElement('div');
+                div.className = `play-card card-then text-white p-2 flex items-center gap-2 mb-2`;
+                div.id = `card-${p.id}`;
+                div.onclick = () => selectPart(p);
+                div.innerHTML = `
+                    <div class="text-2xl bg-white/20 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">${p.icon}</div>
+                    <div>
+                        <div class="text-[9px] text-emerald-200 uppercase font-black tracking-wider">Então Use</div>
+                        <div class="font-bold text-xs lg:text-sm leading-tight">${p.name}</div>
+                    </div>
+                `;
+                deckThen.appendChild(div);
+            });
+        }
+
+        function loadMission() {
+            const missionList = missionDB[currentDifficulty];
+            const mission = missionList[currentMissionIndex];
+            
+            // Textos base
+            document.getElementById('mission-title').innerText = mission.title;
+            document.getElementById('mission-desc').innerText = mission.desc;
+            document.getElementById('mission-bg-icon').innerText = mission.icon;
+            
+            // Traduz a dificuldade para exibir no contador
+            let diffName = currentDifficulty === 'facil' ? 'Fácil' : currentDifficulty === 'medio' ? 'Médio' : 'Difícil';
+            document.getElementById('mission-counter').innerText = `Fase ${currentMissionIndex + 1}/10 (${diffName})`;
+            
+            // Controle de visualização de dicas (Badges)
+            const varContainer = document.getElementById('mission-variables');
+            const varTitle = document.getElementById('variables-title');
+            varContainer.innerHTML = '';
+            
+            if (currentDifficulty === 'facil') {
+                varTitle.innerText = "Sensores do Robô Encontraram:";
+                mission.variables.forEach(v => {
+                    const varData = conditionCards.find(c => c.target === v);
+                    const span = document.createElement('div');
+                    span.className = 'bg-slate-900 border-2 border-slate-700 text-slate-200 py-1 px-3 rounded-xl font-bold flex items-center gap-2 shadow-sm text-sm';
+                    span.innerHTML = `<span class="text-xl">${varData.icon}</span> ${varData.text}`;
+                    varContainer.appendChild(span);
+                });
+            } else {
+                varTitle.innerText = "Sensores com Interferência. Analise o Texto!";
+                mission.variables.forEach(() => {
+                    const span = document.createElement('div');
+                    span.className = 'bg-slate-800/80 border-2 border-slate-600 border-dashed text-slate-400 py-1 px-3 rounded-xl font-bold flex items-center gap-2 shadow-sm text-sm';
+                    span.innerHTML = `<span class="text-xl opacity-50">❓</span> Dado Oculto`;
+                    varContainer.appendChild(span);
+                });
+            }
+
+            clearAssembly();
+        }
+
+        function selectCondition(cond) {
+            document.querySelectorAll('.card-if').forEach(el => el.classList.remove('selected-if'));
+            if (selectedCondition && selectedCondition.id === cond.id) selectedCondition = null;
+            else {
+                selectedCondition = cond;
+                document.getElementById(`card-${cond.id}`).classList.add('selected-if');
+            }
+            tryCombine();
+        }
+
+        function selectPart(part) {
+             document.querySelectorAll('.card-then').forEach(el => el.classList.remove('selected-then'));
+            if (selectedPart && selectedPart.id === part.id) selectedPart = null;
+            else {
+                selectedPart = part;
+                document.getElementById(`card-${part.id}`).classList.add('selected-then');
+            }
+            tryCombine();
+        }
+
+        function tryCombine() {
+            if (selectedCondition && selectedPart) {
+                const logicBlock = {
+                    condTarget: selectedCondition.target,
+                    condText: selectedCondition.text,
+                    condIcon: selectedCondition.icon,
+                    partSolves: selectedPart.solves,
+                    partName: selectedPart.name,
+                    partIcon: selectedPart.icon,
+                    partCss: selectedPart.css,
+                    id: Date.now() 
+                };
+
+                builtLogic.push(logicBlock);
+                selectedCondition = null;
+                selectedPart = null;
+                document.querySelectorAll('.play-card').forEach(el => el.classList.remove('selected-if', 'selected-then'));
+                renderAssembly();
+            }
+        }
+
+        function clearAssembly() {
+            builtLogic = [];
+            renderAssembly();
+        }
+
+        function renderAssembly() {
+            const container = document.getElementById('assembly-line');
+            const emptyState = document.getElementById('assembly-empty');
+            const robotPreview = document.getElementById('robot-preview-container');
+            
+            // Limpeza
+            Array.from(container.children).forEach(child => { if(child.id !== 'assembly-empty') child.remove(); });
+            Array.from(robotPreview.children).forEach(child => {
+                if(!child.classList.contains('absolute') || child.innerHTML.trim() !== '🤖') child.remove();
+            });
+
+            if (builtLogic.length === 0) {
+                emptyState.style.display = 'flex';
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            builtLogic.forEach((block, index) => {
+                const div = document.createElement('div');
+                div.className = 'block-logic bg-slate-800 border-2 border-slate-600 p-2 rounded-2xl flex items-center shadow-md relative group';
+                div.innerHTML = `
+                    <div class="flex flex-grow items-center gap-1 md:gap-2">
+                        <div class="bg-purple-600 text-white px-2 py-1 md:py-2 rounded-xl font-bold flex items-center gap-1 shadow-inner border border-purple-400 text-xs md:text-sm flex-1">
+                            <span class="bg-purple-900/50 px-1 py-0.5 rounded text-[8px] md:text-[10px] uppercase">SE</span>
+                            <span class="text-base md:text-xl">${block.condIcon}</span> <span>${block.condText}</span>
+                        </div>
+                        <div class="text-slate-400 text-sm md:text-lg"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="bg-emerald-600 text-white px-2 py-1 md:py-2 rounded-xl font-bold flex items-center gap-1 shadow-inner border border-emerald-400 text-xs md:text-sm flex-1">
+                            <span class="bg-emerald-900/50 px-1 py-0.5 rounded text-[8px] md:text-[10px] uppercase">USE</span>
+                            <span class="text-base md:text-xl">${block.partIcon}</span> <span>${block.partName}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeBlock(${index})" class="ml-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+
+                // Adiciona peça visual
+                const partEl = document.createElement('div');
+                partEl.className = `robot-part ${block.partCss}`;
+                partEl.innerText = block.partIcon;
+                robotPreview.appendChild(partEl);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeBlock(index) {
+            builtLogic.splice(index, 1);
+            renderAssembly();
+        }
+
+        function compileAndTest() {
+            if(builtLogic.length === 0) {
+                showModal(false, "Robô Vazio!", "Você precisa adicionar algumas peças no robô antes de enviá-lo para a missão!", "Dica: Clique numa carta Roxa e numa Verde.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-compile');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Testando...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const mission = missionDB[currentDifficulty][currentMissionIndex];
+                let success = true;
+                let errorTitle = "";
+                let errorMsg = "";
+                let hintMsg = "";
+
+                // Verifica cada variável que a missão exige
+                for (let requiredVar of mission.variables) {
+                    const logicForThisVar = builtLogic.find(b => b.condTarget === requiredVar);
+                    const varInfo = conditionCards.find(c => c.target === requiredVar);
+                    
+                    if (!logicForThisVar) {
+                        success = false;
+                        errorTitle = "Oh não! O robô falhou!";
+                        errorMsg = `Você esqueceu de preparar o robô para quando **${varInfo.text}** ${varInfo.icon}!`;
+                        hintMsg = `Dica: Leia a missão. Se o ambiente tiver ${varInfo.text.toLowerCase()}, adicione uma carta roxa e verde para resolver isso.`;
+                        break;
+                    }
+
+                    if (logicForThisVar.partSolves !== requiredVar) {
+                        success = false;
+                        errorTitle = "Equipamento Errado!";
+                        errorMsg = `O robô tentou usar **${logicForThisVar.partName} ${logicForThisVar.partIcon}** para lidar com **${varInfo.text} ${varInfo.icon}**, mas quebrou!`;
+                        hintMsg = `Dica: Qual peça verde faz sentido usar quando ${varInfo.text.toLowerCase()}? Remova o bloco errado no X.`;
+                        break;
+                    }
+                }
+
+                // Verifica se colocou coisas extras desnecessárias
+                if (success && builtLogic.length > mission.variables.length) {
+                     success = false;
+                     errorTitle = "Robô Sobrecarregado!";
+                     errorMsg = "Você colocou peças que a missão não pediu! O robô ficou confuso, gastou bateria à toa e desligou.";
+                     hintMsg = "Dica: Coloque APENAS os blocos necessários para resolver os problemas da missão.";
+                }
+
+                btn.innerHTML = '🚀 Testar Robô!';
+                btn.disabled = false;
+                
+                if(success) {
+                    showModal(true, "YAY! Missão Cumprida!", "O seu robô estava perfeitamente programado e superou todos os obstáculos do planeta!");
+                } else {
+                    showModal(false, errorTitle, errorMsg, hintMsg);
+                    const robotPreview = document.getElementById('robot-preview-container');
+                    robotPreview.classList.add('error-shake');
+                    setTimeout(() => robotPreview.classList.remove('error-shake'), 500);
+                }
+
+            }, 800);
+        }
+
+        function showModal(isSuccess, title, desc, hint) {
+            const modal = document.getElementById('feedback-modal');
+            const content = document.getElementById('modal-content');
+            const icon = document.getElementById('modal-icon');
+            const titleEl = document.getElementById('modal-title');
+            const descEl = document.getElementById('modal-desc');
+            const hintEl = document.getElementById('modal-hint');
+            const btn = document.getElementById('btn-modal-action');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+
+            if (isSuccess) {
+                content.className = 'bg-slate-800 border-4 border-emerald-500 rounded-3xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(16,185,129,0.4)] transform scale-95 transition-transform duration-300 relative overflow-hidden';
+                icon.innerHTML = '🎉🤖';
+                titleEl.innerText = title;
+                titleEl.className = 'text-3xl font-extrabold text-emerald-400 mb-2 title-font';
+                descEl.innerText = desc;
+                hintEl.classList.add('hidden');
+                
+                // Lógica de progressão
+                if (currentMissionIndex < 9) { // Fase 1 a 9 (índice 0 a 8)
+                    btn.innerText = 'Próxima Fase ➔';
+                    btn.className = 'w-full bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xl py-4 px-6 rounded-2xl transition-colors title-font uppercase shadow-[0_6px_0_#047857] active:shadow-[0_0px_0_#047857] active:translate-y-[6px]';
+                    btn.onclick = () => {
+                        closeModal();
+                        currentMissionIndex++;
+                        loadMission();
+                    };
+                } else { // Zerou as 10 fases da dificuldade atual
+                    icon.innerHTML = '🏆🏆🏆';
+                    if (currentDifficulty === 'facil') {
+                        descEl.innerText = 'Incrível! Você fechou o Nível Fácil! Que tal tentar jogar sem ver as dicas dos Sensores?';
+                        btn.innerText = 'Jogar Nível Médio';
+                        btn.onclick = () => { closeModal(); startGame('medio'); };
+                    } else if (currentDifficulty === 'medio') {
+                        descEl.innerText = 'UAU! Você venceu o Nível Médio decifrando tudo. Preparado para o Desafio Final Supremo?';
+                        btn.innerText = 'Ir pro Nível Difícil!';
+                        btn.onclick = () => { closeModal(); startGame('dificil'); };
+                    } else {
+                        descEl.innerText = 'VOCÊ É UMA LENDA DA ENGENHARIA ESPACIAL! Zerou o jogo inteiro na dificuldade máxima!';
+                        btn.innerText = 'Menu Principal';
+                        btn.onclick = () => { closeModal(); showDifficultyMenu(); };
+                    }
+                }
+            } else {
+                content.className = 'bg-slate-800 border-4 border-red-500 rounded-3xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(239,68,68,0.4)] transform scale-95 transition-transform duration-300 relative overflow-hidden';
+                icon.innerHTML = '💥🤖';
+                titleEl.innerText = title;
+                titleEl.className = 'text-3xl font-extrabold text-red-400 mb-2 title-font';
+                descEl.innerHTML = desc.replace(/\*\*(.*?)\*\*/g, '<span class="text-white font-black">$1</span>');
+                
+                if(hint) {
+                    hintEl.classList.remove('hidden');
+                    hintEl.innerText = hint;
+                }
+
+                btn.innerText = '🔧 Consertar Robô';
+                btn.className = 'w-full bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-xl py-4 px-6 rounded-2xl transition-colors title-font uppercase shadow-[0_6px_0_#b45309] active:shadow-[0_0px_0_#b45309] active:translate-y-[6px]';
+                btn.onclick = closeModal;
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('feedback-modal');
+            modal.classList.remove('opacity-100');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+    </script>
+</body>
+</html>
