@@ -1,298 +1,343 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal de Jogos Educativos</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
-<style>
-/* ─── CSS Original Mantido ───────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Jogos Educativos - Arcade do Saber</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Configurações do Tailwind para suportar as fontes -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        nunito: ['Nunito', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-:root {
-  --bg:          #04091f;
-  --bg2:         #070e2e;
-  --grid-line:   rgba(30, 80, 200, 0.18);
-  --text:        #e8f0ff;
-  --text-dim:    rgba(180,200,255,0.55);
-  --gold:        #ffd54f;
-  --geo-a: #00e5ff;
-  --geo-b: #0066ff;
-  --geo-glow: rgba(0,180,255,0.45);
-  --rol-a: #ff3d78;
-  --rol-b: #ff9800;
-  --rol-glow: rgba(255,90,30,0.45);
-}
+    <style>
+        body {
+            background-color: #020617; /* bg-slate-950 */
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
 
-html, body {
-  width: 100%; min-height: 100%;
-  background: var(--bg);
-  font-family: 'Nunito', sans-serif;
-  color: var(--text);
-  overflow-x: hidden;
-}
+        /* Efeito de Estrelas no Fundo */
+        #starfield { position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; }
+        .star { position: absolute; border-radius: 50%; background: #ffffff; animation: twinkle var(--d,3s) ease-in-out infinite; animation-delay: var(--delay, 0s); }
+        @keyframes twinkle { 
+            0%, 100% { opacity: var(--lo, 0.1); transform: scale(1); } 
+            50% { opacity: var(--hi, 0.8); transform: scale(1.5); box-shadow: 0 0 10px #fff; } 
+        }
 
-/* ─── CSS DO BOTÃO DE SOM (NOVO) ────────────────────────────── */
-.audio-control {
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  z-index: 100;
-}
+        /* Linhas de Grade e Scanlines Retrô */
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+        }
 
-#muteBtn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 2px solid var(--geo-a);
-  background: var(--bg2);
-  color: var(--geo-a);
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 15px var(--geo-glow);
-}
+        /* Cartões Glassmorphism com Efeito Hover */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6); /* slate-900 com opacidade */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-#muteBtn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 25px var(--geo-a);
-}
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
 
-#muteBtn.muted {
-  border-color: var(--rol-a);
-  color: var(--rol-a);
-  box-shadow: 0 0 15px var(--rol-glow);
-}
+        /* Efeito de Texto Gradiente Animado */
+        .text-gradient {
+            background: linear-gradient(to right, #38bdf8, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: textShine 4s linear infinite;
+        }
 
-/* Estilos de fundo existentes... */
-#starfield { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.star { position: absolute; border-radius: 50%; background: #fff; animation: twinkle var(--d,3s) ease-in-out infinite; animation-delay: var(--delay, 0s); }
-@keyframes twinkle { 0%,100% { opacity: var(--lo,.15); transform: scale(1); } 50% { opacity: var(--hi,.9); transform: scale(1.4); } }
-.grid-overlay { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 30%, transparent 100%); }
-.scanlines { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px); }
+        @keyframes textShine {
+            to { background-position: 200% center; }
+        }
 
-.page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: clamp(24px, 5vh, 64px) clamp(16px, 4vw, 60px) clamp(32px, 6vh, 80px); gap: clamp(24px, 4.5vh, 56px); }
-.header { text-align: center; animation: slideDown 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
-@keyframes slideDown { from { opacity: 0; transform: translateY(-28px); } to { opacity: 1; transform: translateY(0); } }
-.badge { display: inline-block; font-family: 'Orbitron', monospace; font-size: clamp(0.55rem, 1.2vw, 0.78rem); font-weight: 700; letter-spacing: 5px; text-transform: uppercase; color: var(--gold); background: rgba(255,213,79,0.08); border: 1px solid rgba(255,213,79,0.3); border-radius: 30px; padding: 5px 18px; margin-bottom: 14px; }
-.site-title { font-family: 'Orbitron', monospace; font-size: clamp(1.8rem, 5.5vw, 5rem); font-weight: 900; line-height: 1.05; letter-spacing: -1px; background: linear-gradient(135deg, #a8d8ff 0%, #ffffff 40%, #ffd54f 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 30px rgba(120,180,255,0.35)); }
-.site-sub { margin-top: 10px; font-size: clamp(0.85rem, 2vw, 1.2rem); font-weight: 700; color: var(--text-dim); letter-spacing: 1px; }
-.divider { width: clamp(120px, 30vw, 320px); height: 2px; background: linear-gradient(90deg, transparent, rgba(100,180,255,0.6), transparent); border-radius: 2px; }
-.games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(260px, 36vw, 480px), 1fr)); gap: clamp(20px, 3.5vw, 48px); width: 100%; max-width: 1200px; }
-
-/* Cards e botões mantidos... (omitidos aqui para brevidade, mas devem permanecer no seu arquivo) */
-.card { position: relative; border-radius: 24px; padding: clamp(28px, 4vw, 52px) clamp(24px, 3.5vw, 44px); display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(14px, 2.5vh, 24px); background: var(--bg2); border: 2px solid transparent; overflow: hidden; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s; animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.card:hover { transform: translateY(-8px) scale(1.025); }
-.card--geo { --card-accent: var(--geo-a); background: linear-gradient(160deg, #060e24 0%, #091630 100%); }
-.card--geo:hover { box-shadow: 0 0 0 1px rgba(0,220,255,0.4), 0 12px 50px var(--geo-glow), 0 0 80px rgba(0,100,255,0.2); }
-.card--rol { --card-accent: var(--rol-a); background: linear-gradient(160deg, #1a0810 0%, #1c0f06 100%); }
-.card--rol:hover { box-shadow: 0 0 0 1px rgba(255,80,80,0.4), 0 12px 50px var(--rol-glow), 0 0 80px rgba(255,80,0,0.15); }
-.card-icon-wrap { position: relative; width: clamp(80px, 12vw, 130px); height: clamp(80px, 12vw, 130px); }
-.card-icon { position: relative; z-index: 1; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: clamp(3rem, 7vw, 5.5rem); filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5)); transition: transform 0.3s; }
-.card-name { font-family: 'Orbitron', monospace; font-size: clamp(1.1rem, 3vw, 2rem); font-weight: 900; line-height: 1.15; }
-.card-desc { font-size: clamp(0.8rem, 1.7vw, 1.02rem); font-weight: 700; color: var(--text-dim); }
-.btn-play { font-family: 'Orbitron', monospace; font-size: clamp(0.82rem, 1.8vw, 1.05rem); padding: 15px 40px; border-radius: 50px; text-decoration: none; color: #fff; background: var(--geo-b); transition: 0.3s; }
-.footer { text-align: center; color: rgba(120,150,200,0.45); padding: 20px; }
-/* Adicione estas variáveis ao :root */
-:root {
-  /* ... cores anteriores ... */
-  --def-a: #bc13fe;
-  --def-b: #7000ff;
-  --def-glow: rgba(188, 19, 254, 0.45);
-}
-
-/* Estilo específico para o card Defensores */
-.card--def { 
-  --card-accent: var(--def-a); 
-  background: linear-gradient(160deg, #120524 0%, #1a0a3a 100%); 
-}
-
-.card--def:hover { 
-  box-shadow: 0 0 0 1px rgba(188, 19, 254, 0.4), 0 12px 50px var(--def-glow), 0 0 80px rgba(112, 0, 255, 0.2); 
-}
-
-/* Ajuste na Grid para acomodar 3 itens ou mais */
-.games-grid {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-/* Variáveis para o Alquimista */
-:root {
-  /* ... manter as outras ... */
-  --alc-a: #a033ff; /* Roxo Místico */
-  --alc-b: #00ffcc; /* Verde Alquimia */
-  --alc-glow: rgba(160, 51, 255, 0.4);
-}
-
-/* Card Alquimista */
-.card--alc {
-  --card-accent: var(--alc-a);
-  background: linear-gradient(160deg, #1a0b2e 0%, #0d1a1a 100%);
-  border: 1px solid rgba(160, 51, 255, 0.2);
-}
-
-.card--alc:hover {
-  box-shadow: 0 0 0 1px var(--alc-b), 0 12px 50px var(--alc-glow);
-}
-
-/* Estilo para os modos de jogo no card */
-.card-modes {
-  font-size: 0.75rem;
-  color: #00ffcc;
-  font-family: 'Orbitron', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: -10px;
-  opacity: 0.8;
-}
-
-/* Ajuste na Grid para acomodar os 4 jogos agora presentes */
-.games-grid {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  max-width: 1300px;
-}
-</style>
+        /* Scrollbar Personalizada */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
 </head>
-<body>
+<body class="font-nunito min-h-screen flex flex-col relative antialiased selection:bg-purple-500 selection:text-white">
 
-<audio id="arcadeBgm" loop>
-  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-  </audio>
+    <!-- Áudio de Fundo -->
+    <audio id="arcadeBgm" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
 
-<div class="audio-control">
-  <button id="muteBtn" class="muted" title="Ligar/Desligar Som">
-    <span id="audioIcon">🔈</span>
-  </button>
-</div>
+    <!-- Botão de Áudio Modernizado -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="muteBtn" class="w-14 h-14 rounded-full bg-slate-900/80 backdrop-blur-md border-2 border-slate-700 text-2xl flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] text-slate-400 hover:text-cyan-400 group" title="Ligar/Desligar Som">
+            <span id="audioIcon" class="transform transition-transform group-hover:scale-110">🔈</span>
+        </button>
+    </div>
 
-<div id="starfield"></div>
-<div class="grid-overlay"></div>
-<div class="scanlines"></div>
+    <!-- Background Animado -->
+    <div id="starfield"></div>
+    <div class="grid-overlay"></div>
+    
+    <!-- Orbes de Luz no Fundo (Desfocadas) -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] bg-purple-600/20 rounded-full blur-[150px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+    </div>
 
-<main class="page">
-  <header class="header">
-    <div class="badge">🎓 Portal Educativo</div>
-    <h1 class="site-title">ARCADE<br>DO SABER</h1>
-    <p class="site-sub">Selecione um jogo e vamos aprender!</p>
-  </header>
+    <main class="flex-grow container mx-auto px-4 py-12 md:py-20 flex flex-col items-center">
+        
+        <header class="text-center mb-16 animate-[float_6s_ease-in-out_infinite]">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-orbitron text-xs md:text-sm tracking-widest uppercase font-bold mb-6 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                <span class="text-lg">🎓</span> Portal Educativo
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-orbitron font-black text-gradient drop-shadow-2xl mb-4 leading-tight">
+                ARCADE<br>DO SABER
+            </h1>
+            
+            <p class="text-slate-400 font-bold text-lg md:text-xl tracking-wide max-w-2xl mx-auto">
+                Selecione um jogo espacial e prepare-se para aprender!
+            </p>
+            
+            <!-- Divisor Decorativo -->
+            <div class="w-32 h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent mx-auto mt-8 rounded-full opacity-50"></div>
+        </header>
 
-  <div class="divider"></div>
+        <section class="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 relative z-10">
+            
+            <!-- Card: Georrobô -->
+            <a href="georrobo.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(6,182,212,0.3)] border-t-cyan-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]">
+                    🤖
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-cyan-300 transition-colors">Georrobô:<br>Missão Matriz</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Desafios de localização espacial e raciocínio lógico!</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-cyan-600/80 group-hover:bg-cyan-500 transition-colors w-full border border-cyan-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-  <section class="games-grid">
-    <article class="card card--geo">
-      <div class="card-icon-wrap"><div class="card-icon">🤖</div></div>
-      <h2 class="card-name">Georrobô:<br>Missão Matriz</h2>
-      <p class="card-desc">Desafios de localização espacial e raciocínio lógico!</p>
-      <a class="btn-play" href="georrobo.html">▶ JOGAR AGORA</a>
-    </article>
+            <!-- Card: Missão Marte -->
+            <a href="missao-marte.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(239,68,68,0.3)] border-t-red-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(239,68,68,0.6)]">
+                    🔴
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-red-300 transition-colors">Missão<br>Marte</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Analise as imagens e descubra os erros ocultos.</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-red-600/80 group-hover:bg-red-500 transition-colors w-full border border-red-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-    <article class="card card--def">
-      <div class="card-icon-wrap"><div class="card-icon">🔴</div></div>
-      <h2 class="card-name">Missão<br>Marte</h2>
-      <p class="card-desc">Analise as imagens e descubra os erros</p>
-      <a class="btn-play" href="missao-marte.html">▶ JOGAR AGORA</a>
-    </article>
+            <!-- Card: O Resgate no Planeta Sucata -->
+            <a href="sucata.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(168,85,247,0.3)] border-t-purple-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2 group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]">
+                    🛰️
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-purple-300 transition-colors">Resgate no<br>Planeta Sucata</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Programe o trajeto do robô e colete engrenagens.</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-purple-600/80 group-hover:bg-purple-500 transition-colors w-full border border-purple-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-    <article class="card card--def">
-      <div class="card-icon-wrap"><div class="card-icon">🛰️</div></div>
-      <h2 class="card-name">O Resgate no<br>Planeta Sucata</h2>
-      <p class="card-desc">Programe o trajeto do robô, evite poças de ácido, montanhas de sucata e colete todas as engrenagens</p>
-      <a class="btn-play" href="sucata.html">▶ JOGAR AGORA</a>
-    </article>
+            <!-- Card: Fábrica de Robôs Malucos -->
+            <a href="fabrica.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(59,130,246,0.3)] border-t-blue-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">
+                    🤖
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-blue-300 transition-colors">Fábrica de<br>Robôs Malucos</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Combine condições (SE) com a peça certa (ENTÃO).</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-blue-600/80 group-hover:bg-blue-500 transition-colors w-full border border-blue-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-    <article class="card card--def">
-      <div class="card-icon-wrap"><div class="card-icon">🤖</div></div>
-      <h2 class="card-name">Fábrica de<br>Robôs Malucos</h2>
-      <p class="card-desc">Combine uma condição (SE) com a peça certa (ENTÃO) para vencer a missão!</p>
-      <a class="btn-play" href="fabrica.html">▶ JOGAR AGORA</a>
-    </article>
+            <!-- Card: Roleta do Mestre Mandou -->
+            <a href="roleta-mestre-mandou.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(245,158,11,0.3)] border-t-amber-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-180 group-hover:drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]">
+                    🎡
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-amber-300 transition-colors">Roleta do<br>Mestre Mandou</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Gire a roleta e cumpra os desafios motores divertidos!</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-slate-900 bg-amber-400/90 group-hover:bg-amber-300 transition-colors w-full border border-amber-300/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
+            <!-- Card: Defensores da Multiplicação -->
+            <a href="defensores-multiplicacao.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(236,72,153,0.3)] border-t-pink-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-3 group-hover:drop-shadow-[0_0_20px_rgba(236,72,153,0.6)]">
+                    🚀
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-pink-300 transition-colors">Defensores da<br>Multiplicação</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Pilote sua nave e neutralize alienígenas resolvendo tabuadas!</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-pink-600/80 group-hover:bg-pink-500 transition-colors w-full border border-pink-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-    <article class="card card--rol">
-      <div class="card-icon-wrap"><div class="card-icon">🎡</div></div>
-      <h2 class="card-name">Roleta do<br>Mestre Mandou</h2>
-      <p class="card-desc">Gire a roleta e cumpra os desafios motores!</p>
-      <a class="btn-play" href="roleta-mestre-mandou.html">▶ JOGAR AGORA</a>
-    </article>
+            <!-- Card: Alquimista da Multiplicação -->
+            <a href="alquimistalab.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(16,185,129,0.3)] border-t-emerald-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(16,185,129,0.6)]">
+                    🧙‍♂️
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-emerald-300 transition-colors">Alquimista da<br>Multiplicação</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Transmute números em poções mágicas no laboratório.</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-emerald-600/80 group-hover:bg-emerald-500 transition-colors w-full border border-emerald-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-    <article class="card card--def">
-      <div class="card-icon-wrap"><div class="card-icon">🚀</div></div>
-      <h2 class="card-name">Defensores da<br>Multiplicação</h2>
-      <p class="card-desc">Pilote sua nave e neutralize alienígenas resolvendo a tabuada!</p>
-      <a class="btn-play" href="defensores-multiplicacao.html">▶ JOGAR AGORA</a>
-    </article>
+            <!-- Card: Mestre da Planificação -->
+            <a href="mestre-planificacao.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(99,102,241,0.3)] border-t-indigo-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(99,102,241,0.6)]">
+                    🧊
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-indigo-300 transition-colors">Mestre da<br>Planificação</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Dobre o espaço e domine a geometria oculta.</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-indigo-600/80 group-hover:bg-indigo-500 transition-colors w-full border border-indigo-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-<article class="card card--alc">
-  <div class="card-icon-wrap"><div class="card-icon">🧙‍♂️</div></div>
-  <h2 class="card-name">Alquimista da<br>Multiplicação</h2>
-  <p class="card-desc">Entre no laboratório místico para transmutar números em poções mágicas!</p>
-  <a class="btn-play" href="alquimistalab.html">▶ JOGAR AGORA</a>
-</article>
-  
-<article class="card card--alc">
-  <div class="card-icon-wrap"><div class="card-icon">🧊</div></div>
-  <h2 class="card-name">Mestre da<br>Planificação</h2>
-  <p class="card-desc">Dobre o espaço. Domine a geometria.</p>
-  <a class="btn-play" href="mestre-planificacao.html">▶ JOGAR AGORA</a>
-</article>
+            <!-- Card: Planificação 3D -->
+            <a href="planificacao.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(244,63,94,0.3)] border-t-rose-500/50 md:col-span-1 lg:col-span-1 xl:col-span-2">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2 group-hover:drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">
+                    🔺
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-rose-300 transition-colors">Planificação 3D de<br>Sólidos Geométricos</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Teste e expanda sua visão espacial ao máximo.</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-rose-600/80 group-hover:bg-rose-500 transition-colors w-full xl:w-1/2 border border-rose-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-<article class="card card--alc">
-  <div class="card-icon-wrap"><div class="card-icon">🔺</div></div>
-  <h2 class="card-name">Planificação 3D de<br>sólidos geométricos</h2>
-  <p class="card-desc">Teste e expanda sua visão espacial.</p>
-  <a class="btn-play" href="planificacao.html">▶ JOGAR AGORA</a>
-</article>
+            <!-- Card: Clube dos Polígonos -->
+            <a href="poligonos.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(234,179,8,0.3)] border-t-yellow-500/50 md:col-span-1 lg:col-span-1 xl:col-span-2">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(234,179,8,0.6)]">
+                    🔶
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-yellow-300 transition-colors">Clube dos<br>Polígonos</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Reconheça as formas, nomeie cada uma e vença!</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-slate-900 bg-yellow-400/90 group-hover:bg-yellow-300 transition-colors w-full xl:w-1/2 border border-yellow-300/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
 
-<article class="card card--alc">
-  <div class="card-icon-wrap"><div class="card-icon">🔶</div></div>
-  <h2 class="card-name">Clube dos<br>polígonos</h2>
-  <p class="card-desc">Reconheça, Nomeie, Vença!</p>
-  <a class="btn-play" href="poligonos.html">▶ JOGAR AGORA</a>
-</article>
+        </section>
+    </main>
 
-</section>
+    <footer class="w-full text-center py-8 mt-12 border-t border-white/5 bg-slate-950/50 backdrop-blur-sm relative z-10">
+        <p class="text-slate-500 font-orbitron font-bold tracking-[0.3em] text-sm flex items-center justify-center gap-3">
+            <span class="w-8 h-[1px] bg-slate-600"></span>
+            ✦ ARCADE DO SABER ✦
+            <span class="w-8 h-[1px] bg-slate-600"></span>
+        </p>
+    </footer>
 
+    <script>
+        // Lógica do Áudio
+        const bgm = document.getElementById('arcadeBgm');
+        const muteBtn = document.getElementById('muteBtn');
+        const audioIcon = document.getElementById('audioIcon');
 
-  <footer class="footer">
-    <p>✦ ARCADE DO SABER ✦</p>
-  </footer>
-</main>
+        bgm.volume = 0.4;
 
-<script>
-// Lógica do Áudio
-const bgm = document.getElementById('arcadeBgm');
-const muteBtn = document.getElementById('muteBtn');
-const audioIcon = document.getElementById('audioIcon');
+        muteBtn.addEventListener('click', () => {
+            if (bgm.paused) {
+                bgm.play();
+                muteBtn.classList.remove('text-slate-400', 'border-slate-700');
+                muteBtn.classList.add('text-cyan-400', 'border-cyan-400', 'shadow-[0_0_15px_rgba(34,211,238,0.5)]');
+                audioIcon.textContent = '🔊';
+            } else {
+                bgm.pause();
+                muteBtn.classList.add('text-slate-400', 'border-slate-700');
+                muteBtn.classList.remove('text-cyan-400', 'border-cyan-400', 'shadow-[0_0_15px_rgba(34,211,238,0.5)]');
+                audioIcon.textContent = '🔈';
+            }
+        });
 
-// Ajusta volume inicial (mais baixo para não assustar)
-bgm.volume = 0.4;
-
-muteBtn.addEventListener('click', () => {
-  if (bgm.paused) {
-    bgm.play();
-    muteBtn.classList.remove('muted');
-    audioIcon.textContent = '🔊';
-  } else {
-    bgm.pause();
-    muteBtn.classList.add('muted');
-    audioIcon.textContent = '🔈';
-  }
-});
-
-// Gerador de estrelas original mantido...
-(function () {
-  const container = document.getElementById('starfield');
-  for (let i = 0; i < 130; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    const size = 0.8 + Math.random() * 2.8;
-    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*5}s;--delay:${Math.random()*6}s;--lo:0.1;--hi:0.8;`;
-    container.appendChild(s);
-  }
-})();
-</script>
+        // Gerador Otimizado de Estrelas
+        (function () {
+            const container = document.getElementById('starfield');
+            const frag = document.createDocumentFragment();
+            // Reduzi a quantidade para melhorar a performance em dispositivos móveis
+            for (let i = 0; i < 80; i++) {
+                const s = document.createElement('div');
+                s.className = 'star';
+                const size = 0.5 + Math.random() * 2;
+                s.style.cssText = `
+                    width:${size}px;
+                    height:${size}px;
+                    left:${Math.random()*100}%;
+                    top:${Math.random()*100}%;
+                    --d:${2+Math.random()*5}s;
+                    --delay:${Math.random()*6}s;
+                    --lo:0.1;
+                    --hi:0.9;
+                `;
+                frag.appendChild(s);
+            }
+            container.appendChild(frag);
+        })();
+    </script>
 </body>
 </html>
