@@ -231,8 +231,8 @@
 
   .modal-command {
     font-family: 'Fredoka One', cursive;
-    font-size: clamp(2rem, 6vw, 5.8rem);
-    color: white; line-height: 1.1;
+    font-size: clamp(1.8rem, 5vw, 4.5rem);
+    color: white; line-height: 1.15;
     text-shadow: 0 0 30px rgba(255,220,0,0.7), 0 0 80px rgba(255,100,0,0.4), 4px 4px 0 rgba(0,0,0,0.3);
     margin-bottom: 24px;
     animation: commandPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -259,52 +259,46 @@
   .corner.br { bottom:2vw; right:2vw; animation-delay:3s; }
   @keyframes float { 0%,100% { transform:translateY(0) rotate(0deg); } 50% { transform:translateY(-11px) rotate(9deg); } }
 
-.btn-back {
-  position: fixed;
-  bottom: 25px;
-  left: 25px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  text-decoration: none;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: #ffffff;
-  
-  padding: 10px 20px;
-  background: rgba(4, 9, 31, 0.8);
-  border: 1px solid rgba(180, 200, 255, 0.3);
-  border-radius: 8px;
-  backdrop-filter: blur(4px);
-  transition: all 0.3s ease;
-}
-
-.btn-back:hover {
-  color: var(--geo-a);
-  background: rgba(255, 255, 255, 0.25);
-  border-color: #ffffff;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-  transform: scale(1.05);
-}
-
-.btn-back .icon {
-  font-size: 1rem;
-}
-
-/* Ajuste para telas pequenas */
-@media (max-width: 600px) {
   .btn-back {
-    top: 15px;
-    left: 15px;
-    padding: 6px 10px;
-    font-size: 0.65rem;
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #ffffff;
+    padding: 10px 20px;
+    background: rgba(4, 9, 31, 0.8);
+    border: 1px solid rgba(180, 200, 255, 0.3);
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
   }
-}
 
+  .btn-back:hover {
+    color: #00e5ff;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+  }
+
+  .btn-back .icon { font-size: 1rem; }
+
+  @media (max-width: 600px) {
+    .btn-back {
+      top: 15px;
+      left: 15px;
+      padding: 6px 10px;
+      font-size: 0.65rem;
+    }
+  }
 </style>
 </head>
 <body>
@@ -312,7 +306,6 @@
 <a href="index.html" class="btn-back">
   <span class="icon">❮</span> Página inicial
 </a>
-
 
 <div class="stars" id="stars"></div>
 <div class="corner tl">⭐</div>
@@ -354,33 +347,30 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-//  CHALLENGES  (faixa 11–12 anos, 3 níveis × 6 desafios)
-// ═══════════════════════════════════════════════════════════════
 const CHALLENGES = {
   easy: [
-    { label:'Pule\n5 vezes!',                   emoji:'🦘', color:'#FF3366', textColor:'#fff' },
-    { label:'Bata palmas\n10 vezes!',            emoji:'👏', color:'#FF9500', textColor:'#fff' },
-    { label:'Toque nos\npés 6 vezes!',           emoji:'🖐️', color:'#FFDD00', textColor:'#1a1a1a' },
-    { label:'Gire\n2 vezes\nno lugar!',          emoji:'🌀', color:'#00C853', textColor:'#fff' },
-    { label:'Faça\n4 agacha-\nmentos!',          emoji:'🏋️', color:'#00B0FF', textColor:'#fff' },
-    { label:'Pise no\nlugar por\n10 segundos!',  emoji:'🚶', color:'#D500F9', textColor:'#fff' },
+    { label:'Pule\n5 vezes!',                   display:'Pule 5 vezes!',                  emoji:'🦘', color:'#FF3366', textColor:'#fff' },
+    { label:'Bata palmas\n10 vezes!',            display:'Bata palmas 10 vezes!',          emoji:'👏', color:'#FF9500', textColor:'#fff' },
+    { label:'Toque nos\npés 6 vezes!',           display:'Toque nos pés 6 vezes!',         emoji:'🖐️', color:'#FFDD00', textColor:'#1a1a1a' },
+    { label:'Gire\n2 vezes\nno lugar!',          display:'Gire 2 vezes no lugar!',         emoji:'🌀', color:'#00C853', textColor:'#fff' },
+    { label:'Faça\n4 agacha-\nmentos!',          display:'Faça 4 agachamentos!',           emoji:'🏋️', color:'#00B0FF', textColor:'#fff' },
+    { label:'Pise no\nlugar por\n10 segundos!',  display:'Pise no lugar por 10 segundos!', emoji:'🚶', color:'#D500F9', textColor:'#fff' },
   ],
   medium: [
-    { label:'Dê 12\npolichi-\nnelos!',           emoji:'⚡', color:'#FF3366', textColor:'#fff' },
-    { label:'Equilíbrio\nem 1 pé\npor 10 seg!', emoji:'🧘', color:'#FF9500', textColor:'#fff' },
-    { label:'Faça\n5 abdomi-\nnais!',            emoji:'💪', color:'#FFDD00', textColor:'#1a1a1a' },
-    { label:'Dê 5\nsaltos\npara frente!',        emoji:'🚀', color:'#00C853', textColor:'#fff' },
-    { label:'Gire 4×\ne agache\n2 vezes!',       emoji:'🌪️', color:'#00B0FF', textColor:'#fff' },
-    { label:'Corra no\nlugar por\n20 segundos!', emoji:'🏃', color:'#D500F9', textColor:'#fff' },
+    { label:'Dê 12\npolichi-\nnelos!',           display:'Dê 12 polichinelos!',            emoji:'⚡', color:'#FF3366', textColor:'#fff' },
+    { label:'Equilíbrio\nem 1 pé\npor 10 seg!', display:'Equilíbrio em 1 pé por 10 segundos!', emoji:'🧘', color:'#FF9500', textColor:'#fff' },
+    { label:'Faça\n5 abdomi-\nnais!',            display:'Faça 5 abdominais!',             emoji:'💪', color:'#FFDD00', textColor:'#1a1a1a' },
+    { label:'Dê 5\nsaltos\npara frente!',        display:'Dê 5 saltos para frente!',       emoji:'🚀', color:'#00C853', textColor:'#fff' },
+    { label:'Gire 4×\ne agache\n2 vezes!',       display:'Gire 4 vezes e agache 2 vezes!', emoji:'🌪️', color:'#00B0FF', textColor:'#fff' },
+    { label:'Corra no\nlugar por\n20 segundos!', display:'Corra no lugar por 20 segundos!', emoji:'🏃', color:'#D500F9', textColor:'#fff' },
   ],
   hard: [
-    { label:'15\nagacha-\nmentos!',              emoji:'🔥', color:'#FF3366', textColor:'#fff' },
-    { label:'20 polichi-\nnelos o +\nrápido!',   emoji:'⚡', color:'#FF9500', textColor:'#fff' },
-    { label:'1 pé c/\nolhos\nfechados\n15 seg!', emoji:'🧘', color:'#FFDD00', textColor:'#1a1a1a' },
-    { label:'5 flexões\nde braço\ncompletas!',   emoji:'💪', color:'#00C853', textColor:'#fff' },
-    { label:'10 pulos\n+ 5\nagacham.!',          emoji:'🦘', color:'#00B0FF', textColor:'#fff' },
-    { label:'Corra no\nlugar 30 seg\nsem parar!',emoji:'🏆', color:'#D500F9', textColor:'#fff' },
+    { label:'15\nagacha-\nmentos!',              display:'Faça 15 agachamentos!',          emoji:'🔥', color:'#FF3366', textColor:'#fff' },
+    { label:'20 polichi-\nnelos o +\nrápido!',   display:'Faça 20 polichinelos o mais rápido possível!', emoji:'⚡', color:'#FF9500', textColor:'#fff' },
+    { label:'1 pé c/\nolhos\nfechados\n15 seg!', display:'Fique em 1 pé com os olhos fechados por 15 segundos!', emoji:'🧘', color:'#FFDD00', textColor:'#1a1a1a' },
+    { label:'5 flexões\nde braço\ncompletas!',   display:'Faça 5 flexões de braço completas!', emoji:'💪', color:'#00C853', textColor:'#fff' },
+    { label:'10 pulos\n+ 5\nagacham.!',          display:'Faça 10 pulos mais 5 agachamentos!', emoji:'🦘', color:'#00B0FF', textColor:'#fff' },
+    { label:'Corra no\nlugar 30 seg\nsem parar!',display:'Corra no lugar por 30 segundos sem parar!', emoji:'🏆', color:'#D500F9', textColor:'#fff' },
   ],
 };
 
@@ -400,9 +390,6 @@ function setDifficulty(diff) {
   playClick();
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  WEB AUDIO  (zero dependências externas, tudo sintetizado)
-// ═══════════════════════════════════════════════════════════════
 let AC = null;
 function ac() {
   if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -410,7 +397,6 @@ function ac() {
   return AC;
 }
 
-// Tick rápido ao cruzar cada fatia durante o giro
 function playTick(speed) {
   try {
     const a = ac(), now = a.currentTime;
@@ -418,7 +404,7 @@ function playTick(speed) {
     const gain = a.createGain();
     osc.connect(gain); gain.connect(a.destination);
     osc.type = 'square';
-    const freq = 400 + speed * 600;          // mais agudo quando rápido
+    const freq = 400 + speed * 600;
     osc.frequency.setValueAtTime(freq, now);
     osc.frequency.exponentialRampToValueAtTime(freq * 0.4, now + 0.035);
     gain.gain.setValueAtTime(0.14, now);
@@ -427,7 +413,6 @@ function playTick(speed) {
   } catch(_) {}
 }
 
-// Whoosh no início do giro
 function playWhoosh() {
   try {
     const a = ac(), now = a.currentTime;
@@ -449,14 +434,12 @@ function playWhoosh() {
   } catch(_) {}
 }
 
-// Fanfarra ascendente ao abrir o modal
 function playFanfare() {
   try {
     const a = ac(), now = a.currentTime;
     const master = a.createGain(); master.gain.value = 0.28;
     master.connect(a.destination);
 
-    // Reverb simples via convolver
     const cvSize = Math.floor(a.sampleRate * 1.2);
     const cvBuf  = a.createBuffer(2, cvSize, a.sampleRate);
     for (let c = 0; c < 2; c++) {
@@ -467,7 +450,6 @@ function playFanfare() {
     const cvG  = a.createGain(); cvG.gain.value = 0.22;
     conv.connect(cvG); cvG.connect(master);
 
-    // Arpejo ascendente: C5 E5 G5 C6 E6
     [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((freq, i) => {
       const t   = now + i * 0.10;
       const osc = a.createOscillator();
@@ -480,7 +462,6 @@ function playFanfare() {
       osc.start(t); osc.stop(t + 0.62);
     });
 
-    // Acorde sustentado após arpejo
     [523.25, 659.25, 783.99].forEach(freq => {
       const t   = now + 0.52;
       const osc = a.createOscillator();
@@ -494,7 +475,6 @@ function playFanfare() {
   } catch(_) {}
 }
 
-// Click suave para botões da UI
 function playClick() {
   try {
     const a = ac(), now = a.currentTime;
@@ -508,9 +488,6 @@ function playClick() {
   } catch(_) {}
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  CANVAS / WHEEL
-// ═══════════════════════════════════════════════════════════════
 const canvas = document.getElementById('wheelCanvas');
 const ctx    = canvas.getContext('2d');
 let size, R, cx, cy;
@@ -539,23 +516,22 @@ function drawWheel(rotation) {
     const endAngle   = startAngle + ARC;
     const slice = SLICES[i];
 
-    // Fatia
     ctx.beginPath(); ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, outerR, startAngle, endAngle);
     ctx.closePath(); ctx.fillStyle = slice.color; ctx.fill();
 
-    // Borda
     ctx.beginPath(); ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, outerR, startAngle, endAngle);
     ctx.closePath();
     ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 3; ctx.stroke();
 
-    // Texto
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(startAngle + ARC / 2);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = slice.textColor;
+    
+    // Usa a label customizada com hífen para caber na fatia
     const lines    = slice.label.split('\n');
     const baseSize = Math.max(R * 0.10, 8);
     ctx.font = `900 ${baseSize}px 'Nunito', sans-serif`;
@@ -573,21 +549,16 @@ function drawWheel(rotation) {
     ctx.restore();
   }
 
-  // Anel externo
   ctx.beginPath();
   ctx.arc(cx, cy, Math.max(R - 3, 1), 0, Math.PI * 2);
   ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 6; ctx.stroke();
 
-  // Hub interno
   ctx.beginPath();
   ctx.arc(cx, cy, Math.max(R * 0.18, 1), 0, Math.PI * 2);
   ctx.fillStyle = '#0D0D2B'; ctx.fill();
   ctx.strokeStyle = 'rgba(255,220,0,0.6)'; ctx.lineWidth = 4; ctx.stroke();
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  SPIN LOGIC
-// ═══════════════════════════════════════════════════════════════
 function spinWheel() {
   if (spinning) return;
   spinning = true;
@@ -618,12 +589,11 @@ function spinWheel() {
     currentAngle  = startAngle + (totalRotation - startAngle) * eased;
     drawWheel(currentAngle);
 
-    // Tick quando muda de fatia (proporcional à velocidade)
     const a       = (POINTER_OFFSET - currentAngle % (2 * Math.PI) + 4 * Math.PI) % (2 * Math.PI);
     const sliceNow = Math.floor(a / ARC) % N;
     if (sliceNow !== lastTickSlice) {
       lastTickSlice = sliceNow;
-      const speed = 1 - eased;        // 1 = rápido, 0 = parado
+      const speed = 1 - eased;
       if (speed > 0.05) playTick(speed);
     }
 
@@ -641,13 +611,11 @@ function spinWheel() {
   requestAnimationFrame(animate);
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  MODAL
-// ═══════════════════════════════════════════════════════════════
 function showResult(idx) {
   const slice = SLICES[idx];
   document.getElementById('modalEmoji').textContent   = slice.emoji;
-  document.getElementById('modalCommand').textContent = slice.label.replace(/\n/g, ' ');
+  // Exibe a ortografia limpa e sem hifens na tela do resultado
+  document.getElementById('modalCommand').textContent = slice.display;
   document.getElementById('modalBar').style.background =
     `linear-gradient(90deg, ${slice.color}, ${slice.color}99)`;
   const badge = document.getElementById('modalDiffBadge');
@@ -665,9 +633,6 @@ function closeModal() {
   stopConfetti();
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  CONFETTI
-// ═══════════════════════════════════════════════════════════════
 const cCanvas = document.getElementById('confettiCanvas');
 const cCtx    = cCanvas.getContext('2d');
 let particles = [], confettiAF, confettiActive = false;
@@ -723,9 +688,6 @@ function stopConfetti() {
   cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  STARS & INIT
-// ═══════════════════════════════════════════════════════════════
 function createStars() {
   const c = document.getElementById('stars');
   for (let i = 0; i < 80; i++) {
