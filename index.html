@@ -254,8 +254,22 @@
                 </div>
             </a>
 
-            <!-- Card: Planificação 3D -->
-            <a href="planificacao.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(244,63,94,0.3)] border-t-rose-500/50 md:col-span-1 lg:col-span-1 xl:col-span-2">
+            <!-- Card: Frações Divertidas -->
+            <a href="fracoes.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(249,115,22,0.3)] border-t-orange-500/50">
+                <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]">
+                    🍕
+                </div>
+                <div class="flex-grow">
+                    <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-orange-300 transition-colors">Frações<br>Divertidas</h2>
+                    <p class="text-slate-400 text-sm font-semibold leading-relaxed">Descubra o todo, as partes e a reta numérica.</p>
+                </div>
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-orange-600/80 group-hover:bg-orange-500 transition-colors w-full border border-orange-400/50 shadow-inner">
+                    ▶ Jogar Agora
+                </div>
+            </a>
+
+            <!-- Card: Planificação 3D (Tamanho Padrão para alinhar o grid) -->
+            <a href="planificacao.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(244,63,94,0.3)] border-t-rose-500/50">
                 <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2 group-hover:drop-shadow-[0_0_20px_rgba(244,63,94,0.6)]">
                     🔺
                 </div>
@@ -263,13 +277,13 @@
                     <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-rose-300 transition-colors">Planificação 3D de<br>Sólidos Geométricos</h2>
                     <p class="text-slate-400 text-sm font-semibold leading-relaxed">Teste e expanda sua visão espacial ao máximo.</p>
                 </div>
-                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-rose-600/80 group-hover:bg-rose-500 transition-colors w-full xl:w-1/2 border border-rose-400/50 shadow-inner">
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-white bg-rose-600/80 group-hover:bg-rose-500 transition-colors w-full border border-rose-400/50 shadow-inner">
                     ▶ Jogar Agora
                 </div>
             </a>
 
-            <!-- Card: Clube dos Polígonos -->
-            <a href="poligonos.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(234,179,8,0.3)] border-t-yellow-500/50 md:col-span-1 lg:col-span-1 xl:col-span-2">
+            <!-- Card: Clube dos Polígonos (Tamanho Padrão para alinhar o grid) -->
+            <a href="poligonos.html" class="glass-card group rounded-3xl p-6 flex flex-col items-center text-center gap-4 hover:shadow-[0_0_40px_rgba(234,179,8,0.3)] border-t-yellow-500/50">
                 <div class="w-24 h-24 flex items-center justify-center text-6xl drop-shadow-lg transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(234,179,8,0.6)]">
                     🔶
                 </div>
@@ -277,7 +291,7 @@
                     <h2 class="font-orbitron font-bold text-xl md:text-2xl text-white mb-2 group-hover:text-yellow-300 transition-colors">Clube dos<br>Polígonos</h2>
                     <p class="text-slate-400 text-sm font-semibold leading-relaxed">Reconheça as formas, nomeie cada uma e vença!</p>
                 </div>
-                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-slate-900 bg-yellow-400/90 group-hover:bg-yellow-300 transition-colors w-full xl:w-1/2 border border-yellow-300/50 shadow-inner">
+                <div class="mt-4 px-6 py-2 rounded-full font-orbitron font-bold text-xs tracking-wider uppercase text-slate-900 bg-yellow-400/90 group-hover:bg-yellow-300 transition-colors w-full border border-yellow-300/50 shadow-inner">
                     ▶ Jogar Agora
                 </div>
             </a>
@@ -319,7 +333,6 @@
         (function () {
             const container = document.getElementById('starfield');
             const frag = document.createDocumentFragment();
-            // Reduzi a quantidade para melhorar a performance em dispositivos móveis
             for (let i = 0; i < 80; i++) {
                 const s = document.createElement('div');
                 s.className = 'star';
