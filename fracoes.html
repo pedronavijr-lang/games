@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Frações Divertidas — 5º ano</title>
+<style>
+  :root{
+    --azul:#1e6fd9; --azul-claro:#e6f0ff;
+    --laranja:#ff8a3d; --verde:#22b573; --rosa:#ff5d8f;
+    --roxo:#7a5cff; --amarelo:#ffc93c;
+    --tinta:#14243a; --papel:#fdfaf4; --cartao:#ffffff;
+    --borda:#d8e2f0; --sombra:0 6px 0 rgba(20,36,58,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+    background:var(--papel); color:var(--tinta); font-size:18px; line-height:1.5;
+  }
+  header{
+    background:linear-gradient(120deg,var(--azul),var(--roxo));
+    color:#fff; padding:28px 20px; text-align:center;
+  }
+  header h1{margin:0; font-size:2.2rem; letter-spacing:.5px}
+  header p{margin:8px 0 0; font-size:1.1rem; opacity:.95}
+  main{max-width:1080px; margin:0 auto; padding:20px 16px 60px}
+  section{
+    background:var(--cartao); border:3px solid var(--borda); border-radius:20px;
+    padding:20px; margin:22px 0; box-shadow:var(--sombra);
+  }
+  h2{margin:0 0 6px; font-size:1.5rem; color:var(--azul)}
+  .sub{margin:0 0 16px; color:#5b6b80; font-size:1rem}
+  .linha{display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin:12px 0}
+  .grade{display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  button{
+    font:inherit; font-weight:bold; cursor:pointer; border:none; border-radius:14px;
+    padding:10px 16px; background:var(--azul); color:#fff; box-shadow:0 4px 0 #12508f;
+    transition:transform .08s;
+  }
+  button:active{transform:translateY(3px); box-shadow:0 1px 0 #12508f}
+  button.pequeno{width:44px; padding:8px 0; font-size:1.3rem; line-height:1}
+  button.verde{background:var(--verde); box-shadow:0 4px 0 #14804f}
+  button.laranja{background:var(--laranja); box-shadow:0 4px 0 #c25e1f}
+  button.rosa{background:var(--rosa); box-shadow:0 4px 0 #c33a67}
+  .cartao{
+    background:var(--azul-claro); border:2px dashed #b9d2f5; border-radius:16px; padding:14px;
+  }
+  .fracao{display:inline-flex; flex-direction:column; align-items:center; line-height:1.05; font-weight:bold}
+  .fracao .num{color:var(--rosa); font-size:1.6rem}
+  .fracao .barra{width:100%; min-width:34px; height:4px; background:var(--tinta); border-radius:4px; margin:3px 0}
+  .fracao .den{color:var(--azul); font-size:1.6rem}
+  .legenda{font-size:.95rem; color:#5b6b80}
+  .feedback{
+    margin-top:14px; background:#fff6e3; border:2px solid var(--amarelo);
+    border-radius:14px; padding:12px 14px; font-weight:bold;
+  }
+  /* barras */
+  .barras{display:flex; width:100%; height:64px; border:3px solid var(--tinta); border-radius:12px; overflow:hidden; background:#fff}
+  .barras div{flex:1; border-right:2px solid var(--tinta); cursor:pointer; transition:background .15s}
+  .barras div:last-child{border-right:none}
+  .barras div.on{background:var(--laranja)}
+  /* copos */
+  .copo{position:relative; width:110px; height:170px; margin:0 auto; border:4px solid var(--tinta);
+        border-top:none; border-radius:0 0 22px 22px; background:#fff; overflow:hidden}
+  .agua{position:absolute; bottom:0; left:0; right:0; background:linear-gradient(#6bc9ff,#1e6fd9); transition:height .25s}
+  .marca{position:absolute; left:0; right:0; height:0; border-top:2px dashed rgba(20,36,58,.35)}
+  /* chocolate */
+  .choco{display:grid; gap:5px; background:#5b3218; padding:8px; border-radius:12px}
+  .choco div{aspect-ratio:1; background:#8b5a2b; border-radius:6px; box-shadow:inset 0 -4px 0 #6d431f; cursor:pointer}
+  .choco div.on{background:var(--amarelo); box-shadow:inset 0 -4px 0 #d9a318}
+  /* pizza */
+  .pizza-wrap{display:flex; flex-wrap:wrap; gap:24px; justify-content:center; margin:14px 0}
+  .pizza{position:relative; width:220px; height:220px; border-radius:50%; border:4px solid var(--tinta); overflow:hidden; pointer-events:none}
+  .pizza::before{content:""; position:absolute; inset:0; border-radius:50%; background:repeating-conic-gradient(from 0deg, var(--tinta) 0deg 1deg, transparent 1deg calc(360deg/var(--d) - 1deg), var(--tinta) calc(360deg/var(--d) - 1deg) calc(360deg/var(--d))); opacity:.25; pointer-events:none}
+  .fatia{position:absolute; inset:0; clip-path:polygon(50% 50%, 50% 0%, calc(50% + 50% * sin(var(--a2))) calc(50% - 50% * cos(var(--a2)))); cursor:pointer; pointer-events:auto; transition:filter .15s}
+  .fatia:hover{filter:brightness(1.08)}
+  .pizza-legenda{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none}
+  .pizza-legenda span{background:rgba(255,255,255,.85); border:2px solid var(--tinta); border-radius:12px; padding:6px 12px; font-weight:bold; font-size:1.2rem}
+  .pizza-mini{display:grid; gap:12px; justify-items:center; margin-top:8px}
+  .pizza-mini .bola{width:140px; height:140px; border-radius:50%; border:3px solid var(--tinta); background:conic-gradient(from 0deg, var(--recheio) var(--p), transparent 0); position:relative}
+  .pizza-mini .bola::after{content:""; position:absolute; inset:0; border-radius:50%; background:repeating-conic-gradient(from 0deg, var(--tinta) 0deg 1deg, transparent 1deg calc(360deg/var(--d) - 1deg), var(--tinta) calc(360deg/var(--d) - 1deg) calc(360deg/var(--d))); opacity:.25}
+  /* sobreposição */
+  .pilha{position:relative}
+  .pilha .topo{position:absolute; inset:0; opacity:.55}
+  /* reta */
+  .reta{position:relative; height:110px; margin-top:20px}
+  .trilho{position:absolute; top:46px; left:0; right:0; height:8px; background:var(--tinta); border-radius:8px}
+  .tick{position:absolute; top:34px; width:3px; height:32px; background:var(--tinta); transform:translateX(-50%)}
+  .rot{position:absolute; top:72px; transform:translateX(-50%); font-size:.85rem; color:#5b6b80; white-space:nowrap}
+  .marcador{position:absolute; top:22px; width:34px; height:56px; margin-left:-17px; background:var(--rosa);
+            border:3px solid #fff; border-radius:12px; box-shadow:0 4px 0 #c33a67; cursor:grab; touch-action:none}
+  .valor{font-size:1.3rem; font-weight:bold}
+  footer{text-align:center; color:#7a8798; padding:10px 20px 40px; font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>🍕 Frações Divertidas</h1>
+  <p>Descubra o todo, as partes e a reta numérica — 5º ano</p>
+</header>
+
+<main>
+  <section>
+    <h2>1. O que é uma fração?</h2>
+    <p class="sub">Toda fração fala de um <b>inteiro</b> que foi dividido em partes <b>iguais</b>.</p>
+    <div class="linha">
+      <div class="cartao" style="flex:1">
+        <span class="fracao"><span class="num">3</span><span class="barra"></span><span class="den">4</span></span>
+        <span style="margin-left:14px">
+          <b style="color:var(--rosa)">Numerador (3)</b>: quantas partes eu peguei.<br>
+          <b style="color:var(--azul)">Denominador (4)</b>: em quantas partes iguais o todo foi dividido.
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Retângulos de barras</h2>
+    <p class="sub">Clique nas partes para pintar. Use + e − para mudar o número de divisões.</p>
+    <div class="grade" id="barras"></div>
+    <div class="feedback" id="fbBarras"></div>
+    <div class="linha">
+      <button class="rosa" id="btnEquiv">🔍 Verificar equivalência (sobrepor)</button>
+      <button class="verde" id="btnClassico">Mostrar 2/3, 4/6 e 8/12</button>
+    </div>
+    <div id="sobreposicao"></div>
+  </section>
+
+  <section>
+    <h2>3. Gráficos de pizza</h2>
+    <p class="sub">Escolha quantas fatias tem a pizza e pinte algumas. Perceba como a fração muda de tamanho.</p>
+    <div class="linha">
+      <span class="legenda">Fatias:</span>
+      <button class="pequeno laranja" data-pizza-d="-1">−</button>
+      <b id="pizzaDQtd" style="font-size:1.2rem"></b>
+      <button class="pequeno laranja" data-pizza-d="1">+</button>
+      <button class="verde" id="pizzaLimpar">Limpar</button>
+    </div>
+    <div class="pizza-wrap" id="pizzaWrap"></div>
+    <div class="feedback" id="fbPizza"></div>
+  </section>
+
+  <section>
+    <h2>4. Copos de medição</h2>
+    <p class="sub">Mesma capacidade, graduações diferentes. Encha e compare o volume!</p>
+    <div class="grade" id="copos"></div>
+    <div class="feedback" id="fbCopos"></div>
+  </section>
+
+  <section>
+    <h2>5. Barra de chocolate</h2>
+    <p class="sub">Quebre a barra em quadradinhos e escolha quantos comer.</p>
+    <div class="linha">
+      <button class="pequeno laranja" data-choco="-1">−</button>
+      <b id="chocoQtd" style="font-size:1.2rem"></b>
+      <button class="pequeno laranja" data-choco="1">+</button>
+      <button class="verde" id="chocoLimpar">Limpar</button>
+    </div>
+    <div class="choco" id="choco"></div>
+    <div class="feedback" id="fbChoco"></div>
+  </section>
+
+  <section>
+    <h2>6. Calculadora de proporção</h2>
+    <p class="sub">Multiplicando ou dividindo <b>numerador e denominador</b> pelo mesmo número, a fração continua valendo o mesmo!</p>
+    <div class="linha">
+      <button class="pequeno" data-prop="n-1">−</button>
+      <span class="fracao"><span class="num" id="pn">1</span><span class="barra"></span><span class="den" id="pd">2</span></span>
+      <button class="pequeno" data-prop="n+1">+</button>
+      <span style="width:14px"></span>
+      <button class="pequeno" data-prop="d-1">−</button><span class="legenda">denominador</span><button class="pequeno" data-prop="d+1">+</button>
+      <span style="width:14px"></span>
+      <span class="legenda">multiplicar por:</span>
+      <button class="laranja" data-mult="2">×2</button>
+      <button class="laranja" data-mult="3">×3</button>
+      <button class="verde" data-mult="0">÷ simplificar</button>
+    </div>
+    <div class="grade" id="propVis"></div>
+    <div class="feedback" id="fbProp"></div>
+  </section>
+
+  <section>
+    <h2>7. Reta numérica de 0 a 1</h2>
+    <p class="sub">Arraste o marcador rosa e veja a fração e o número decimal.</p>
+    <div class="linha">
+      <span class="legenda">Divisões da reta:</span>
+      <button class="pequeno" data-reta="-1">−</button>
+      <b id="retaQtd" style="font-size:1.2rem"></b>
+      <button class="pequeno" data-reta="1">+</button>
+      <button class="verde" data-ir="1/2">Ir para 1/2</button>
+      <button class="verde" data-ir="1/4">Ir para 1/4</button>
+      <button class="verde" data-ir="3/4">Ir para 3/4</button>
+    </div>
+    <div class="reta" id="reta">
+      <div class="trilho"></div>
+      <div class="marcador" id="marcador"></div>
+    </div>
+    <div class="feedback" id="fbReta"></div>
+  </section>
+</main>
+<footer>Recurso instrucional de frações • HTML, CSS e JavaScript puro</footer>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const frac = (n,d) => `<span class="fracao"><span class="num">${n}</span><span class="barra"></span><span class="den">${d}</span></span>`;
+  const mdc = (a,b) => b ? mdc(b, a%b) : a;
+
+  /* ---------- 2. BARRAS ---------- */
+  const barras = [{d:3,p:new Set()},{d:6,p:new Set()},{d:12,p:new Set()}];
+  function renderBarras(){
+    const cont = $("#barras"); cont.innerHTML = "";
+    barras.forEach((b,i)=>{
+      const box = document.createElement("div");
+      box.className = "cartao";
+      box.innerHTML = `
+        <div class="linha" style="justify-content:space-between">
+          <span><b>Retângulo ${i+1}</b></span>
+          <span>
+            <button class="pequeno laranja" data-b="${i}" data-dd="-1">−</button>
+            <b> ${b.d} </b>
+            <button class="pequeno laranja" data-b="${i}" data-dd="1">+</button>
+          </span>
+        </div>
+        <div class="barras" data-bar="${i}"></div>
+        <div class="linha" style="justify-content:center">${frac(b.p.size,b.d)}
+          <span class="legenda">= ${(b.p.size/b.d).toFixed(3).replace(".",",")}</span></div>`;
+      cont.appendChild(box);
+      const bar = box.querySelector(".barras");
+      for(let k=0;k<b.d;k++){
+        const c = document.createElement("div");
+        if(b.p.has(k)) c.className = "on";
+        c.onclick = ()=>{ b.p.has(k) ? b.p.delete(k) : b.p.add(k); renderBarras(); };
+        bar.appendChild(c);
+      }
+    });
+    fbBarras();
+  }
+  function fbBarras(){
+    const vals = barras.map(b=>b.p.size/b.d);
+    const iguais = vals.every(v=>Math.abs(v-vals[0])<1e-9) && vals[0]>0;
+    const t = barras.map(b=>`${b.p.size}/${b.d}`).join(", ");
+    $("#fbBarras").innerHTML = iguais
+      ? `🎉 As três áreas pintadas são iguais! ${t} são frações <b>equivalentes</b> (valem ${vals[0].toFixed(2).replace(".",",")} do inteiro).`
+      : `Você pintou ${t}. Pinte áreas do mesmo tamanho nos três retângulos para achar frações equivalentes.`;
+  }
+  document.addEventListener("click", e=>{
+    const b = e.target.closest("[data-dd]");
+    if(!b) return;
+    const i = +b.dataset.b, novo = Math.min(24, Math.max(1, barras[i].d + (+b.dataset.dd)));
+    barras[i].d = novo; barras[i].p = new Set();
+    renderBarras();
+  });
+  $("#btnClassico").onclick = ()=>{
+    const alvo=[[3,2],[6,4],[12,8]];
+    barras.forEach((b,i)=>{ b.d=alvo[i][0]; b.p=new Set([...Array(alvo[i][1]).keys()]); });
+    renderBarras();
+  };
+  $("#btnEquiv").onclick = ()=>{
+    const [a,b] = barras;
+    const faixa = (obj,cor)=>`<div class="barras" style="height:64px">${
+      Array.from({length:obj.d},(_,k)=>`<div style="${obj.p.has(k)?`background:${cor}`:""}"></div>`).join("")}</div>`;
+    $("#sobreposicao").innerHTML = `
+      <div class="cartao" style="margin-top:10px">
+        <b>Sobreposição do Retângulo 1 e do Retângulo 2:</b>
+        <div class="pilha" style="margin-top:10px">
+          ${faixa(a,"var(--laranja)")}
+          <div class="topo">${faixa(b,"var(--roxo)")}</div>
+        </div>
+        <p class="legenda" style="margin-top:26px">${
+          Math.abs(a.p.size/a.d - b.p.size/b.d) < 1e-9 && a.p.size>0
+          ? "✅ As duas cores cobrem exatamente a mesma área: as frações são equivalentes."
+          : "❌ As cores não cobrem a mesma área: as frações não são equivalentes."}</p>
+      </div>`;
+  };
+
+  /* ---------- 3. PIZZAS ---------- */
+  let pizzaD = 8, pizzaSel = new Set(), pizzaRecheio = "var(--laranja)";
+  const pizzaCores = ["var(--laranja)","var(--rosa)","var(--verde)","var(--roxo)"];
+  function pizzaSlice(k, n){
+    const a1 = k * 360 / n, a2 = (k+1) * 360 / n;
+    const d = document.createElement("div");
+    d.className = "fatia";
+    d.style.setProperty("--a1", a1+"deg");
+    d.style.setProperty("--a2", a2+"deg");
+    d.style.setProperty("--cor", pizzaRecheio);
+    d.style.clipPath = `polygon(50% 50%, ${50+50*Math.sin(a1*Math.PI/180)}% ${50-50*Math.cos(a1*Math.PI/180)}%, ${50+50*Math.sin(a2*Math.PI/180)}% ${50-50*Math.cos(a2*Math.PI/180)}%)`;
+    d.style.background = pizzaSel.has(k) ? "var(--cor)" : "transparent";
+    return d;
+  }
+  function togglePizzaFatia(k){
+    pizzaSel.has(k) ? pizzaSel.delete(k) : pizzaSel.add(k);
+    renderPizza();
+  }
+  function renderPizza(){
+    const wrap = $("#pizzaWrap");
+    const pct = (pizzaSel.size/pizzaD*100).toFixed(1);
+    const r = pizzaSel.size ? mdc(pizzaSel.size, pizzaD) : 1;
+    wrap.innerHTML = `
+      <div class="pizza-mini">
+        <div class="bola" style="--d:${pizzaD};--p:${pizzaSel.size/pizzaD*360}deg;--recheio:${pizzaRecheio}"></div>
+        <div class="linha" style="justify-content:center">${frac(pizzaSel.size,pizzaD)}</div>
+      </div>
+      <div class="pizza" id="pizza" style="--d:${pizzaD};--recheio:${pizzaRecheio}">
+        <div class="pizza-legenda"><span>${pct}%</span></div>
+      </div>
+      <div class="pizza-mini" style="align-self:center">
+        <p class="legenda">Clique em qualquer fatia para pintar ou apagar.</p>
+        <div class="linha" style="justify-content:center">
+          <span class="legenda">Cor:</span>
+          ${pizzaCores.map(c=>`<button class="pequeno" style="background:${c};box-shadow:0 4px 0 rgba(0,0,0,.2);width:34px;height:34px;border-radius:50%" data-pizza-cor="${c}"></button>`).join("")}
+        </div>
+      </div>`;
+    const p = $("#pizza");
+    for(let k=0;k<pizzaD;k++) p.appendChild(pizzaSlice(k, pizzaD));
+    p.onclick = e=>{
+      const rect = p.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width/2;
+      const y = e.clientY - rect.top - rect.height/2;
+      const raio = Math.sqrt(x*x + y*y) / (rect.width/2);
+      if(raio < 0.12) return; // clique no centro não alterna fatia
+      let ang = Math.atan2(x, -y) * 180 / Math.PI;
+      if(ang < 0) ang += 360;
+      const k = Math.floor(ang / (360/pizzaD)) % pizzaD;
+      togglePizzaFatia(k);
+    };
+    $("#pizzaDQtd").textContent = `${pizzaD} fatias`;
+    let extra = "";
+    if(pizzaSel.size>0){
+      if(pizzaSel.size===pizzaD) extra = " = 1 pizza inteira!";
+      else if(pizzaSel.size/pizzaD===0.5) extra = " = metade da pizza!";
+      else if(pizzaSel.size/pizzaD===0.25) extra = " = um quarto da pizza!";
+      else if(pizzaSel.size/pizzaD===0.75) extra = " = três quartos da pizza!";
+      else extra = `, que simplificando é <b>${pizzaSel.size/r}/${pizzaD/r}</b>`;
+    }
+    $("#fbPizza").innerHTML = pizzaSel.size===0
+      ? `Escolha quantas fatias você quer colorir. Cada fatia vale <b>1/${pizzaD}</b> da pizza.`
+      : `Você coloriu ${pizzaSel.size} de ${pizzaD} fatias: ${pizzaSel.size}/${pizzaD}${extra}.`;
+  }
+  document.querySelectorAll("[data-pizza-d]").forEach(b=> b.onclick = ()=>{
+    pizzaD = Math.min(16, Math.max(2, pizzaD + (+b.dataset.pizzaD)));
+    pizzaSel = new Set(); renderPizza();
+  });
+  $("#pizzaLimpar").onclick = ()=>{ pizzaSel = new Set(); renderPizza(); };
+  document.addEventListener("click", e=>{
+    const b = e.target.closest("[data-pizza-cor]");
+    if(b){ pizzaRecheio = b.dataset.pizzaCor; renderPizza(); }
+  });
+
+  /* ---------- 4. COPOS ---------- */
+  const copos = [{d:2,c:0},{d:4,c:0},{d:8,c:0}];
+  function renderCopos(){
+    const cont = $("#copos"); cont.innerHTML="";
+    copos.forEach((c,i)=>{
+      const marcas = Array.from({length:c.d-1},(_,k)=>
+        `<div class="marca" style="bottom:${(k+1)/c.d*100}%"></div>`).join("");
+      const box = document.createElement("div");
+      box.className = "cartao";
+      box.innerHTML = `
+        <div class="linha" style="justify-content:center"><b>Copo dividido em ${c.d}</b></div>
+        <div class="copo"><div class="agua" style="height:${c.c/c.d*100}%"></div>${marcas}</div>
+        <div class="linha" style="justify-content:center">
+          <button class="pequeno" data-copo="${i}" data-cc="-1">−</button>
+          ${frac(c.c,c.d)}
+          <button class="pequeno" data-copo="${i}" data-cc="1">+</button>
+        </div>`;
+      cont.appendChild(box);
+    });
+    const v = copos.map(c=>c.c/c.d);
+    const iguais = v.every(x=>Math.abs(x-v[0])<1e-9) && v[0]>0;
+    $("#fbCopos").innerHTML = iguais
+      ? `💧 Os três copos têm o mesmo volume de água! ${copos.map(c=>`${c.c}/${c.d}`).join(" = ")}.`
+      : `Encha os copos até o mesmo nível para descobrir frações equivalentes (tente 1/2, 2/4 e 4/8).`;
+  }
+  document.addEventListener("click", e=>{
+    const b = e.target.closest("[data-cc]"); if(!b) return;
+    const c = copos[+b.dataset.copo];
+    c.c = Math.min(c.d, Math.max(0, c.c + (+b.dataset.cc)));
+    renderCopos();
+  });
+
+  /* ---------- 5. CHOCOLATE ---------- */
+  let chocoD = 8, chocoSel = new Set();
+  function renderChoco(){
+    const g = $("#choco");
+    const cols = chocoD % 4 === 0 ? 4 : (chocoD % 3 === 0 ? 3 : Math.min(chocoD,4));
+    g.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+    g.innerHTML = "";
+    for(let k=0;k<chocoD;k++){
+      const d = document.createElement("div");
+      if(chocoSel.has(k)) d.className="on";
+      d.onclick = ()=>{ chocoSel.has(k)?chocoSel.delete(k):chocoSel.add(k); renderChoco(); };
+      g.appendChild(d);
+    }
+    $("#chocoQtd").textContent = `${chocoD} pedaços`;
+    const n = chocoSel.size, r = n?mdc(n,chocoD):1;
+    let extra = "";
+    if(n>0){
+      const s = `${n/r}/${chocoD/r}`;
+      if(n/chocoD===0.5) extra = " ou seja, <b>metade</b> da barra!";
+      else if(n===chocoD) extra = " isso é a <b>barra inteira</b> (1)!";
+      else extra = ` que simplificando é <b>${s}</b>.`;
+    }
+    $("#fbChoco").innerHTML = n===0
+      ? `Clique nos quadradinhos para escolher quantos pegar.`
+      : `Você dividiu o chocolate em ${chocoD} partes e pegou ${n}. Isso é ${n}/${chocoD}${extra}`;
+  }
+  document.querySelectorAll("[data-choco]").forEach(b=> b.onclick = ()=>{
+    chocoD = Math.min(24, Math.max(2, chocoD + (+b.dataset.choco)));
+    chocoSel = new Set(); renderChoco();
+  });
+  $("#chocoLimpar").onclick = ()=>{ chocoSel=new Set(); renderChoco(); };
+
+  /* ---------- 6. PROPORÇÃO ---------- */
+  let pn = 1, pd = 2;
+  function faixaProp(n,d,cor){
+    return `<div class="barras" style="height:52px">${
+      Array.from({length:d},(_,k)=>`<div style="${k<n?`background:${cor}`:""}"></div>`).join("")}</div>`;
+  }
+  function renderProp(){
+    $("#pn").textContent = pn; $("#pd").textContent = pd;
+    const r = mdc(pn,pd) || 1;
+    const lista = [[pn,pd,"var(--rosa)"],[pn*2,pd*2,"var(--roxo)"],[pn*3,pd*3,"var(--verde)"]];
+    $("#propVis").innerHTML = lista.map(([n,d,c])=>`
+      <div class="cartao">
+        <div class="linha" style="justify-content:center">${frac(n,d)}</div>
+        ${faixaProp(n,d,c)}
+        <p class="legenda" style="text-align:center;margin:8px 0 0">${(n/d).toFixed(3).replace(".",",")} do inteiro</p>
+      </div>`).join("");
+    $("#fbProp").innerHTML = `${pn}/${pd} = ${pn*2}/${pd*2} = ${pn*3}/${pd*3}. ` +
+      (r>1 ? `Dividindo os dois termos por ${r}, a forma mais simples é <b>${pn/r}/${pd/r}</b>.`
+           : `A fração <b>${pn}/${pd}</b> já está na forma mais simples.`);
+  }
+  document.querySelectorAll("[data-prop]").forEach(b=> b.onclick = ()=>{
+    const a = b.dataset.prop;
+    if(a==="n+1") pn = Math.min(pd, pn+1);
+    if(a==="n-1") pn = Math.max(0, pn-1);
+    if(a==="d+1") pd = Math.min(20, pd+1);
+    if(a==="d-1"){ pd = Math.max(1, pd-1); pn = Math.min(pn, pd); }
+    renderProp();
+  });
+  document.querySelectorAll("[data-mult]").forEach(b=> b.onclick = ()=>{
+    const m = +b.dataset.mult;
+    if(m===0){ const r = mdc(pn,pd)||1; pn/=r; pd/=r; }
+    else if(pd*m<=40){ pn*=m; pd*=m; }
+    renderProp();
+  });
+
+  /* ---------- 7. RETA NUMÉRICA ---------- */
+  let retaD = 4, retaPos = 0.5;
+  const reta = $("#reta"), marcador = $("#marcador");
+  function renderReta(){
+    reta.querySelectorAll(".tick,.rot").forEach(e=>e.remove());
+    for(let k=0;k<=retaD;k++){
+      const p = k/retaD*100;
+      const t = document.createElement("div"); t.className="tick"; t.style.left = p+"%"; reta.appendChild(t);
+      const r = document.createElement("div"); r.className="rot"; r.style.left = p+"%";
+      r.innerHTML = k===0 ? "0" : (k===retaD ? "1" : `${k}/${retaD}`);
+      reta.appendChild(r);
+    }
+    marcador.style.left = retaPos*100 + "%";
+    $("#retaQtd").textContent = `${retaD} partes`;
+    const passo = Math.round(retaPos*retaD), exato = Math.abs(retaPos - passo/retaD) < 0.005;
+    const r = passo ? mdc(passo,retaD) : 1;
+    $("#fbReta").innerHTML = exato
+      ? `📍 O marcador está em <b>${passo}/${retaD}</b>${r>1?` (ou <b>${passo/r}/${retaD/r}</b>)`:""} = <span class="valor">${(passo/retaD).toFixed(2).replace(".",",")}</span>`
+      : `📍 Posição aproximada: <span class="valor">${retaPos.toFixed(2).replace(".",",")}</span> — arraste até uma marquinha para ver a fração exata.`;
+  }
+  function mover(clientX){
+    const r = reta.getBoundingClientRect();
+    let p = (clientX - r.left)/r.width;
+    p = Math.min(1, Math.max(0, p));
+    const passo = Math.round(p*retaD);
+    if(Math.abs(p - passo/retaD) < 0.03) p = passo/retaD; // imã nas marcas
+    retaPos = p; renderReta();
+  }
+  let arrastando = false;
+  marcador.addEventListener("pointerdown", e=>{ arrastando=true; marcador.setPointerCapture(e.pointerId); });
+  marcador.addEventListener("pointermove", e=>{ if(arrastando) mover(e.clientX); });
+  marcador.addEventListener("pointerup", ()=> arrastando=false);
+  reta.addEventListener("click", e=>{ if(e.target!==marcador) mover(e.clientX); });
+  document.querySelectorAll("[data-reta]").forEach(b=> b.onclick = ()=>{
+    retaD = Math.min(12, Math.max(2, retaD + (+b.dataset.reta)));
+    retaPos = Math.round(retaPos*retaD)/retaD; renderReta();
+  });
+  document.querySelectorAll("[data-ir]").forEach(b=> b.onclick = ()=>{
+    const [n,d] = b.dataset.ir.split("/").map(Number);
+    if(retaD % d !== 0) retaD = d===2?4:d;
+    retaPos = n/d; renderReta();
+  });
+
+  renderBarras(); renderPizza(); renderCopos(); renderChoco(); renderProp(); renderReta();
+})();
+</script>
+</body>
+</html>
